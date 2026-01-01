@@ -162,16 +162,19 @@ input, textarea, [contenteditable="true"] {
   right: 0;
   bottom: 0;
   background: var(--deep-space);
-  /* Removed background-image from here - it's handled by ::after */
+  /* Background image must be here too for backdrop-filter visibility (e.g., Totality knob) */
   background-image: 
+    var(--plugin-background-image, none),
     radial-gradient(1px 1px at 20% 30%, white, transparent),
     radial-gradient(1px 1px at 60% 70%, white, transparent),
     radial-gradient(1px 1px at 50% 50%, white, transparent),
     radial-gradient(1px 1px at 80% 10%, white, transparent),
     radial-gradient(1px 1px at 90% 60%, white, transparent);
   background-size: 
+    100% 100%,
     200% 200%;
   background-position: 
+    0 0,
     0% 0%;
   background-repeat: no-repeat;
   opacity: 1;
