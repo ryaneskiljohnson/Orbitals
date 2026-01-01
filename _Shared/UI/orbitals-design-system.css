@@ -220,12 +220,26 @@ body, html {
   border-radius: var(--radius-md);
   color: var(--comet-white);
   font-family: var(--font-header);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
   transition: all var(--transition-medium);
   position: relative;
   overflow: hidden;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.help-toggle::before {
+  content: '?';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  line-height: 1;
+  text-align: center;
 }
 
 .help-toggle:hover {
@@ -242,8 +256,8 @@ body, html {
   box-shadow: 0 0 25px var(--plugin-glow, rgba(0, 212, 255, 0.6));
 }
 
-.help-toggle::before {
-  content: '?';
+.help-toggle.active::before {
+  color: var(--space-black);
 }
 
 .preset-browser {
