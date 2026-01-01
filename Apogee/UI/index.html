@@ -72,11 +72,21 @@
             <button class="bypass-toggle" id="bypassToggle"
                     data-help-title="BYPASS"
                     data-help-description="Disables all processing and passes MIDI through unaffected. Use to A/B compare or temporarily disable the effect.">BYPASS</button>
-            <div class="velocity-meter-dual"
-                 data-help-title="VELOCITY METERS"
-                 data-help-description="Before and After velocity visualization. Shows the input velocity and boosted output velocity in real-time.">
-                <div class="meter-before"></div>
-                <div class="meter-after"></div>
+            <div class="footer-center">
+                <div class="velocity-meter-dual"
+                     data-help-title="VELOCITY METERS"
+                     data-help-description="Before and After velocity visualization. Shows the input velocity and boosted output velocity in real-time.">
+                    <div class="meter-wrapper">
+                        <label class="meter-label">BEFORE</label>
+                        <div class="meter-before"></div>
+                        <div class="meter-value" id="beforeValue">0</div>
+                    </div>
+                    <div class="meter-wrapper">
+                        <label class="meter-label">AFTER</label>
+                        <div class="meter-after"></div>
+                        <div class="meter-value" id="afterValue">0</div>
+                    </div>
+                </div>
             </div>
             <div class="info-display">
                 <span id="noteCount">Notes: 0</span>

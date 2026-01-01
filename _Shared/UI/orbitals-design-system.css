@@ -188,6 +188,8 @@ body, html {
   text-align: center;
   pointer-events: none;
   margin: 0;
+  width: 100%;
+  z-index: 1;
 }
 
 .orbitals-logo {

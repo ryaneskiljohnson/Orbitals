@@ -93,6 +93,7 @@ function setupApogeeVisualization(canvas) {
     let currentCurve = 'exp';
     let liftValue = 50;
     let momentumValue = 50;
+    let ceilingValue = 127;
     
     // Handle resize
     const resizeObserver = new ResizeObserver(() => {
@@ -112,6 +113,10 @@ function setupApogeeVisualization(canvas) {
       momentumValue = Math.max(0, Math.min(100, value));
     };
     
+    window.updateCeilingValue = (value) => {
+      ceilingValue = Math.max(1, Math.min(127, value));
+    };
+    
     window.updateCurveType = (curve) => {
       currentCurve = curve;
     };
@@ -122,11 +127,12 @@ function setupApogeeVisualization(canvas) {
       ctx.fillStyle = 'rgba(10, 10, 15, 0.15)';
       ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
       
-      // Draw trajectory curve
+      // Draw trajectory curve - opacity affected by ceiling
+      const ceilingOpacity = 0.3 + (ceilingValue / 127) * 0.4; // 0.3 to 0.7 opacity
       const gradient = ctx.createLinearGradient(0, canvasSize.height, 0, 0);
-      gradient.addColorStop(0, 'rgba(0, 148, 255, 0.3)');
-      gradient.addColorStop(0.5, 'rgba(0, 212, 255, 0.5)');
-      gradient.addColorStop(1, 'rgba(255, 255, 255, 0.7)');
+      gradient.addColorStop(0, `rgba(0, 148, 255, ${ceilingOpacity * 0.5})`);
+      gradient.addColorStop(0.5, `rgba(0, 212, 255, ${ceilingOpacity * 0.7})`);
+      gradient.addColorStop(1, `rgba(255, 255, 255, ${ceilingOpacity})`);
       ctx.strokeStyle = gradient;
       ctx.lineWidth = 2;
       ctx.setLineDash([5, 10]);
@@ -156,15 +162,48 @@ function setupApogeeVisualization(canvas) {
       const emissionChance = 0.05 + (liftValue / 100) * 0.25;
       if (Math.random() < emissionChance) {
         const x = Math.random() * canvasSize.width;
-        const speed = 0.003 + (momentumValue / 100) * 0.007;
+        // Speed is affected by both lift (primary) and momentum (secondary)
+        const baseSpeed = 0.002;
+        const liftSpeed = (liftValue / 100) * 0.012; // Lift has strong effect on speed
+        const momentumSpeed = (momentumValue / 100) * 0.004; // Momentum has smaller effect
+        const speed = baseSpeed + liftSpeed + momentumSpeed;
+        // Particle size is affected by momentum - higher momentum = larger particles
+        const baseSize = 1.5;
+        const momentumSize = (momentumValue / 100) * 3.5; // Momentum affects size from 1.5 to 5
+        const randomVariation = Math.random() * 1.5;
+        const size = baseSize + momentumSize + randomVariation;
+        
+        // Particle brightness/intensity affected by ceiling - higher ceiling = brighter particles
+        const ceilingBrightness = 50 + (ceilingValue / 127) * 50; // 50 to 100 brightness
+        const ceilingSaturation = 80 + (ceilingValue / 127) * 20; // 80 to 100 saturation
+        const hue = 180 + Math.random() * 40;
+        const color = ColorUtils.hslToRgb(hue, ceilingSaturation, ceilingBrightness);
+        
         particles.push(new AscendingParticle(x, canvasSize.height, {
           speed: speed,
           curve: currentCurve,
-          size: 2 + Math.random() * 2,
-          color: ColorUtils.hslToRgb(180 + Math.random() * 40, 100, 50 + Math.random() * 30),
+          size: size,
+          color: color,
           trailLength: 30 + Math.floor((momentumValue / 100) * 30)
         }));
       }
+      
+      // Update speed and size of existing particles based on current values
+      const currentBaseSpeed = 0.002;
+      const currentLiftSpeed = (liftValue / 100) * 0.012;
+      const currentMomentumSpeed = (momentumValue / 100) * 0.004;
+      const targetSpeed = currentBaseSpeed + currentLiftSpeed + currentMomentumSpeed;
+      
+      const currentBaseSize = 1.5;
+      const currentMomentumSize = (momentumValue / 100) * 3.5;
+      const targetSize = currentBaseSize + currentMomentumSize;
+      
+      particles.forEach(particle => {
+        // Smoothly adjust speed of existing particles
+        particle.speed += (targetSpeed - particle.speed) * 0.1;
+        // Smoothly adjust size of existing particles
+        particle.size += (targetSize - particle.size) * 0.1;
+      });
       
       // Update and draw particles
       for (let i = particles.length - 1; i >= 0; i--) {
@@ -185,12 +224,23 @@ function setupApogeeVisualization(canvas) {
 }
 
 function setupControls() {
-  new OrbitalsSlider(document.getElementById('liftSlider'), {
+  const liftSlider = new OrbitalsSlider(document.getElementById('liftSlider'), {
     min: 0, max: 100, value: 50,
     orientation: 'vertical',
     onChange: (v) => {
       document.getElementById('liftValue').textContent = Math.round(v) + '%';
       if (window.updateLiftValue) window.updateLiftValue(v);
+    }
+  });
+  // Ensure initial value is set for fill
+  liftSlider.updatePosition();
+  
+  new OrbitalsSlider(document.getElementById('ceilingSlider'), {
+    min: 1, max: 127, value: 127,
+    orientation: 'horizontal',
+    onChange: (v) => {
+      document.getElementById('ceilingValue').textContent = Math.round(v);
+      if (window.updateCeilingValue) window.updateCeilingValue(v);
     }
   });
   

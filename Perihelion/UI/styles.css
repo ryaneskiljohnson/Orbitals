@@ -28,7 +28,31 @@
   
   /* Background image */
   --plugin-background-image: url('../../_Shared/Assets/backgrounds/perihelion-background.png');
-  --plugin-background-opacity: 0.6;
+  --plugin-background-opacity: 0.7;
+}
+
+/* Make the starfield layer not block the background image - remove the dark background */
+.perihelion-theme .plugin-container::before {
+  background: transparent !important;
+  background-image: 
+    radial-gradient(1px 1px at 20% 30%, white, transparent),
+    radial-gradient(1px 1px at 60% 70%, white, transparent),
+    radial-gradient(1px 1px at 50% 50%, white, transparent),
+    radial-gradient(1px 1px at 80% 10%, white, transparent),
+    radial-gradient(1px 1px at 90% 60%, white, transparent) !important;
+  background-size: 200% 200% !important;
+  opacity: 0.15 !important;
+}
+
+/* Background image layer - below the canvas animations */
+.perihelion-theme .plugin-container::after {
+  opacity: 0.7 !important;
+  z-index: 0 !important;
+}
+
+/* Canvas stays above background image so animations are visible */
+.perihelion-theme #solarCanvas {
+  z-index: 1 !important;
 }
 
 /* ===================================================================
@@ -61,6 +85,7 @@
 .perihelion-theme .plugin-main {
   padding: 0;
   position: relative;
+  background: transparent;
 }
 
 .controls-area {
@@ -74,6 +99,7 @@
   justify-content: space-between;
   padding: var(--spacing-lg) var(--spacing-xl);
   box-sizing: border-box;
+  background: transparent;
 }
 
 /* Top: Orbit Arc */

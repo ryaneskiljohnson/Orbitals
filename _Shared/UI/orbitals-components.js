@@ -218,6 +218,13 @@ class OrbitalsSlider {
   updatePosition() {
     const percent = (this.value - this.options.min) / (this.options.max - this.options.min);
     
+    // Set CSS variable for fill visualization - must be set first
+    this.element.style.setProperty('--slider-value', percent);
+    
+    // Disable transitions for instant updates
+    this.handle.style.transition = 'none';
+    
+    // Update handle position synchronously
     if (this.options.orientation === 'vertical') {
       this.handle.style.bottom = `${percent * 100}%`;
       this.handle.style.left = '50%';

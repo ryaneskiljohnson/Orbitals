@@ -74,6 +74,10 @@
 }
 
 .control-lift {
+  position: absolute;
+  left: calc(25% - 125px);
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -82,16 +86,23 @@
 }
 
 .control-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-lg);
-  flex: 1;
   max-width: 500px;
 }
 
 .control-momentum {
+  position: absolute;
+  left: calc(75% + 125px);
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -130,14 +141,16 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 50%;
+  height: calc(var(--slider-value, 0.5) * 100%);
   background: linear-gradient(to top,
     var(--plugin-secondary) 0%,
     var(--plugin-primary) 50%,
     var(--apogee-peak) 100%
   );
-  opacity: 0.3;
-  transition: height 0.2s ease;
+  opacity: 0.6;
+  pointer-events: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  z-index: 1;
 }
 
 /* ===================================================================
@@ -195,7 +208,7 @@
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   border: 2px solid var(--plugin-primary);
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 0 20px rgba(0, 212, 255, 0.3),
               inset 0 0 15px rgba(0, 212, 255, 0.1);
 }
@@ -205,7 +218,7 @@
   position: absolute;
   left: 0;
   top: 0;
-  width: 80%;
+  width: calc(var(--slider-value, 0.8) * 100%);
   height: 100%;
   background: linear-gradient(to right,
     var(--plugin-secondary) 0%,
@@ -213,7 +226,20 @@
     var(--apogee-peak) 100%
   );
   opacity: 0.3;
-  transition: width 0.2s ease;
+  pointer-events: none;
+}
+
+/* Full-height rounded rectangle handle for ceiling slider */
+.slider-horizontal-limiter .slider-handle {
+  width: 24px;
+  height: 100%;
+  top: 0;
+  background: linear-gradient(180deg, var(--plugin-accent), var(--plugin-primary));
+  border-radius: var(--radius-md);
+  border: 3px solid white;
+  cursor: ew-resize;
+  transition: none !important;
+  will-change: left;
 }
 
 /* ===================================================================
@@ -246,8 +272,9 @@
 }
 
 .curve-selector button:hover {
-  background: rgba(0, 212, 255, 0.15);
+  background: rgba(0, 212, 255, 0.2);
   border-color: var(--plugin-primary);
+  transform: none;
 }
 
 .curve-selector button.active {
@@ -259,23 +286,73 @@
 }
 
 /* ===================================================================
-   VELOCITY METER DUAL
+   VELOCITY METER DUAL - CENTERED ON WINDOW
    =================================================================== */
+
+.footer-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
 
 .velocity-meter-dual {
   display: flex;
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
+  align-items: center;
 }
 
-.velocity-meter-dual::before,
-.velocity-meter-dual::after {
-  content: '';
+.meter-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.meter-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--plugin-primary);
+  text-shadow: 0 0 8px var(--plugin-glow);
+}
+
+.meter-before,
+.meter-after {
   width: 150px;
   height: 24px;
   background: var(--glass-bg-dark);
   border: 2px solid var(--plugin-primary);
   border-radius: var(--radius-md);
   box-shadow: inset 0 0 15px rgba(0, 212, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.meter-before::before,
+.meter-after::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(to top,
+    var(--plugin-secondary) 0%,
+    var(--plugin-primary) 50%,
+    var(--apogee-peak) 100%
+  );
+  transition: width 0.15s ease;
+  box-shadow: 0 0 10px var(--plugin-glow);
+}
+
+.meter-value {
+  font-size: var(--font-size-xs);
+  font-family: var(--font-mono);
+  color: var(--plugin-primary);
+  text-shadow: 0 0 8px var(--plugin-glow);
+  min-width: 30px;
+  text-align: center;
 }
 
 /* ===================================================================
@@ -360,17 +437,17 @@
 
 .knob-indicator {
   position: absolute;
-  top: 12%;
+  top: calc(50% - 42%);
   left: 50%;
-  transform: translateX(-50%);
   width: 5px;
   height: 42%;
   background: linear-gradient(to bottom, #ffffff, var(--plugin-primary), transparent);
   border-radius: 3px;
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.9),
               0 0 20px var(--plugin-glow);
-  transform-origin: bottom center;
+  transform-origin: 50% 100%;
   transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%) rotate(0deg);
 }
 
 
@@ -431,28 +508,4 @@
   animation: ascent-trail 3s ease-in-out infinite;
 }
 
-/* Curve selector highlight */
-.curve-selector button {
-  position: relative;
-}
-
-.curve-selector button::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0%;
-  height: 2px;
-  background: var(--plugin-secondary);
-  transition: width var(--transition-medium);
-}
-
-.curve-selector button:hover::before {
-  width: 80%;
-  box-shadow: 0 0 10px var(--plugin-glow);
-}
-
-.curve-selector button.active::before {
-  width: 100%;
-}
+/* Curve selector - removed bottom line animation for cleaner look */
