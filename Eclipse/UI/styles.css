@@ -57,16 +57,19 @@
    =================================================================== */
 
 .controls-eclipse {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 10;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: auto 1fr auto;
-  gap: var(--spacing-3xl);
-  width: 100%;
-  height: 100%;
-  padding: var(--spacing-3xl);
+  grid-template-rows: auto 1fr;
+  gap: var(--spacing-md) var(--spacing-3xl);
+  padding: calc(var(--spacing-xs) - 10px) var(--spacing-3xl) var(--spacing-2xl) var(--spacing-3xl);
   align-items: center;
+  box-sizing: border-box;
 }
 
 .control-eclipse-section {
@@ -76,15 +79,25 @@
   gap: var(--spacing-md);
 }
 
-.control-eclipse-center {
-  grid-column: 2;
-  grid-row: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-xl);
+/* Left: Umbra Control - Centered vertically on window */
+.control-umbra-section {
+  position: absolute;
+  left: var(--spacing-3xl);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
 }
+
+/* Right: Penumbra Control - Centered vertically on window */
+.control-penumbra-section {
+  position: absolute;
+  right: var(--spacing-3xl);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+/* Removed - totality is now at bottom */
 
 .control-eclipse-wide {
   grid-column: 1 / -1;
@@ -92,6 +105,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
 }
 
 /* ===================================================================
@@ -99,20 +113,21 @@
    =================================================================== */
 
 .totality-knob {
-  width: 180px;
-  height: 180px;
+  width: 120px;
+  height: 120px;
   position: relative;
   cursor: ns-resize;
   border-radius: 50%;
   background: radial-gradient(circle at center, #000000 0%, #1a1a1a 40%, #2a2a2a 70%, transparent),
               var(--glass-bg);
   backdrop-filter: var(--glass-blur);
-  border: 5px solid var(--plugin-secondary);
-  box-shadow: 0 0 50px var(--plugin-glow),
-              0 0 80px rgba(251, 191, 36, 0.5),
-              inset 0 0 40px rgba(0, 0, 0, 0.8);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 4px solid var(--plugin-secondary);
+  box-shadow: 0 0 40px var(--plugin-glow),
+              0 0 60px rgba(251, 191, 36, 0.5),
+              inset 0 0 30px rgba(0, 0, 0, 0.8);
+  transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: visible;
+  transform: translateZ(0); /* Force hardware acceleration, prevent layout shifts */
 }
 
 /* Corona effect */
@@ -159,12 +174,12 @@
   top: 10%;
   left: 50%;
   transform: translateX(-50%);
-  width: 6px;
-  height: 44%;
+  width: 5px;
+  height: 40%;
   background: linear-gradient(to bottom, var(--corona-bright), var(--plugin-secondary), transparent);
   border-radius: 3px;
-  box-shadow: 0 0 20px rgba(254, 243, 199, 1),
-              0 0 35px rgba(251, 191, 36, 0.8);
+  box-shadow: 0 0 15px rgba(254, 243, 199, 1),
+              0 0 25px rgba(251, 191, 36, 0.8);
   transform-origin: bottom center;
 }
 
@@ -174,73 +189,98 @@
 
 .shadow-zone-slider {
   width: 700px;
-  height: 80px;
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
   position: relative;
-  background: var(--glass-bg);
+  background: rgba(0, 0, 0, 0.9); /* Black track background - always visible */
   backdrop-filter: var(--glass-blur);
   border: 3px solid var(--plugin-secondary);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 0 25px rgba(251, 191, 36, 0.3),
-              inset 0 0 20px rgba(0, 0, 0, 0.5);
+              inset 0 0 15px rgba(0, 0, 0, 0.8);
+  flex-shrink: 0;
+  display: block;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
-.shadow-zone-slider .zone-track {
+/* Fill between the two handles - orange/yellow gradient */
+.shadow-zone-slider::before {
+  content: '';
   position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 12px;
-  transform: translateY(-50%);
+  left: var(--range-min, 30%);
+  top: 0;
+  bottom: 0;
+  width: calc(var(--range-max, 70%) - var(--range-min, 30%));
+  height: 100% !important;
+  min-height: 100%;
   background: linear-gradient(to right,
-    #000000 0%,
-    var(--plugin-accent) 30%,
-    var(--plugin-secondary) 70%,
-    var(--corona-bright) 100%
+    var(--plugin-secondary) 0%,    /* Gold */
+    var(--corona-bright) 50%,       /* Bright yellow/orange */
+    var(--plugin-secondary) 100%   /* Gold */
   );
-  border-radius: var(--radius-full);
-  opacity: 0.6;
-}
-
-.shadow-zone-slider .zone-range {
-  position: absolute;
-  top: 50%;
-  left: 30%;
-  width: 40%;
-  height: 16px;
-  transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  border: 2px solid var(--plugin-secondary);
-  border-radius: var(--radius-full);
-  box-shadow: 0 0 20px var(--plugin-glow),
-              inset 0 0 15px rgba(251, 191, 36, 0.2);
-}
-
-.shadow-zone-slider .zone-handle {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 36px;
-  height: 60px;
-  background: linear-gradient(180deg, var(--corona-bright), var(--plugin-secondary), #000000);
-  border: 3px solid var(--plugin-secondary);
+  opacity: 0.8;
+  pointer-events: none;
   border-radius: var(--radius-md);
-  box-shadow: 0 0 25px var(--plugin-glow),
-              0 4px 15px rgba(0, 0, 0, 0.6);
+  z-index: 1;
+  box-sizing: border-box;
+}
+
+/* Hide the old track element */
+.shadow-zone-slider .zone-track {
+  display: none;
+}
+
+/* Make range element visible and clickable for dragging */
+.shadow-zone-slider .range-slider-range {
+  position: absolute;
+  left: var(--range-min, 30%);
+  top: 0;
+  width: calc(var(--range-max, 70%) - var(--range-min, 30%));
+  height: 100%;
+  pointer-events: auto;
+  cursor: grab;
+  z-index: 2;
+  background: transparent;
+}
+
+.shadow-zone-slider .range-slider-range:active {
+  cursor: grabbing;
+}
+
+/* Full-height rounded rectangle handles */
+.shadow-zone-slider .range-slider-handle {
+  position: absolute;
+  top: -2px !important;
+  left: 50%;
+  width: 20px;
+  height: 32px !important;
+  background: linear-gradient(180deg, var(--corona-bright), var(--plugin-secondary), #000000);
+  border-radius: var(--radius-md);
+  border: 3px solid var(--plugin-secondary);
+  box-shadow: 0 0 20px var(--plugin-glow);
   cursor: ew-resize;
-  transition: all 0.3s ease;
+  transition: none !important;
+  will-change: left;
+  transform: translateX(-50%) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
 }
 
-.shadow-zone-slider .zone-handle:hover {
-  transform: translate(-50%, -50%) scale(1.1);
+.shadow-zone-slider .range-slider-handle:hover {
+  box-shadow: 0 0 30px var(--plugin-glow);
 }
 
-.zone-handle-min {
-  left: 30%;
+.shadow-zone-slider .range-handle-min {
+  left: var(--range-min, 30%);
 }
 
-.zone-handle-max {
-  left: 70%;
+.shadow-zone-slider .range-handle-max {
+  left: var(--range-max, 70%);
 }
 
 /* ===================================================================
@@ -249,8 +289,8 @@
 
 .umbra-control,
 .penumbra-control {
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   position: relative;
   cursor: ns-resize;
   border-radius: 50%;
@@ -297,6 +337,17 @@
   box-shadow: 0 0 12px rgba(251, 191, 36, 0.9);
   transform-origin: bottom center;
   transition: transform 0.15s ease;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Prevent initial snap animation */
+.totality-knob .knob-indicator {
+  transition: none;
+}
+
+.totality-knob.initialized .knob-indicator {
+  transition: transform 0.15s ease;
 }
 
 /* ===================================================================
@@ -337,6 +388,15 @@
   box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
 }
 
+/* Center reveal/hide toggle on window */
+.orbitals-footer .eclipse-mode-toggle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  gap: var(--spacing-sm);
+}
+
 .eclipse-mode-toggle button {
   padding: var(--spacing-md) var(--spacing-2xl);
   background: transparent;
@@ -351,6 +411,14 @@
   transition: all 0.2s ease;
   min-width: 140px;
   text-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+}
+
+/* In footer, make buttons smaller */
+.orbitals-footer .eclipse-mode-toggle button {
+  padding: var(--spacing-xs) var(--spacing-lg);
+  font-size: var(--font-size-sm);
+  min-width: 100px;
+  letter-spacing: 1px;
 }
 
 .eclipse-mode-toggle button:hover {
@@ -379,12 +447,12 @@
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
-  color: var(--corona-bright);
+  color: #fbbf24 !important; /* Corona Gold - yellow/orange */
   text-align: center;
   min-width: 70px;
   font-weight: 700;
   text-shadow: 0 0 12px rgba(251, 191, 36, 1),
-               0 0 20px rgba(251, 191, 36, 0.6),
+               0 0 20px rgba(251, 191, 36, 0.8),
                0 1px 3px rgba(0, 0, 0, 0.9);
   letter-spacing: 0.5px;
 }
@@ -393,8 +461,9 @@
   font-size: var(--font-size-lg);
   font-weight: 800;
   padding: var(--spacing-md) var(--spacing-lg);
+  color: #fbbf24 !important; /* Corona Gold - yellow/orange */
   text-shadow: 0 0 15px rgba(251, 191, 36, 1),
-               0 0 25px rgba(251, 191, 36, 0.7),
+               0 0 25px rgba(251, 191, 36, 0.9),
                0 2px 4px rgba(0, 0, 0, 0.9);
 }
 
@@ -425,6 +494,25 @@
   text-shadow: 0 0 10px rgba(251, 191, 36, 0.8),
                0 1px 3px rgba(0, 0, 0, 0.8);
   font-weight: 600;
+}
+
+/* ===================================================================
+   TOTALITY CONTAINER (Below footer)
+   =================================================================== */
+
+.totality-container {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  z-index: 10;
+  width: auto;
+  transition: none !important;
+  will-change: transform;
 }
 
 /* ===================================================================

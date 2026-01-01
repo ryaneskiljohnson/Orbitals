@@ -54,6 +54,13 @@ class OrbitalsKnob {
     this.startY = e.clientY;
     this.startValue = this.value;
     
+    // Disable transitions during drag for smooth updates
+    const indicator = this.element.querySelector('.knob-indicator');
+    if (indicator) {
+      indicator.style.transition = 'none';
+      indicator.style.willChange = 'transform';
+    }
+    
     document.addEventListener('mousemove', this.onMouseMove.bind(this));
     document.addEventListener('mouseup', this.onMouseUp.bind(this));
   }
@@ -71,6 +78,14 @@ class OrbitalsKnob {
   
   onMouseUp() {
     this.isDragging = false;
+    
+    // Re-enable transitions after drag
+    const indicator = this.element.querySelector('.knob-indicator');
+    if (indicator) {
+      indicator.style.transition = '';
+      indicator.style.willChange = '';
+    }
+    
     document.removeEventListener('mousemove', this.onMouseMove);
     document.removeEventListener('mouseup', this.onMouseUp);
   }
@@ -103,9 +118,11 @@ class OrbitalsKnob {
     const angleRange = this.options.angleEnd - this.options.angleStart;
     const angle = this.options.angleStart + (percent * angleRange);
     
-    // Rotate the indicator line
-    if (this.element.querySelector('.knob-indicator')) {
-      this.element.querySelector('.knob-indicator').style.transform = `rotate(${angle}deg)`;
+    // Update rotation immediately (transitions are disabled during drag)
+    const indicator = this.element.querySelector('.knob-indicator');
+    if (indicator) {
+      // Preserve translateX(-50%) for centering, add rotation
+      indicator.style.transform = `translateX(-50%) rotate(${angle}deg)`;
     } else {
       this.element.style.setProperty('--knob-rotation', `${angle}deg`);
     }
@@ -389,6 +406,10 @@ class OrbitalsRangeSlider {
     this.valueMin = this.options.valueMin;
     this.valueMax = this.options.valueMax;
     this.activeHandle = null;
+    this.isDraggingRange = false;
+    this.dragStartX = 0;
+    this.dragStartMin = 0;
+    this.dragStartMax = 0;
     
     this.init();
   }
@@ -406,10 +427,161 @@ class OrbitalsRangeSlider {
     this.handleMax = this.element.querySelector('.range-handle-max');
     this.range = this.element.querySelector('.range-slider-range');
     
-    this.handleMin.addEventListener('mousedown', (e) => this.onMouseDown(e, 'min'));
-    this.handleMax.addEventListener('mousedown', (e) => this.onMouseDown(e, 'max'));
+    // Handle proximity threshold (in pixels)
+    this.handleProximityThreshold = 20;
+    
+    this.handleMin.addEventListener('mousedown', (e) => { e.stopPropagation(); this.onMouseDown(e, 'min'); });
+    this.handleMax.addEventListener('mousedown', (e) => { e.stopPropagation(); this.onMouseDown(e, 'max'); });
+    
+    // Allow dragging the entire range, but check proximity to handles first
+    this.range.addEventListener('mousedown', (e) => this.onRangeMouseDown(e));
+    this.range.addEventListener('mousemove', (e) => this.onRangeHover(e)); // For cursor changes on hover
+    this.range.addEventListener('mouseleave', () => {
+      if (!this.isDraggingRange) {
+        this.range.style.cursor = 'grab';
+      }
+    });
+    this.element.addEventListener('mousedown', (e) => {
+      // If clicking on the slider but not on a handle or range, check if it's in the range area
+      if (e.target === this.element || e.target === this.element.querySelector('.range-slider-track')) {
+        const rect = this.element.getBoundingClientRect();
+        const percent = (e.clientX - rect.left) / rect.width;
+        const percentMin = (this.valueMin - this.options.min) / (this.options.max - this.options.min);
+        const percentMax = (this.valueMax - this.options.min) / (this.options.max - this.options.min);
+        
+        // If click is within the range, check proximity to handles
+        if (percent >= percentMin && percent <= percentMax) {
+          const handle = this.getHandleAtPosition(e.clientX);
+          if (handle) {
+            // Close to a handle - resize that end
+            this.onMouseDown(e, handle);
+          } else {
+            // In the middle - move entire range
+            this.onRangeMouseDown(e);
+          }
+        }
+      }
+    });
     
     this.updatePosition();
+  }
+  
+  /**
+   * @brief Check which handle (if any) is near the mouse position
+   * @param {number} clientX - Mouse X position
+   * @returns {string|null} 'min', 'max', or null
+   */
+  getHandleAtPosition(clientX) {
+    const rect = this.element.getBoundingClientRect();
+    const percentMin = (this.valueMin - this.options.min) / (this.options.max - this.options.min);
+    const percentMax = (this.valueMax - this.options.min) / (this.options.max - this.options.min);
+    
+    const minHandleX = rect.left + (percentMin * rect.width);
+    const maxHandleX = rect.left + (percentMax * rect.width);
+    
+    const distanceToMin = Math.abs(clientX - minHandleX);
+    const distanceToMax = Math.abs(clientX - maxHandleX);
+    
+    // Check if within threshold of either handle
+    if (distanceToMin <= this.handleProximityThreshold && distanceToMin < distanceToMax) {
+      return 'min';
+    } else if (distanceToMax <= this.handleProximityThreshold) {
+      return 'max';
+    }
+    
+    return null;
+  }
+  
+  onRangeMouseDown(e) {
+    // Check if we're actually close to a handle - if so, resize that handle instead
+    const handle = this.getHandleAtPosition(e.clientX);
+    if (handle) {
+      // Close to a handle - resize that end instead of moving range
+      this.onMouseDown(e, handle);
+      return;
+    }
+    
+    e.preventDefault();
+    e.stopPropagation();
+    this.isDraggingRange = true;
+    this.dragStartX = e.clientX;
+    this.dragStartMin = this.valueMin;
+    this.dragStartMax = this.valueMax;
+    
+    document.addEventListener('mousemove', this.onRangeMouseMove.bind(this));
+    document.addEventListener('mouseup', this.onRangeMouseUp.bind(this));
+  }
+  
+  
+  /**
+   * @brief Update cursor on hover over range (not dragging)
+   * @param {MouseEvent} e - Mouse event
+   */
+  onRangeHover(e) {
+    if (this.isDraggingRange) return; // Don't update cursor while dragging
+    
+    const handle = this.getHandleAtPosition(e.clientX);
+    if (handle) {
+      // Close to a handle - show resize cursor
+      this.range.style.cursor = 'ew-resize';
+    } else {
+      // In the middle - show grab cursor
+      this.range.style.cursor = 'grab';
+    }
+  }
+  
+  /**
+   * @brief Handle mouse move while dragging the range
+   * @param {MouseEvent} e - Mouse event
+   */
+  onRangeMouseMove(e) {
+    if (!this.isDraggingRange) return;
+    
+    // While dragging, show grabbing cursor
+    this.range.style.cursor = 'grabbing';
+    
+    const rect = this.element.getBoundingClientRect();
+    const deltaX = e.clientX - this.dragStartX;
+    const deltaPercent = deltaX / rect.width;
+    const deltaValue = deltaPercent * (this.options.max - this.options.min);
+    
+    const newMin = this.dragStartMin + deltaValue;
+    const newMax = this.dragStartMax + deltaValue;
+    
+    // Clamp to bounds
+    if (newMin < this.options.min) {
+      const offset = this.options.min - newMin;
+      this.valueMin = this.options.min;
+      this.valueMax = newMax + offset;
+    } else if (newMax > this.options.max) {
+      const offset = newMax - this.options.max;
+      this.valueMin = newMin - offset;
+      this.valueMax = this.options.max;
+    } else {
+      this.valueMin = newMin;
+      this.valueMax = newMax;
+    }
+    
+    // Ensure min doesn't exceed max
+    if (this.valueMin > this.valueMax) {
+      const temp = this.valueMin;
+      this.valueMin = this.valueMax;
+      this.valueMax = temp;
+    }
+    
+    this.updatePosition();
+    
+    if (this.options.onChange) {
+      this.options.onChange(this.valueMin, this.valueMax, this.options.parameter);
+    }
+  }
+  
+  onRangeMouseUp() {
+    this.isDraggingRange = false;
+    document.removeEventListener('mousemove', this.onRangeMouseMove);
+    document.removeEventListener('mouseup', this.onRangeMouseUp);
+    // Reset cursor
+    this.range.style.cursor = 'grab';
   }
   
   onMouseDown(e, handle) {
@@ -421,7 +593,7 @@ class OrbitalsRangeSlider {
   }
   
   onMouseMove(e) {
-    if (!this.activeHandle) return;
+    if (!this.activeHandle || this.isDraggingRange) return;
     
     const rect = this.element.getBoundingClientRect();
     const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -450,6 +622,11 @@ class OrbitalsRangeSlider {
     const percentMin = (this.valueMin - this.options.min) / (this.options.max - this.options.min);
     const percentMax = (this.valueMax - this.options.min) / (this.options.max - this.options.min);
     
+    // Set CSS variables for styling
+    this.element.style.setProperty('--range-min', `${percentMin * 100}%`);
+    this.element.style.setProperty('--range-max', `${percentMax * 100}%`);
+    
+    // Also set directly for compatibility
     this.handleMin.style.left = `${percentMin * 100}%`;
     this.handleMax.style.left = `${percentMax * 100}%`;
     this.range.style.left = `${percentMin * 100}%`;

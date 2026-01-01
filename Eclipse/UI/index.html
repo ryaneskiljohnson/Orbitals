@@ -36,7 +36,7 @@
                 </div>
 
                 <!-- Left: Umbra Control -->
-                <div class="control-eclipse-section" style="grid-column: 1; grid-row: 2;">
+                <div class="control-eclipse-section control-umbra-section">
                     <label class="control-label">UMBRA<br/>(Full Shadow)</label>
                     <div class="umbra-control" id="umbraControl" data-param="umbra"
                          data-help-title="UMBRA (Full Shadow)"
@@ -48,21 +48,8 @@
                     <div class="value-display" id="umbraValue">100%</div>
                 </div>
 
-                <!-- Center: Totality Knob -->
-                <div class="control-eclipse-center">
-                    <label class="control-label">TOTALITY</label>
-                    <div class="totality-knob" id="totalityKnob" data-param="totality"
-                         data-help-title="THRESHOLD"
-                         data-help-description="Velocity level where the eclipse occurs (0-127). Notes below are hidden, above are revealed.">
-                        <div class="knob-inner">
-                            <div class="knob-indicator"></div>
-                        </div>
-                    </div>
-                    <div class="value-display large" id="totalityValue">50%</div>
-                </div>
-
                 <!-- Right: Penumbra Control -->
-                <div class="control-eclipse-section" style="grid-column: 3; grid-row: 2;">
+                <div class="control-eclipse-section control-penumbra-section">
                     <label class="control-label">PENUMBRA<br/>(Partial Shadow)</label>
                     <div class="penumbra-control" id="penumbraControl" data-param="penumbra"
                          data-help-title="PENUMBRA (Partial Shadow)"
@@ -74,15 +61,6 @@
                     <div class="value-display" id="penumbraValue">50%</div>
                 </div>
 
-                <!-- Mode Toggle (Bottom) -->
-                <div class="control-eclipse-wide" style="grid-row: 3;">
-                    <div class="eclipse-mode-toggle"
-                         data-help-title="INVERT"
-                         data-help-description="Toggle between REVEAL (show notes above threshold) and HIDE (hide notes above threshold) modes.">
-                        <button data-mode="reveal" class="active">REVEAL</button>
-                        <button data-mode="hide">HIDE</button>
-                    </div>
-                </div>
             </div>
         </main>
 
@@ -90,11 +68,30 @@
             <button class="bypass-toggle" id="bypassToggle"
                     data-help-title="BYPASS"
                     data-help-description="Disables all processing and passes MIDI through unaffected. Use to A/B compare or temporarily disable the effect.">BYPASS</button>
+            <div class="eclipse-mode-toggle"
+                 data-help-title="INVERT"
+                 data-help-description="Toggle between REVEAL (show notes above threshold) and HIDE (hide notes above threshold) modes.">
+                <button data-mode="reveal" class="active">REVEAL</button>
+                <button data-mode="hide">HIDE</button>
+            </div>
             <div class="info-display">
                 <span id="noteCount">Notes: 0</span>
                 <span id="maskedNotes">Masked: 0</span>
             </div>
         </footer>
+        
+        <!-- Totality Knob (Below footer) -->
+        <div class="totality-container">
+            <label class="control-label">TOTALITY</label>
+            <div class="totality-knob" id="totalityKnob" data-param="totality"
+                 data-help-title="THRESHOLD"
+                 data-help-description="Velocity level where the eclipse occurs (0-127). Notes below are hidden, above are revealed.">
+                <div class="knob-inner">
+                    <div class="knob-indicator"></div>
+                </div>
+            </div>
+            <div class="value-display" id="totalityValue">50%</div>
+        </div>
     </div>
 
     <script src="../../_Shared/UI/orbitals-animations.js"></script>

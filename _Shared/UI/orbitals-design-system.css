@@ -95,8 +95,12 @@
 }
 
 body, html {
-  width: 100%;
-  height: 100%;
+  width: 1200px; /* Fixed width to prevent layout shifts */
+  height: 750px; /* Fixed height to prevent layout shifts */
+  min-width: 1200px;
+  min-height: 750px;
+  max-width: 1200px;
+  max-height: 750px;
   overflow: hidden;
   font-family: var(--font-body);
   font-size: var(--font-size-base);
@@ -108,6 +112,9 @@ body, html {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 * {
@@ -130,13 +137,20 @@ input, textarea, [contenteditable="true"] {
    =================================================================== */
 
 .plugin-container {
-  width: 100%;
-  height: 100%;
+  width: 1200px; /* Fixed width */
+  height: 750px; /* Fixed height */
+  min-width: 1200px;
+  min-height: 750px;
+  max-width: 1200px;
+  max-height: 750px;
   display: flex;
   flex-direction: column;
   background: transparent;
   position: relative;
   overflow: hidden;
+  transform: translateZ(0); /* Force hardware acceleration, prevent layout shifts */
+  will-change: contents; /* Optimize for content changes, not position */
+  box-sizing: border-box;
 }
 
 /* Starfield background (all plugins) */
@@ -173,16 +187,24 @@ input, textarea, [contenteditable="true"] {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 1200px; /* Fixed width to match container */
+  height: 750px; /* Fixed height to match container */
+  min-width: 1200px;
+  min-height: 750px;
+  max-width: 1200px;
+  max-height: 750px;
   background-image: var(--plugin-background-image, none);
-  background-size: var(--plugin-background-size, cover);
-  background-position: var(--plugin-background-position, center);
+  background-size: 100% 100% !important; /* Fill container exactly - no aspect ratio changes */
+  background-position: 0 0 !important; /* Fixed position - top-left, no centering that can shift */
   background-repeat: no-repeat;
   opacity: var(--plugin-background-opacity, 0.6);
   pointer-events: none;
   z-index: 0;
   animation: fadeOutBackground 2s ease-out 1.5s forwards; /* Fade out after 1.5s, takes 2s */
+  will-change: opacity; /* Only animate opacity, not position */
+  transform: translateZ(0); /* Force hardware acceleration, prevent layout shifts */
+  backface-visibility: hidden; /* Prevent rendering shifts */
+  box-sizing: border-box;
 }
 
 @keyframes fadeOutBackground {
@@ -203,11 +225,14 @@ input, textarea, [contenteditable="true"] {
   grid-template-columns: 120px 1fr 40px;
   align-items: center;
   padding: var(--spacing-md) var(--spacing-lg);
+  min-height: 64px; /* Fixed height to prevent shifts */
+  height: 64px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--glass-border);
   z-index: var(--z-header);
   position: relative;
+  box-sizing: border-box;
 }
 
 .orbitals-header h1 {
@@ -448,10 +473,13 @@ input, textarea, [contenteditable="true"] {
 
 .plugin-main {
   flex: 1;
+  min-height: 638px; /* Fixed: 750 - 64 (header) - 48 (footer) */
+  height: 638px;
   display: flex;
   position: relative;
   overflow: hidden;
   padding: var(--spacing-lg);
+  box-sizing: border-box;
 }
 
 canvas {
@@ -473,11 +501,14 @@ canvas {
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-sm) var(--spacing-lg);
+  min-height: 48px; /* Fixed height to prevent shifts */
+  height: 48px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   border-top: 1px solid var(--glass-border);
   z-index: var(--z-header);
   position: relative;
+  box-sizing: border-box;
 }
 
 .bypass-toggle {
@@ -1050,6 +1081,12 @@ label {
     0 0 15px var(--plugin-glow),
     inset 0 1px 2px rgba(255, 255, 255, 0.3);
   transition: all var(--transition-fast);
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.range-slider-range:active {
+  cursor: grabbing;
 }
 
 .range-slider-handle {
