@@ -14,19 +14,9 @@ function setupRetrogradeVisualization(canvas) {
       return { width: rect.width, height: rect.height };
     };
     
-    // Get center based on Scope knob position
+    // Get center - centered on canvas
     const getCenter = () => {
       const size = getCanvasSize();
-      const canvasRect = canvas.getBoundingClientRect();
-      
-      const scopeKnob = document.getElementById('scopeKnob');
-      if (scopeKnob) {
-        const knobRect = scopeKnob.getBoundingClientRect();
-        const knobCenterX = knobRect.left + knobRect.width / 2 - canvasRect.left;
-        const knobCenterY = knobRect.top + knobRect.height / 2 - canvasRect.top;
-        return { x: knobCenterX, y: knobCenterY };
-      }
-      
       return { x: size.width / 2, y: size.height / 2 };
     };
     
@@ -170,23 +160,26 @@ function setupRetrogradeVisualization(canvas) {
 }
 
 function setupControls() {
+  // Scope Knob (1-4 notes/bars)
   new OrbitalsKnob(document.getElementById('scopeKnob'), {
-    min: 0, max: 4, value: 1, step: 1,
+    min: 1, max: 4, value: 1, step: 1,
     onChange: (v) => {
       document.getElementById('scopeValue').textContent = Math.round(v);
       if (window.updateScopeValue) window.updateScopeValue(v);
     }
   });
   
+  // Symmetry Slider (0-360 degrees, displayed as 0-100 for simplicity)
   new OrbitalsSlider(document.getElementById('symmetrySlider'), {
-    min: 0, max: 100, value: 50,
+    min: 0, max: 360, value: 180,
     orientation: 'horizontal',
     onChange: (v) => {
       document.getElementById('symmetryValue').textContent = Math.round(v) + '°';
-      if (window.updateSymmetryValue) window.updateSymmetryValue(v);
+      if (window.updateSymmetryValue) window.updateSymmetryValue(v / 360 * 100); // Normalize to 0-100 for internal use
     }
   });
   
+  // Echo Knob (0-8 echoes)
   new OrbitalsKnob(document.getElementById('echoKnob'), {
     min: 0, max: 8, value: 0, step: 1,
     onChange: (v) => {
@@ -195,10 +188,13 @@ function setupControls() {
     }
   });
   
+  // Mode selector buttons
   document.querySelectorAll('.mode-selector button').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.mode-selector button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      const mode = btn.dataset.mode;
+      console.log('Reverse mode:', mode);
     });
   });
 }

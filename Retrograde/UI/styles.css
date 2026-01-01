@@ -28,6 +28,8 @@
   /* Background image */
   --plugin-background-image: url('../../_Shared/Assets/backgrounds/retrograde-background.png');
   --plugin-background-opacity: 0.6;
+  --plugin-background-size: 100% auto; /* Full width, maintain aspect ratio */
+  --plugin-background-position: center;
 }
 
 /* ===================================================================
@@ -61,11 +63,11 @@
   z-index: 10;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: auto 1fr auto;
-  gap: var(--spacing-3xl);
+  grid-template-rows: auto 1fr 60px auto;
+  gap: var(--spacing-2xl);
   width: 100%;
   height: 100%;
-  padding: var(--spacing-3xl);
+  padding: var(--spacing-lg) var(--spacing-3xl) var(--spacing-2xl) var(--spacing-3xl);
   align-items: center;
 }
 
@@ -74,6 +76,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-md);
+  justify-content: center;
 }
 
 .control-section-center {
@@ -110,7 +113,7 @@
 }
 
 .mode-selector button {
-  padding: var(--spacing-md) var(--spacing-xl);
+  padding: var(--spacing-sm) var(--spacing-lg);
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
@@ -121,7 +124,7 @@
   letter-spacing: 1.5px;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 120px;
+  min-width: 110px;
 }
 
 .mode-selector button:hover {
@@ -131,67 +134,80 @@
 
 .mode-selector button.active {
   background: var(--plugin-primary);
-  color: var(--space-black);
+  color: white;
   border-color: var(--plugin-secondary);
   box-shadow: 0 0 20px var(--plugin-glow),
               inset 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
 /* ===================================================================
-   DEPTH KNOB (Large Central Control)
+   SCOPE KNOB (Left Side)
    =================================================================== */
 
-.depth-knob {
-  width: 180px;
-  height: 180px;
+.scope-knob {
+  width: 120px;
+  height: 120px;
   position: relative;
   cursor: ns-resize;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.2) 50%, rgba(107, 47, 181, 0.1) 80%, transparent),
               var(--glass-bg);
   backdrop-filter: var(--glass-blur);
-  border: 5px solid var(--plugin-primary);
-  box-shadow: 0 0 45px var(--plugin-glow),
-              0 0 75px rgba(168, 85, 247, 0.4),
-              inset 0 0 35px rgba(236, 72, 153, 0.2);
+  border: 3px solid var(--plugin-primary);
+  box-shadow: 0 0 35px var(--plugin-glow),
+              0 0 60px rgba(168, 85, 247, 0.4),
+              inset 0 0 25px rgba(236, 72, 153, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.depth-knob:hover {
-  transform: scale(1.08);
+.scope-knob:hover {
+  transform: scale(1.05);
   border-color: var(--plugin-secondary);
-  box-shadow: 0 0 55px var(--plugin-glow),
-              0 0 95px rgba(168, 85, 247, 0.6),
-              inset 0 0 45px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 0 45px var(--plugin-glow),
+              0 0 75px rgba(168, 85, 247, 0.6),
+              inset 0 0 35px rgba(236, 72, 153, 0.3);
 }
 
-.depth-knob::before {
-  content: '';
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  height: 44%;
-  background: linear-gradient(to bottom, #ffffff, var(--plugin-accent), transparent);
-  border-radius: 3px;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.9),
-              0 0 25px rgba(236, 72, 153, 0.7);
-  transform-origin: bottom center;
+/* ===================================================================
+   ECHO KNOB (Right Side)
+   =================================================================== */
+
+.echo-knob {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  cursor: ns-resize;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.2) 50%, rgba(107, 47, 181, 0.1) 80%, transparent),
+              var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 3px solid var(--plugin-primary);
+  box-shadow: 0 0 35px var(--plugin-glow),
+              0 0 60px rgba(168, 85, 247, 0.4),
+              inset 0 0 25px rgba(236, 72, 153, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Rotating rings animation */
-.depth-knob::after {
+.echo-knob:hover {
+  transform: scale(1.05);
+  border-color: var(--plugin-secondary);
+  box-shadow: 0 0 45px var(--plugin-glow),
+              0 0 75px rgba(168, 85, 247, 0.6),
+              inset 0 0 35px rgba(236, 72, 153, 0.3);
+}
+
+/* Rotating rings animation for echo knob */
+.echo-knob::after {
   content: '';
   position: absolute;
-  top: -20px;
-  left: -20px;
-  right: -20px;
-  bottom: -20px;
-  border: 2px solid var(--plugin-secondary);
+  top: -15px;
+  left: -15px;
+  right: -15px;
+  bottom: -15px;
+  border: 2px solid var(--plugin-accent);
   border-radius: 50%;
   opacity: 0.3;
-  animation: reverse-rotate 8s linear infinite;
+  animation: reverse-rotate 10s linear infinite;
 }
 
 @keyframes reverse-rotate {
@@ -200,60 +216,59 @@
 }
 
 /* ===================================================================
-   TIME WINDOW SLIDER
+   SYMMETRY SLIDER (Horizontal)
    =================================================================== */
 
-.time-window-slider {
+.symmetry-slider {
   width: 500px;
-  height: 70px;
+  height: 40px;
   position: relative;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   border: 2px solid var(--plugin-primary);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 0 20px rgba(168, 85, 247, 0.3),
               inset 0 0 15px rgba(168, 85, 247, 0.1);
 }
 
-.time-window-slider .slider-track {
+.symmetry-slider::before {
+  content: '';
   position: absolute;
-  top: 50%;
   left: 0;
-  right: 0;
-  height: 10px;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-full);
+  top: 0;
+  width: calc(var(--slider-value, 0.5) * 100%);
+  height: 100%;
+  background: linear-gradient(to right,
+    var(--plugin-secondary) 0%,
+    var(--plugin-primary) 70%,
+    var(--plugin-accent) 100%
+  );
+  opacity: 0.3;
+  pointer-events: none;
 }
 
-.time-window-slider .slider-handle {
+.symmetry-slider .slider-handle {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px;
-  height: 56px;
+  top: 0;
+  width: 20px;
+  height: 100%;
   background: linear-gradient(180deg, var(--plugin-accent), var(--plugin-primary));
-  border: 3px solid white;
+  border: 2px solid white;
   border-radius: var(--radius-md);
-  box-shadow: 0 0 25px var(--plugin-glow),
-              0 4px 15px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 20px var(--plugin-glow),
+              0 4px 12px rgba(0, 0, 0, 0.5);
   cursor: ew-resize;
-  transition: all 0.3s ease;
-}
-
-.time-window-slider .slider-handle:hover {
-  transform: translate(-50%, -50%) scale(1.1);
-  box-shadow: 0 0 35px var(--plugin-glow),
-              0 4px 20px rgba(0, 0, 0, 0.6);
+  transition: none !important;
+  will-change: left;
+  transform: translateX(-50%);
 }
 
 /* ===================================================================
    VALUE DISPLAYS
    =================================================================== */
 
-.value-display {
+.retrograde-theme .value-display {
   background: var(--glass-bg-dark);
   border: 1px solid var(--plugin-primary);
   box-shadow: 0 0 10px var(--plugin-glow);
@@ -261,15 +276,18 @@
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
-  color: var(--plugin-secondary);
+  color: rgba(255, 255, 255, 0.6) !important;
+  text-shadow: none !important;
   text-align: center;
   min-width: 70px;
 }
 
-.value-display.large {
+.retrograde-theme .value-display.large {
   font-size: var(--font-size-lg);
   padding: var(--spacing-md) var(--spacing-lg);
   min-width: 90px;
+  color: rgba(255, 255, 255, 0.6) !important;
+  text-shadow: none !important;
 }
 
 /* ===================================================================

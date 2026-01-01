@@ -23,32 +23,51 @@
             <div class="controls-reverse">
                 <!-- Mode Selector (Top) -->
                 <div class="control-section-wide" style="grid-row: 1;">
-                    <div class="mode-selector">
+                    <div class="mode-selector"
+                         data-help-title="REVERSE MODE"
+                         data-help-description="Selects what to reverse - VELOCITY (velocity contours), TIMING (note timing), or PHRASE (note order).">
                         <button data-mode="velocity" class="active">VELOCITY</button>
                         <button data-mode="timing">TIMING</button>
                         <button data-mode="phrase">PHRASE</button>
                     </div>
                 </div>
 
-                <!-- Center: Depth Knob -->
-                <div class="control-section-center">
-                    <label class="control-label">DEPTH</label>
-                    <div class="depth-knob" id="depthKnob" data-param="depth">
+                <!-- Left: Scope Knob -->
+                <div class="control-section" style="grid-column: 1; grid-row: 2;">
+                    <label class="control-label">SCOPE</label>
+                    <div class="scope-knob" id="scopeKnob" data-param="scope"
+                         data-help-title="SCOPE"
+                         data-help-description="Number of notes or bars to reverse (1-4). Larger scope reverses longer phrases.">
                         <div class="knob-inner">
                             <div class="knob-indicator"></div>
                         </div>
                     </div>
-                    <div class="value-display large" id="depthValue">50%</div>
+                    <div class="value-display" id="scopeValue">1</div>
                 </div>
 
-                <!-- Bottom: Time Window Slider -->
-                <div class="control-section-wide" style="grid-row: 3;">
-                    <label class="control-label">TIME WINDOW</label>
-                    <div class="time-window-slider" id="timeWindowSlider" data-param="timeWindow">
+                <!-- Right: Echo Knob -->
+                <div class="control-section" style="grid-column: 3; grid-row: 2;">
+                    <label class="control-label">ECHO</label>
+                    <div class="echo-knob" id="echoKnob" data-param="echo"
+                         data-help-title="ECHO"
+                         data-help-description="Creates mirrored copies of reversed notes (0-8 echoes). Adds rhythmic complexity.">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="value-display" id="echoValue">0</div>
+                </div>
+
+                <!-- Bottom: Symmetry Slider -->
+                <div class="control-section-wide" style="grid-row: 4;">
+                    <label class="control-label">SYMMETRY</label>
+                    <div class="symmetry-slider" id="symmetrySlider" data-param="symmetry"
+                         data-help-title="SYMMETRY"
+                         data-help-description="Rotation angle of the mirror axis (0-360°). Changes the reflection plane for reversal.">
                         <div class="slider-track"></div>
                         <div class="slider-handle"></div>
                     </div>
-                    <div class="value-display" id="timeWindowValue">500ms</div>
+                    <div class="value-display" id="symmetryValue">180°</div>
                 </div>
             </div>
         </main>
