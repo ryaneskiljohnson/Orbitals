@@ -88,11 +88,23 @@
   align-items: center;
   gap: var(--spacing-xs);
   width: 100%;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .control-section .slider-vertical {
   position: relative;
   flex-shrink: 0;
+  align-self: center;
+}
+
+.control-section .range-slider {
+  position: relative;
+  flex-shrink: 0;
+  align-self: stretch;
+  height: 24px;
+  min-height: 24px;
+  max-height: 24px;
 }
 
 .control-section .control-label {
@@ -173,7 +185,7 @@
 
 .slider-vertical {
   width: 56px;
-  height: 200px;
+  height: 220px;
   position: relative;
   border-radius: var(--radius-lg);
   background: var(--glass-bg);
@@ -185,6 +197,11 @@
   transition: all var(--transition-medium);
   margin: 0 auto;
   isolation: isolate;
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
+  padding: 12px 0;
+  box-sizing: border-box;
 }
 
 .slider-vertical:hover {
@@ -207,7 +224,7 @@
     var(--plugin-accent) 100%
   );
   opacity: 0.6;
-  pointer-events: none;
+  pointer-events: none !important;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   z-index: 1;
 }
@@ -226,28 +243,25 @@
 
 .slider-vertical .slider-handle {
   position: absolute !important;
-  width: 32px;
-  height: 32px;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 3%),
-              radial-gradient(circle, var(--plugin-accent), var(--plugin-primary), var(--plugin-secondary));
-  border: 2px solid white;
-  border-radius: var(--radius-full);
-  box-shadow: 0 0 15px var(--plugin-glow),
-              0 0 30px rgba(0, 212, 255, 0.5);
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(180deg, var(--plugin-accent), var(--plugin-primary));
+  border-radius: var(--radius-md);
+  border: 3px solid white;
+  box-shadow: 0 0 20px var(--plugin-glow);
   cursor: grab;
   transition: none !important;
   z-index: 10;
+  box-sizing: border-box;
+  pointer-events: auto;
 }
 
 .slider-vertical .slider-handle:hover {
-  transform: scale(1.08);
-  box-shadow: 0 0 35px var(--plugin-glow),
-              0 0 70px rgba(0, 212, 255, 0.8);
+  box-shadow: 0 0 30px var(--plugin-glow);
 }
 
 .slider-vertical .slider-handle:active {
   cursor: grabbing;
-  transform: scale(1.05);
 }
 
 /* ===================================================================
@@ -257,6 +271,8 @@
 .range-slider {
   width: 100%;
   height: 24px;
+  min-height: 24px;
+  max-height: 24px;
   position: relative;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
@@ -265,6 +281,12 @@
   overflow: visible;
   box-shadow: 0 0 20px rgba(0, 212, 255, 0.3),
               inset 0 0 15px rgba(0, 148, 255, 0.1);
+  flex-shrink: 0;
+  display: block;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  align-self: stretch;
 }
 
 /* Fill between the two handles */
@@ -296,9 +318,10 @@
 /* Full-height rounded rectangle handles */
 .range-slider-handle {
   position: absolute;
-  top: 0;
+  top: -2px !important;
+  left: 50%;
   width: 24px;
-  height: 100%;
+  height: 24px !important;
   background: linear-gradient(180deg, var(--plugin-accent), var(--plugin-primary));
   border-radius: var(--radius-md);
   border: 3px solid white;
@@ -306,7 +329,10 @@
   cursor: ew-resize;
   transition: none !important;
   will-change: left;
-  transform: translateX(-50%);
+  transform: translateX(-50%) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
 }
 
 .range-slider-handle:hover {
@@ -386,7 +412,9 @@
   background: var(--glass-bg-dark);
   border: 2px solid var(--plugin-primary);
   border-radius: var(--radius-md);
-  position: relative;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   overflow: hidden;
   box-shadow: inset 0 0 15px rgba(0, 148, 255, 0.2);
 }
@@ -468,25 +496,7 @@
   border-radius: var(--radius-full);
 }
 
-.slider-handle {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 50px;
-  height: 50px;
-  background: radial-gradient(circle at 30% 30%, #ffffff, var(--plugin-secondary) 40%, var(--plugin-primary));
-  border: 3px solid white;
-  border-radius: 50%;
-  box-shadow: 0 0 20px var(--plugin-glow),
-              inset 0 0 15px rgba(0, 212, 255, 0.3);
-  cursor: ns-resize;
-  transition: all 0.3s ease;
-}
-
-.slider-handle:hover {
-  transform: translate(-50%, -50%) scale(1.1);
-}
+/* Generic slider handle removed - specific styles defined for each slider type */
 
 /* ===================================================================
    KNOB INNER STRUCTURE

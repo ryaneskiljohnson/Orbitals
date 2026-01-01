@@ -188,7 +188,12 @@ class OrbitalsSlider {
     let percent;
     
     if (this.options.orientation === 'vertical') {
-      percent = 1 - ((e.clientY - rect.top) / rect.height);
+      // Account for 12px padding (24px total, which is 10.9% of 220px height)
+      const padding = 12;
+      const paddingPercent = padding / rect.height;
+      const rawPercent = 1 - ((e.clientY - rect.top) / rect.height);
+      // Map from full range to padded range
+      percent = (rawPercent - paddingPercent) / (1 - 2 * paddingPercent);
     } else {
       percent = (e.clientX - rect.left) / rect.width;
     }
@@ -223,10 +228,19 @@ class OrbitalsSlider {
     
     // Disable transitions for instant updates
     this.handle.style.transition = 'none';
+    this.handle.style.position = 'absolute';
     
     // Update handle position synchronously
     if (this.options.orientation === 'vertical') {
-      this.handle.style.bottom = `${percent * 100}%`;
+      // Account for 12px padding at top and bottom
+      // Map percent (0-1) to the padded range
+      // Total height: 220px, padding: 12px top/bottom, usable: 196px
+      // bottom = 12px + (percent * 196px) = 12px + (percent * (220px - 24px))
+      // As percentage: (12 + percent * 196) / 220 * 100 = 5.45 + percent * 89.09
+      const paddingPercent = 5.45; // 12/220 * 100
+      const usablePercent = 89.09; // 196/220 * 100
+      const bottomPercent = paddingPercent + (percent * usablePercent);
+      this.handle.style.bottom = `${bottomPercent}%`;
       this.handle.style.left = '50%';
       this.handle.style.transform = 'translate(-50%, 50%)';
     } else {
@@ -344,6 +358,7 @@ class OrbitalsXYPad {
     const percentX = (this.valueX - this.options.minX) / (this.options.maxX - this.options.minX);
     const percentY = (this.valueY - this.options.minY) / (this.options.maxY - this.options.minY);
     
+    this.handle.style.transition = 'none';
     this.handle.style.left = `${percentX * 100}%`;
     this.handle.style.bottom = `${percentY * 100}%`;
     this.handle.style.transform = 'translate(-50%, 50%)';
