@@ -334,3 +334,81 @@
 .xy-pad {
   animation: equilibrium-pulse 3s ease-in-out infinite;
 }
+
+
+/* ===================================================================
+   TIMING INDICATOR
+   =================================================================== */
+
+.timing-indicator {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--plugin-secondary);
+  box-shadow: 0 0 12px var(--plugin-glow);
+  transform: translateX(-50%);
+  transition: left 0.1s ease;
+}
+
+/* ===================================================================
+   SLIDER ELEMENTS (Handle and Track)
+   =================================================================== */
+
+.slider-track {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+}
+
+.slider-handle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle at 30% 30%, #ffffff, var(--plugin-secondary) 40%, var(--plugin-primary));
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 20px var(--plugin-glow),
+              inset 0 0 15px rgba(0, 212, 255, 0.3);
+  cursor: ns-resize;
+  transition: all 0.3s ease;
+}
+
+.slider-handle:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* ===================================================================
+   KNOB INNER STRUCTURE
+   =================================================================== */
+
+.knob-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: inherit;
+}
+
+.knob-indicator {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 42%;
+  background: linear-gradient(to bottom, #ffffff, var(--plugin-secondary), transparent);
+  border-radius: 3px;
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.9),
+              0 0 20px rgba(0, 148, 255, 0.5);
+  transform-origin: bottom center;
+  transition: transform 0.15s ease;
+}
