@@ -25,13 +25,19 @@
 
             <!-- Controls Area -->
             <div class="controls-area">
-                <!-- Orbit Arc (Top) -->
-                <div class="control-orbit-arc">
+                <!-- Left: Orbit Slider -->
+                <div class="control-vertical-section control-orbit-section">
                     <label class="control-label">ORBIT</label>
-                    <div class="arc-slider" id="orbitControl" data-param="orbit"
+                    <div class="slider-vertical-tall orbit-slider" id="orbitSlider" data-param="orbit"
                          data-help-title="ORBIT"
                          data-help-description="Controls orbital eccentricity. Low values create circular orbits, high values create highly elliptical paths with varying velocity.">
-                        <div class="arc-fill"></div>
+                        <div class="slider-fill"></div>
+                        <div class="slider-track">
+                            <div class="orbit-gradient"></div>
+                        </div>
+                        <div class="slider-handle">
+                            <div class="orbit-icon">○</div>
+                        </div>
                     </div>
                     <div class="value-display" id="orbitValue">50%</div>
                 </div>
@@ -51,11 +57,12 @@
                 </div>
 
                 <!-- Right: Solar Point Slider -->
-                <div class="control-vertical-section">
+                <div class="control-vertical-section control-solar-section">
                     <label class="control-label">SOLAR POINT</label>
                     <div class="slider-vertical-tall solar-slider" id="solarPointSlider" data-param="solarPoint"
                          data-help-title="SOLAR POINT"
                          data-help-description="Target velocity value (1-127) that notes are pulled toward. Acts as the gravitational center for velocity shaping.">
+                        <div class="slider-fill"></div>
                         <div class="slider-track">
                             <div class="velocity-heatmap"></div>
                         </div>

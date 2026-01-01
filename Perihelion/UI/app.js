@@ -25,7 +25,7 @@ function initializePerihelion() {
   // Setup controls
   setupGravityKnob();
   setupSolarPointSlider();
-  setupOrbitArc();
+  setupOrbitSlider();
   setupBiasSlider();
   setupBypassToggle();
   
@@ -564,6 +564,20 @@ function setupSolarPointSlider() {
   const slider = document.getElementById('solarPointSlider');
   const valueDisplay = document.getElementById('solarPointValue');
   
+  if (!slider) {
+    console.error('Solar point slider not found');
+    return;
+  }
+  
+  const fill = slider.querySelector('.slider-fill');
+  console.log('Solar slider found:', slider);
+  console.log('Solar fill element:', fill);
+  console.log('Solar slider computed style:', window.getComputedStyle(slider));
+  if (fill) {
+    console.log('Solar fill computed style:', window.getComputedStyle(fill));
+    console.log('Solar fill height:', fill.offsetHeight);
+  }
+  
   const solarSlider = new OrbitalsSlider(slider, {
     min: 1,
     max: 127,
@@ -571,6 +585,17 @@ function setupSolarPointSlider() {
     orientation: 'vertical',
     onChange: (value) => {
       valueDisplay.textContent = Math.round(value);
+      
+      // Ensure fill updates - force CSS variable update
+      const percent = (value - 1) / (127 - 1);
+      slider.style.setProperty('--slider-value', percent);
+      
+      console.log('Solar slider value changed:', value, 'percent:', percent);
+      console.log('Solar slider --slider-value:', slider.style.getPropertyValue('--slider-value'));
+      if (fill) {
+        const fillHeight = window.getComputedStyle(fill).height;
+        console.log('Solar fill height after update:', fillHeight);
+      }
       
       // Update orbital system - solar point affects orbital size
       if (window.updateSolarPointValue) {
@@ -580,57 +605,87 @@ function setupSolarPointSlider() {
       sendParameterToJUCE('solarPoint', value);
     }
   });
+  
+  // Force initial fill display
+  const initialPercent = (64 - 1) / (127 - 1);
+  slider.style.setProperty('--slider-value', initialPercent);
+  console.log('Solar slider initial --slider-value set to:', slider.style.getPropertyValue('--slider-value'));
+  if (fill) {
+    setTimeout(() => {
+      const fillHeight = window.getComputedStyle(fill).height;
+      console.log('Solar fill initial height:', fillHeight);
+      console.log('Solar fill display:', window.getComputedStyle(fill).display);
+      console.log('Solar fill visibility:', window.getComputedStyle(fill).visibility);
+      console.log('Solar fill opacity:', window.getComputedStyle(fill).opacity);
+      console.log('Solar fill z-index:', window.getComputedStyle(fill).zIndex);
+    }, 100);
+  }
 }
 
 /**
  * @brief Setup orbit arc control - controls orbital eccentricity
  */
-function setupOrbitArc() {
-  const arc = document.getElementById('orbitControl');
+function setupOrbitSlider() {
+  const slider = document.getElementById('orbitSlider');
   const valueDisplay = document.getElementById('orbitValue');
   
-  let isDragging = false;
-  let currentValue = 50;
+  if (!slider) {
+    console.error('Orbit slider not found');
+    return;
+  }
   
-  const updateArc = (event) => {
-    const rect = arc.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height;
-    
-    const dx = event.clientX - centerX;
-    const dy = centerY - event.clientY;
-    const angle = Math.atan2(dy, dx);
-    
-    // Map angle (-PI to 0) to value (0 to 100)
-    const normalizedAngle = (angle + Math.PI) / Math.PI;
-    currentValue = Math.max(0, Math.min(100, normalizedAngle * 100));
-    
-    valueDisplay.textContent = Math.round(currentValue) + '%';
-    
-    // Update visual (clip-path for the arc fill)
-    const clipPercent = currentValue;
-    arc.style.setProperty('--arc-fill', clipPercent + '%');
-    
-    // Update orbital system - orbit affects eccentricity
-    if (window.updateOrbitValue) {
-      window.updateOrbitValue(currentValue);
+  const fill = slider.querySelector('.slider-fill');
+  console.log('Orbit slider found:', slider);
+  console.log('Orbit fill element:', fill);
+  console.log('Orbit slider computed style:', window.getComputedStyle(slider));
+  if (fill) {
+    console.log('Orbit fill computed style:', window.getComputedStyle(fill));
+    console.log('Orbit fill height:', fill.offsetHeight);
+  }
+  
+  // Use OrbitalsSlider component for consistent behavior
+  const orbitSlider = new OrbitalsSlider(slider, {
+    min: 0,
+    max: 100,
+    value: 50,
+    step: 1,
+    orientation: 'vertical',
+    onChange: (value) => {
+      valueDisplay.textContent = Math.round(value) + '%';
+      
+      // Ensure fill updates - force CSS variable update
+      const percent = (value - 0) / (100 - 0);
+      slider.style.setProperty('--slider-value', percent);
+      
+      console.log('Orbit slider value changed:', value, 'percent:', percent);
+      console.log('Orbit slider --slider-value:', slider.style.getPropertyValue('--slider-value'));
+      if (fill) {
+        const fillHeight = window.getComputedStyle(fill).height;
+        console.log('Orbit fill height after update:', fillHeight);
+      }
+      
+      // Update orbital system - orbit affects eccentricity
+      if (window.updateOrbitValue) {
+        window.updateOrbitValue(value);
+      }
+      
+      sendParameterToJUCE('orbit', value);
     }
-    
-    sendParameterToJUCE('orbit', currentValue);
-  };
-  
-  arc.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    updateArc(e);
   });
   
-  document.addEventListener('mousemove', (e) => {
-    if (isDragging) updateArc(e);
-  });
-  
-  document.addEventListener('mouseup', () => {
-    isDragging = false;
-  });
+  // Force initial fill display
+  slider.style.setProperty('--slider-value', 0.5);
+  console.log('Orbit slider initial --slider-value set to:', slider.style.getPropertyValue('--slider-value'));
+  if (fill) {
+    setTimeout(() => {
+      const fillHeight = window.getComputedStyle(fill).height;
+      console.log('Orbit fill initial height:', fillHeight);
+      console.log('Orbit fill display:', window.getComputedStyle(fill).display);
+      console.log('Orbit fill visibility:', window.getComputedStyle(fill).visibility);
+      console.log('Orbit fill opacity:', window.getComputedStyle(fill).opacity);
+      console.log('Orbit fill z-index:', window.getComputedStyle(fill).zIndex);
+    }, 100);
+  }
 }
 
 /**

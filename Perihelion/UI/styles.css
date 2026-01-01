@@ -102,17 +102,24 @@
   background: transparent;
 }
 
-/* Top: Orbit Arc */
-.control-orbit-arc {
+/* Left: Orbit Slider */
+.control-orbit-section {
+  position: absolute;
+  left: var(--spacing-xl);
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-md);
-  flex-shrink: 0;
+  z-index: 15;
 }
 
-/* Middle Row: Gravity Knob (center) and Solar Point Slider (right) */
+.control-orbit-section .value-display {
+  margin-top: var(--spacing-md);
+}
+
+/* Center: Gravity Knob */
 .control-center-section {
   position: absolute;
   left: 50%;
@@ -125,7 +132,8 @@
   z-index: 15;
 }
 
-.control-vertical-section {
+/* Right: Solar Point Slider */
+.control-solar-section {
   position: absolute;
   right: var(--spacing-xl);
   top: 50%;
@@ -135,6 +143,10 @@
   align-items: center;
   gap: var(--spacing-xs);
   z-index: 15;
+}
+
+.control-solar-section .value-display {
+  margin-top: var(--spacing-md);
 }
 
 /* Bottom: Bias Slider */
@@ -149,55 +161,110 @@
   max-width: 500px;
 
 /* ===================================================================
-   ARC SLIDER (Orbit Control) - Enhanced for 16:10
+   ORBIT SLIDER (Vertical) - Mirrors Solar Point Slider
    =================================================================== */
 
-.arc-slider {
-  width: 360px;
-  height: 180px;
+.orbit-slider {
+  width: 56px;
+  height: 320px;
   position: relative;
-  cursor: pointer;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  border: 2px solid var(--plugin-primary);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  --slider-value: 0.5; /* Default value */
 }
 
-.arc-slider::before {
-  content: '';
+/* Fill from bottom to slider position */
+.orbit-slider .slider-fill {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, 0);
-  width: 250px;
-  height: 125px;
-  border: 3px solid var(--glass-border);
-  border-bottom: none;
-  border-radius: 250px 250px 0 0;
-  box-shadow: inset 0 0 20px rgba(255, 165, 0, 0.3);
-}
-
-.arc-slider::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, 0);
-  width: 250px;
-  height: 125px;
-  border: 5px solid var(--plugin-primary);
-  border-bottom: none;
-  border-radius: 250px 250px 0 0;
-  clip-path: polygon(0 100%, 50% 100%, 50% 0, 0 0);
-  opacity: 0.9;
-  box-shadow: 
-    0 0 20px var(--plugin-glow),
-    inset 0 0 20px var(--plugin-glow);
-  transition: clip-path var(--transition-medium);
-}
-
-.arc-slider:hover::after {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: calc(var(--slider-value, 0.5) * 100%);
+  background: linear-gradient(to top,
+    #ff6b00,
+    #ffa500 50%,
+    #ffcc00 100%
+  );
   opacity: 1;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  min-height: 10px;
+}
+
+.orbit-slider .slider-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  background: rgba(10, 10, 26, 0.3);
+}
+
+.orbit-gradient {
+  display: none;
+}
+
+.orbit-slider .slider-handle {
+  position: absolute !important;
+  width: 56px;
+  height: 56px;
+  background: 
+    radial-gradient(circle at 30% 30%, #ffffff 0%, transparent 3%),
+    radial-gradient(circle, var(--plugin-accent), var(--plugin-primary), var(--plugin-secondary));
+  border: 4px solid white;
+  border-radius: var(--radius-full);
   box-shadow: 
-    0 0 30px var(--plugin-glow),
-    0 0 50px var(--plugin-glow),
-    inset 0 0 25px var(--plugin-glow);
+    0 0 25px var(--plugin-glow),
+    0 0 50px rgba(255, 165, 0, 0.6),
+    inset 0 0 20px rgba(255, 255, 100, 0.6);
+  cursor: grab;
+  transition: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.orbit-slider .slider-handle::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  background: radial-gradient(circle,
+    rgba(255, 165, 0, 0.3) 0%,
+    transparent 60%);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.orbit-slider .slider-handle:hover {
+  transform: translate(-50%, 50%) scale(1.08);
+  box-shadow: 
+    0 0 35px var(--plugin-glow),
+    0 0 70px rgba(255, 165, 0, 0.8);
+}
+
+.orbit-slider .slider-handle:active {
+  cursor: grabbing;
+  transform: translate(-50%, 50%) scale(1.05);
+}
+
+.orbit-icon {
+  font-size: 26px;
+  text-shadow: 
+    0 0 15px rgba(255, 255, 255, 1),
+    0 0 30px rgba(255, 200, 0, 0.8);
+  animation: rotate 10s linear infinite;
+  filter: drop-shadow(0 0 5px white);
 }
 
 /* ===================================================================
@@ -346,39 +413,49 @@
   height: 320px;
   position: relative;
   border-radius: var(--radius-lg);
-  background: var(--glass-bg);
-  border: 2px solid var(--glass-border);
+  background: transparent;
+  border: 2px solid var(--plugin-primary);
   overflow: hidden;
   box-shadow: var(--shadow-md);
+  --slider-value: 0.5; /* Default value */
 }
 
-.slider-track {
+/* Fill from bottom to slider position */
+.solar-slider .slider-fill {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: calc(var(--slider-value, 0.5) * 100%);
+  background: linear-gradient(to top,
+    #ff6b00 0%,
+    #ffa500 50%,
+    #ffcc00 100%
+  );
+  opacity: 1;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  min-height: 10px;
+}
+
+.solar-slider .slider-track {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  background: rgba(10, 10, 26, 0.3);
 }
 
 .velocity-heatmap {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to top,
-    #0066ff 0%,
-    #00aaff 20%,
-    #00ff88 40%,
-    #ffff00 60%,
-    #ff8800 80%,
-    #ff0000 100%
-  );
-  opacity: 0.3;
+  display: none;
 }
 
 .solar-slider .slider-handle {
-  position: absolute;
-  left: 50%;
-  bottom: 50%;
-  transform: translate(-50%, 50%);
+  position: absolute !important;
   width: 56px;
   height: 56px;
   background: 
@@ -391,11 +468,11 @@
     0 0 50px rgba(255, 165, 0, 0.6),
     inset 0 0 20px rgba(255, 255, 100, 0.6);
   cursor: grab;
-  transition: transform var(--transition-fast);
+  transition: none !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  z-index: 10;
 }
 
 .solar-slider .slider-handle::before {
@@ -433,6 +510,7 @@
   animation: rotate 10s linear infinite;
   filter: drop-shadow(0 0 5px white);
 }
+
 
 /* ===================================================================
    DUAL BIAS SLIDER
@@ -602,17 +680,9 @@
 
 
 /* ===================================================================
-   ARC FILL (For orbit control visualization)
+   ORBIT SLIDER FILL (For vertical slider visualization)
    =================================================================== */
 
-.arc-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
 
 /* ===================================================================
    METER FILL (For velocity meters)
@@ -698,8 +768,8 @@
              rotate 10s linear infinite;
 }
 
-/* Arc glow on hover */
-.arc-slider:hover {
+/* Orbit slider glow on hover */
+.orbit-slider:hover {
   filter: drop-shadow(0 0 30px rgba(255, 165, 0, 0.6));
 }
 
