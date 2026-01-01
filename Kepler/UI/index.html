@@ -12,7 +12,8 @@
     <div class="plugin-container kepler-theme">
         <header class="orbitals-header">
             <div class="orbitals-logo" title="NNAudio"></div>
-            <h1>KEPLER</h1>
+            <h1 data-help-title="KEPLER"
+                data-help-description="MIDI Orbit Generator - Transforms note timing using elliptical orbital mechanics. Notes follow multiple orbital paths with configurable eccentricity, period, and direction for complex rhythmic patterns.">KEPLER</h1>
             <button class="help-toggle" title="Toggle contextual help"></button>
         </header>
 
@@ -20,75 +21,69 @@
             <canvas id="keplerCanvas"></canvas>
 
             <div class="controls-orbital">
-                <!-- Orbit Visualizer (Top Left) -->
-                <div class="control-orbital-section" style="grid-column: 1; grid-row: 1;">
-                    <label class="control-label">ORBIT PREVIEW</label>
-                    <div class="orbit-visualizer">
-                        <canvas id="orbitVisualizerCanvas"></canvas>
-                    </div>
-                </div>
-
-                <!-- Period Slider (Top Right) -->
-                <div class="control-orbital-section" style="grid-column: 3; grid-row: 1;">
-                    <label class="control-label">ORBITAL PERIOD</label>
-                    <div class="period-selector"
-                         data-help-title="ORBITAL PERIOD"
-                         data-help-description="Tempo-synced orbit duration. Determines how long it takes for notes to complete one full orbit.">
-                        <button data-period="1/8" >1/8</button>
-                        <button data-period="1/4">1/4</button>
-                        <button data-period="1/2" class="active">1/2</button>
-                        <button data-period="1">1 BAR</button>
-                        <button data-period="2">2 BAR</button>
-                    </div>
-                    <div class="value-display" id="periodValue">1/2</div>
-                </div>
-
-                <!-- Left: Semi-Major Axis Slider -->
-                <div class="control-orbital-section" style="grid-column: 1; grid-row: 2;">
-                    <label class="control-label">SEMI-MAJOR<br/>AXIS</label>
-                    <div class="semi-major-slider" id="semiMajorSlider" data-param="semiMajor"
-                         data-help-title="ORBIT COUNT"
-                         data-help-description="Number of simultaneous orbital paths (1-8). More orbits create complex rhythmic patterns.">
-                        <div class="slider-track"></div>
-                        <div class="slider-handle"></div>
-                    </div>
-                    <div class="value-display" id="semiMajorValue">64</div>
-                </div>
-
-                <!-- Center: Eccentricity Knob -->
-                <div class="control-orbital-center">
-                    <label class="control-label">ECCENTRICITY</label>
-                    <div class="eccentricity-knob" id="eccentricityKnob" data-param="eccentricity"
-                         data-help-title="ECCENTRICITY"
-                         data-help-description="Shape of the orbits (0-0.95). Higher values create more elliptical, less circular orbits with varying note timing.">
-                        <div class="knob-inner">
-                            <div class="knob-indicator"></div>
+                <!-- Right side: All controls stacked in one column -->
+                <div class="controls-right">
+                    <!-- Row 1: Orbit Direction -->
+                    <div class="control-orbital-section">
+                        <label class="control-label">ORBIT DIRECTION</label>
+                        <div class="direction-selector"
+                             data-help-title="ORBIT DIRECTION"
+                             data-help-description="Clockwise, counter-clockwise, or alternating orbital motion. Changes the rhythmic transformation direction.">
+                            <button data-dir="cw" class="active">CLOCKWISE</button>
+                            <button data-dir="ccw">COUNTER-CW</button>
+                            <button data-dir="alt">ALTERNATING</button>
                         </div>
                     </div>
-                    <div class="value-display large" id="eccentricityValue">0.50</div>
-                </div>
 
-                <!-- Right: Velocity Spread -->
-                <div class="control-orbital-section" style="grid-column: 3; grid-row: 2;">
-                    <label class="control-label">VELOCITY<br/>SPREAD</label>
-                    <div class="spread-slider" id="spreadSlider" data-param="spread"
-                         data-help-title="ROTATION SPEED"
-                         data-help-description="How fast notes move through their orbits. Affects rhythmic timing transformation speed.">
-                        <div class="slider-track"></div>
-                        <div class="slider-handle"></div>
+                    <!-- Row 2: Orbital Period -->
+                    <div class="control-orbital-section">
+                        <label class="control-label">ORBITAL PERIOD</label>
+                        <div class="period-selector"
+                             data-help-title="ORBITAL PERIOD"
+                             data-help-description="Tempo-synced orbit duration. Determines how long it takes for notes to complete one full orbit.">
+                            <button data-period="1/8" >1/8</button>
+                            <button data-period="1/4">1/4</button>
+                            <button data-period="1/2" class="active">1/2</button>
+                            <button data-period="1">1 BAR</button>
+                            <button data-period="2">2 BAR</button>
+                        </div>
                     </div>
-                    <div class="value-display" id="spreadValue">30</div>
-                </div>
 
-                <!-- Bottom: Direction Control -->
-                <div class="control-orbital-wide" style="grid-row: 3;">
-                    <label class="control-label">ORBIT DIRECTION</label>
-                    <div class="direction-selector"
-                         data-help-title="ORBIT DIRECTION"
-                         data-help-description="Clockwise, counter-clockwise, or alternating orbital motion. Changes the rhythmic transformation direction.">
-                        <button data-dir="cw" class="active">CLOCKWISE</button>
-                        <button data-dir="ccw">COUNTER-CW</button>
-                        <button data-dir="alt">ALTERNATING</button>
+                    <!-- Row 3: Eccentricity (smaller) -->
+                    <div class="control-orbital-section">
+                        <label class="control-label">ECCENTRICITY</label>
+                        <div class="eccentricity-knob" id="eccentricityKnob" data-param="eccentricity"
+                             data-help-title="ECCENTRICITY"
+                             data-help-description="Shape of the orbits (0-0.95). Higher values create more elliptical, less circular orbits with varying note timing.">
+                            <div class="knob-inner">
+                                <div class="knob-indicator"></div>
+                            </div>
+                        </div>
+                        <div class="value-display" id="eccentricityValue">0.50</div>
+                    </div>
+
+                    <!-- Row 4: Both sliders side by side (smaller) -->
+                    <div class="control-sliders-group">
+                        <div class="control-orbital-section">
+                            <label class="control-label">SEMI-MAJOR<br/>AXIS</label>
+                            <div class="semi-major-slider" id="semiMajorSlider" data-param="semiMajor"
+                                 data-help-title="ORBIT COUNT"
+                                 data-help-description="Number of simultaneous orbital paths (1-8). More orbits create complex rhythmic patterns.">
+                                <div class="slider-track"></div>
+                                <div class="slider-handle"></div>
+                            </div>
+                            <div class="value-display" id="semiMajorValue">64</div>
+                        </div>
+                        <div class="control-orbital-section">
+                            <label class="control-label">VELOCITY<br/>SPREAD</label>
+                            <div class="spread-slider" id="spreadSlider" data-param="spread"
+                                 data-help-title="ROTATION SPEED"
+                                 data-help-description="How fast notes move through their orbits. Affects rhythmic timing transformation speed.">
+                                <div class="slider-track"></div>
+                                <div class="slider-handle"></div>
+                            </div>
+                            <div class="value-display" id="spreadValue">30</div>
+                        </div>
                     </div>
                 </div>
             </div>

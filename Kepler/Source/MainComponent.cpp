@@ -38,24 +38,52 @@ MainComponent::MainComponent()
     addAndMakeVisible (webView.get());
     webView->setBounds (getLocalBounds());
     
-    // Load a minimal dark HTML page immediately to prevent white flash
-    const char* blackHTML = 
-        "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Loading</title>"
-        "<style>html, body { background: #0a0a0f !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }</style>"
-        "</head><body style='background: #0a0a0f; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;'></body></html>";
+    // Load shared loading animation (embedded inline)
+    const char* loadingHTML = 
+        "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Orbitals - Loading</title>"
+        "<style>"
+        "* { margin: 0; padding: 0; box-sizing: border-box; }"
+        "body, html { width: 100%; height: 100%; overflow: hidden; font-family: 'Orbitron', 'Space Mono', monospace; background: #0a0a0f; color: #e8e8f0; }"
+        ".loading-container { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }"
+        ".loading-container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: radial-gradient(1px 1px at 20% 30%, white, transparent), radial-gradient(1px 1px at 60% 70%, white, transparent), radial-gradient(1px 1px at 50% 50%, white, transparent), radial-gradient(1px 1px at 80% 10%, white, transparent), radial-gradient(1px 1px at 90% 60%, white, transparent), radial-gradient(2px 2px at 30% 80%, white, transparent), radial-gradient(1px 1px at 40% 20%, white, transparent); background-size: 200% 200%; background-position: 0% 0%; opacity: 0.4; animation: twinkle 4s ease-in-out infinite; }"
+        ".orbitals-logo { width: 120px; height: 120px; background: radial-gradient(circle at 40% 40%, #00d4ff, #0094ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 64px; font-weight: bold; color: #0a0a0f; box-shadow: 0 0 60px rgba(0, 212, 255, 0.8), 0 0 100px rgba(0, 212, 255, 0.4); position: relative; margin-bottom: 40px; animation: pulse 2s ease-in-out infinite; }"
+        ".orbitals-logo::before { content: ''; position: absolute; top: -20px; left: -20px; right: -20px; bottom: -20px; border: 2px solid rgba(0, 212, 255, 0.3); border-radius: 50%; animation: rotate 8s linear infinite; }"
+        ".orbitals-logo::after { content: ''; position: absolute; top: -40px; left: -40px; right: -40px; bottom: -40px; border: 2px solid rgba(0, 212, 255, 0.2); border-radius: 50%; animation: rotate 12s linear infinite reverse; }"
+        "h1 { font-size: 48px; font-weight: 700; letter-spacing: 8px; text-transform: uppercase; background: linear-gradient(90deg, #00d4ff, #0094ff, #00d4ff); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: shimmer 3s ease-in-out infinite; margin-bottom: 20px; }"
+        ".subtitle { font-size: 16px; font-weight: 400; letter-spacing: 3px; text-transform: uppercase; opacity: 0.6; margin-bottom: 60px; }"
+        ".loading-spinner { width: 200px; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; position: relative; }"
+        ".loading-bar { height: 100%; background: linear-gradient(90deg, transparent, #00d4ff, #0094ff, #00d4ff, transparent); background-size: 200% 100%; animation: loading 1.5s ease-in-out infinite; box-shadow: 0 0 20px rgba(0, 212, 255, 0.6); }"
+        ".loading-text { margin-top: 20px; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.5; animation: fade 2s ease-in-out infinite; }"
+        "@keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(0, 212, 255, 0.8), 0 0 100px rgba(0, 212, 255, 0.4); } 50% { transform: scale(1.05); box-shadow: 0 0 80px rgba(0, 212, 255, 1), 0 0 120px rgba(0, 212, 255, 0.6); } }"
+        "@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }"
+        "@keyframes shimmer { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }"
+        "@keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }"
+        "@keyframes fade { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }"
+        "@keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.5; } }"
+        "</style>"
+        "</head><body>"
+        "<div class='loading-container'>"
+        "<div class='orbitals-logo'>O</div>"
+        "<h1>ORBITALS</h1>"
+        "<div class='subtitle'>MIDI FX Plugin Line</div>"
+        "<div class='loading-spinner'><div class='loading-bar'></div></div>"
+        "<div class='loading-text'>Initializing...</div>"
+        "</div>"
+        "</body></html>";
     
-    juce::String htmlString (blackHTML);
+    juce::String htmlString (loadingHTML);
     auto escapedHTML = juce::URL::addEscapeChars (htmlString, true);
     juce::String dataURL = "data:text/html;charset=utf-8," + escapedHTML;
     webView->goToURL (dataURL);
+    
     webView->setVisible (true);
     
     DBG ("WebView created, bounds: " + getLocalBounds().toString());
     DBG ("Component size: " + juce::String (getWidth()) + "x" + juce::String (getHeight()));
     DBG ("Component visible: " + juce::String (isVisible() ? "YES" : "NO"));
     
-    // Load UI after a brief delay to show black screen first
-    juce::Timer::callAfterDelay (100, [this]()
+    // Load UI after a delay to show loading animation
+    juce::Timer::callAfterDelay (1500, [this]()
     {
         loadMainUI();
     });

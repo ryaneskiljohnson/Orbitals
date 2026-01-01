@@ -1,3 +1,9 @@
+// Shared state for both canvases
+let globalOrbitCount = 4;
+let globalEccentricity = 0.5;
+let globalRotationSpeed = 50;
+let globalDirection = 'cw';
+
 document.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('keplerCanvas');
   if (canvas) setupKeplerVisualization(canvas);
@@ -43,49 +49,74 @@ function setupKeplerVisualization(canvas) {
     resizeObserver.observe(canvas);
     
     // Expose control updaters
-    window.updateOrbitCount = (value) => { orbitCount = Math.max(1, Math.min(8, value)); };
-    window.updateEccentricity = (value) => { eccentricity = Math.max(0, Math.min(0.95, value)); };
-    window.updateRotationSpeed = (value) => { rotationSpeed = value; };
+    window.updateOrbitCount = (value) => { 
+      orbitCount = Math.max(1, Math.min(8, value)); 
+      globalOrbitCount = orbitCount;
+    };
+    window.updateEccentricity = (value) => { 
+      eccentricity = Math.max(0, Math.min(0.95, value)); 
+      globalEccentricity = eccentricity;
+    };
+    window.updateRotationSpeed = (value) => { 
+      rotationSpeed = value; 
+      globalRotationSpeed = value;
+    };
+    window.updateDirection = (dir) => {
+      globalDirection = dir;
+    };
     
     animationManager.add('kepler-orbits', (deltaTime) => {
-      time += (rotationSpeed / 100) * 0.015;
+      // Apply direction
+      let speedMultiplier = (rotationSpeed / 100) * 0.02;
+      if (globalDirection === 'ccw') speedMultiplier *= -1;
+      else if (globalDirection === 'alt') speedMultiplier *= Math.sin(time * 0.5);
+      
+      time += speedMultiplier;
       canvasSize = getCanvasSize();
       center = getCenter();
       centerX = center.x;
       centerY = center.y;
       
-      ctx.fillStyle = 'rgba(10, 10, 15, 0.12)';
-      ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
+      // Clear canvas with fully transparent background to preserve the dark background
+      ctx.clearRect(0, 0, canvasSize.width, canvasSize.height);
       
       // Draw central sun
-      const sunGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 15);
-      sunGradient.addColorStop(0, '#fbbf24');
-      sunGradient.addColorStop(0.5, '#f59e0b');
+      const sunGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 20);
+      sunGradient.addColorStop(0, '#fef3c7');
+      sunGradient.addColorStop(0.3, '#fbbf24');
+      sunGradient.addColorStop(0.6, '#f59e0b');
       sunGradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
       
       ctx.save();
       ctx.shadowColor = '#fbbf24';
-      ctx.shadowBlur = 25;
+      ctx.shadowBlur = 30;
       ctx.fillStyle = sunGradient;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, 20, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
       
+      // Sun core
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
+      ctx.fill();
+      
       // Draw orbits and planets
       for (let i = 0; i < orbitCount; i++) {
-        const orbitRadius = 60 + i * 45;
+        const baseRadius = Math.min(canvasSize.width, canvasSize.height) * 0.15;
+        const orbitRadius = baseRadius + i * (baseRadius * 0.7);
         const eccent = eccentricity;
-        const alpha = 0.4 - (i / orbitCount) * 0.15;
+        const alpha = 0.5 - (i / orbitCount) * 0.2;
         
         // Draw elliptical orbit path
         ctx.save();
         ctx.strokeStyle = `rgba(59, 130, 246, ${alpha})`;
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([4, 8]);
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 10]);
         ctx.beginPath();
         
-        for (let angle = 0; angle <= Math.PI * 2; angle += 0.05) {
+        for (let angle = 0; angle <= Math.PI * 2; angle += 0.03) {
           const r = (orbitRadius * (1 - eccent * eccent)) / (1 + eccent * Math.cos(angle));
           const x = centerX + r * Math.cos(angle);
           const y = centerY + r * Math.sin(angle);
@@ -103,24 +134,31 @@ function setupKeplerVisualization(canvas) {
         const py = centerY + planetR * Math.sin(planetAngle);
         
         // Draw planet with glow
-        const planetGradient = ctx.createRadialGradient(px, py, 0, px, py, 12);
-        planetGradient.addColorStop(0, '#60a5fa');
-        planetGradient.addColorStop(0.5, 'rgba(96, 165, 250, 0.5)');
+        const planetGradient = ctx.createRadialGradient(px, py, 0, px, py, 18);
+        planetGradient.addColorStop(0, '#ffffff');
+        planetGradient.addColorStop(0.3, '#60a5fa');
+        planetGradient.addColorStop(0.6, 'rgba(96, 165, 250, 0.5)');
         planetGradient.addColorStop(1, 'rgba(96, 165, 250, 0)');
         ctx.fillStyle = planetGradient;
         ctx.beginPath();
-        ctx.arc(px, py, 12, 0, Math.PI * 2);
+        ctx.arc(px, py, 18, 0, Math.PI * 2);
         ctx.fill();
         
         // Planet core
         ctx.save();
         ctx.shadowColor = '#60a5fa';
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 20;
         ctx.fillStyle = '#60a5fa';
         ctx.beginPath();
-        ctx.arc(px, py, 5, 0, Math.PI * 2);
+        ctx.arc(px, py, 7, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
+        
+        // Planet inner core
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(px, py, 3, 0, Math.PI * 2);
+        ctx.fill();
       }
     });
   };
@@ -132,37 +170,118 @@ function setupKeplerVisualization(canvas) {
   }
 }
 
+function setupOrbitPreview(canvas) {
+  let ctx = CanvasUtils.setupHiDPI(canvas);
+  
+  const drawPreview = () => {
+    const width = canvas.width;
+    const height = canvas.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    
+    // Clear
+    ctx.fillStyle = 'rgba(10, 10, 15, 0.95)';
+    ctx.fillRect(0, 0, width, height);
+    
+    // Draw sun
+    ctx.fillStyle = '#fbbf24';
+    ctx.shadowColor = '#fbbf24';
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    
+    // Draw orbits
+    for (let i = 0; i < globalOrbitCount; i++) {
+      const baseRadius = Math.min(width, height) * 0.15;
+      const orbitRadius = baseRadius + i * (baseRadius * 0.5);
+      const eccent = globalEccentricity;
+      const alpha = 0.6 - (i / globalOrbitCount) * 0.2;
+      
+      ctx.save();
+      ctx.strokeStyle = `rgba(59, 130, 246, ${alpha})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      
+      for (let angle = 0; angle <= Math.PI * 2; angle += 0.05) {
+        const r = (orbitRadius * (1 - eccent * eccent)) / (1 + eccent * Math.cos(angle));
+        const x = centerX + r * Math.cos(angle);
+        const y = centerY + r * Math.sin(angle);
+        if (angle === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    }
+  };
+  
+  window.updateOrbitPreview = drawPreview;
+  
+  // Handle resize
+  const resizeObserver = new ResizeObserver(() => {
+    ctx = CanvasUtils.setupHiDPI(canvas);
+    drawPreview();
+  });
+  resizeObserver.observe(canvas);
+  
+  // Initial draw
+  drawPreview();
+}
+
 function setupControls() {
-  new OrbitalsKnob(document.getElementById('orbitCountKnob'), {
+  // Semi-Major Axis Slider (actually controls orbit count)
+  new OrbitalsSlider(document.getElementById('semiMajorSlider'), {
     min: 1, max: 8, value: 4, step: 1,
+    orientation: 'vertical',
     onChange: (v) => {
-      document.getElementById('orbitCountValue').textContent = Math.round(v);
-      if (window.updateOrbitCount) window.updateOrbitCount(v);
+      document.getElementById('semiMajorValue').textContent = Math.round(v);
+      if (window.updateOrbitCount) window.updateOrbitCount(Math.round(v));
+      if (window.updateOrbitPreview) window.updateOrbitPreview();
     }
   });
   
-  new OrbitalsKnob(document.getElementById('rotationKnob'), {
-    min: 0, max: 100, value: 50,
+  // Eccentricity Knob
+  new OrbitalsKnob(document.getElementById('eccentricityKnob'), {
+    min: 0, max: 95, value: 50,
     onChange: (v) => {
-      document.getElementById('rotationValue').textContent = Math.round(v) + '%';
+      const eccValue = v / 100;
+      document.getElementById('eccentricityValue').textContent = eccValue.toFixed(2);
+      if (window.updateEccentricity) window.updateEccentricity(eccValue);
+      if (window.updateOrbitPreview) window.updateOrbitPreview();
+    }
+  });
+  
+  // Velocity Spread Slider (actually controls rotation speed)
+  new OrbitalsSlider(document.getElementById('spreadSlider'), {
+    min: 0, max: 100, value: 50,
+    orientation: 'vertical',
+    onChange: (v) => {
+      document.getElementById('spreadValue').textContent = Math.round(v);
       if (window.updateRotationSpeed) window.updateRotationSpeed(v);
     }
   });
   
-  new OrbitalsSlider(document.getElementById('eccentricitySlider'), {
-    min: 0, max: 0.95, value: 0.5, step: 0.01,
-    orientation: 'horizontal',
-    onChange: (v) => {
-      document.getElementById('eccentricityValue').textContent = v.toFixed(2);
-      if (window.updateEccentricity) window.updateEccentricity(v);
-    }
+  // Period selector buttons
+  document.querySelectorAll('.period-selector button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.period-selector button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const period = btn.dataset.period;
+      // Value display removed - selected button shows the value
+    });
   });
   
-  new OrbitalsXYPad(document.getElementById('stabilityPad'), {
-    minX: 0, maxX: 100, minY: 0, maxY: 100,
-    valueX: 50, valueY: 50,
-    onChange: (x, y) => {
-      document.getElementById('stabilityValue').textContent = `X:${Math.round(x)} Y:${Math.round(y)}`;
-    }
+  // Direction selector buttons
+  document.querySelectorAll('.direction-selector button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.direction-selector button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const direction = btn.dataset.dir;
+      if (window.updateDirection) window.updateDirection(direction);
+    });
   });
+  
+  // Orbit preview removed - using main canvas only
 }
