@@ -25,7 +25,9 @@
                 <!-- Shadow Zone Range (Top) -->
                 <div class="control-eclipse-wide" style="grid-row: 1;">
                     <label class="control-label">SHADOW ZONE (Velocity Range)</label>
-                    <div class="shadow-zone-slider" id="shadowZoneSlider" data-param="shadowZone">
+                    <div class="shadow-zone-slider" id="shadowZoneSlider" data-param="shadowZone"
+                         data-help-title="FADE ZONE"
+                         data-help-description="Range around threshold where notes gradually fade in/out. Creates smooth transitions between hidden and revealed notes.">
                         <div class="zone-track"></div>
                         <div class="zone-range"></div>
                         <div class="zone-handle zone-handle-min"></div>
@@ -48,7 +50,9 @@
                 <!-- Center: Totality Knob -->
                 <div class="control-eclipse-center">
                     <label class="control-label">TOTALITY</label>
-                    <div class="totality-knob" id="totalityKnob" data-param="totality">
+                    <div class="totality-knob" id="totalityKnob" data-param="totality"
+                         data-help-title="THRESHOLD"
+                         data-help-description="Velocity level where the eclipse occurs (0-127). Notes below are hidden, above are revealed.">
                         <div class="knob-inner">
                             <div class="knob-indicator"></div>
                         </div>

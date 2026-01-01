@@ -25,7 +25,9 @@
                 <!-- Scale Selector (Top) -->
                 <div class="control-magnetic-wide" style="grid-row: 1;">
                     <label class="control-label">SCALE</label>
-                    <div class="scale-selector">
+                    <div class="scale-selector"
+                         data-help-title="SCALE"
+                         data-help-description="Selects the scale/mode. Defines which notes are 'in key' and attract incoming MIDI notes.">
                         <button data-scale="major" class="active">MAJOR</button>
                         <button data-scale="minor">MINOR</button>
                         <button data-scale="dorian">DORIAN</button>
@@ -50,7 +52,9 @@
                 <!-- Center: Field Strength Knob -->
                 <div class="control-magnetic-center">
                     <label class="control-label">FIELD STRENGTH</label>
-                    <div class="field-strength-knob" id="fieldStrengthKnob" data-param="fieldStrength">
+                    <div class="field-strength-knob" id="fieldStrengthKnob" data-param="fieldStrength"
+                         data-help-title="FIELD WIDTH"
+                         data-help-description="Size of the harmonic attraction field. Wider fields allow more note deviation before correction.">
                         <div class="knob-inner">
                             <div class="knob-indicator"></div>
                         </div>
@@ -61,7 +65,9 @@
                 <!-- Right: Attraction Type -->
                 <div class="control-magnetic-section" style="grid-column: 3; grid-row: 2;">
                     <label class="control-label">ATTRACTION</label>
-                    <div class="attraction-type-selector">
+                    <div class="attraction-type-selector"
+                         data-help-title="ATTRACTION"
+                         data-help-description="Mode selector - SNAP (immediate correction), PULL (gradual attraction), or GUIDE (subtle suggestion).">
                         <button data-type="snap" class="active">SNAP</button>
                         <button data-type="pull">PULL</button>
                         <button data-type="guide">GUIDE</button>
