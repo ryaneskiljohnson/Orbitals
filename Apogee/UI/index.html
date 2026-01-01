@@ -25,7 +25,9 @@
                 <!-- Left: Lift Slider -->
                 <div class="control-lift">
                     <label class="control-label">LIFT</label>
-                    <div class="slider-vertical-tall" id="liftSlider" data-param="lift">
+                    <div class="slider-vertical-tall" id="liftSlider" data-param="lift"
+                         data-help-title="LIFT"
+                         data-help-description="Controls the amount of velocity boost applied. Higher values raise velocities more dramatically.">
                         <div class="slider-track"></div>
                         <div class="slider-handle"></div>
                     </div>
@@ -34,7 +36,9 @@
 
                 <!-- Center: Curve Selector & Ceiling -->
                 <div class="control-center">
-                    <div class="curve-selector">
+                    <div class="curve-selector"
+                         data-help-title="CURVE"
+                         data-help-description="Selects the boost curve shape. LINEAR for even boost, EXP for aggressive, S-CURVE for smooth, LOG for gentle.">
                         <button data-curve="linear" class="active">LINEAR</button>
                         <button data-curve="exp">EXP</button>
                         <button data-curve="s">S-CURVE</button>
@@ -42,7 +46,9 @@
                     </div>
                     
                     <label class="control-label">CEILING</label>
-                    <div class="slider-horizontal-limiter" id="ceilingSlider" data-param="ceiling">
+                    <div class="slider-horizontal-limiter" id="ceilingSlider" data-param="ceiling"
+                         data-help-title="CEILING"
+                         data-help-description="Maximum output velocity (1-127). Prevents velocities from exceeding this limit.">
                         <div class="slider-track"></div>
                         <div class="slider-handle"></div>
                     </div>
@@ -52,7 +58,9 @@
                 <!-- Right: Momentum Knob -->
                 <div class="control-momentum">
                     <label class="control-label">MOMENTUM</label>
-                    <div class="knob-large" id="momentumKnob" data-param="momentum">
+                    <div class="knob-large" id="momentumKnob" data-param="momentum"
+                         data-help-title="MOMENTUM"
+                         data-help-description="Controls how quickly the boost is applied. Higher values create more immediate velocity changes.">
                         <div class="knob-inner">
                             <div class="knob-indicator"></div>
                         </div>

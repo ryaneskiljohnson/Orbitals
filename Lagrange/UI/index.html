@@ -25,7 +25,9 @@
                 <!-- Stability Slider -->
                 <div class="control-col">
                     <label class="control-label">STABILITY</label>
-                    <div class="slider-vertical" id="stabilitySlider" data-param="stability">
+                    <div class="slider-vertical" id="stabilitySlider" data-param="stability"
+                         data-help-title="STABILITY"
+                         data-help-description="Controls how strongly timing is stabilized. Higher values reduce timing drift without quantization.">
                         <div class="slider-track"></div>
                         <div class="slider-handle"></div>
                     </div>
@@ -35,7 +37,9 @@
                 <!-- Mass Knob -->
                 <div class="control-col">
                     <label class="control-label">MASS</label>
-                    <div class="knob-medium" id="massKnob" data-param="mass">
+                    <div class="knob-medium" id="massKnob" data-param="mass"
+                         data-help-title="MASS"
+                         data-help-description="Affects the gravitational balance between grid and human feel. Higher mass increases pull toward the grid.">
                         <div class="knob-inner">
                             <div class="knob-indicator"></div>
                         </div>
@@ -46,7 +50,9 @@
                 <!-- Drift Range Slider -->
                 <div class="control-col-wide">
                     <label class="control-label">DRIFT RANGE</label>
-                    <div class="range-slider" id="driftSlider" data-param="drift">
+                    <div class="range-slider" id="driftSlider" data-param="drift"
+                         data-help-title="DRIFT RANGE"
+                         data-help-description="Sets the allowed timing deviation range in milliseconds. Notes stay within this window.">
                         <div class="range-slider-track"></div>
                         <div class="range-slider-range"></div>
                         <div class="range-slider-handle range-handle-min"></div>
@@ -58,7 +64,9 @@
                 <!-- Micro Chaos XY Pad -->
                 <div class="control-col">
                     <label class="control-label">MICRO CHAOS</label>
-                    <div class="xy-pad" id="chaosPad" data-param="microChaos">
+                    <div class="xy-pad" id="chaosPad" data-param="microChaos"
+                         data-help-title="MICRO CHAOS"
+                         data-help-description="X/Y pad for subtle randomization. X controls timing variance, Y controls velocity variance.">
                         <div class="xy-handle"></div>
                     </div>
                     <div class="value-display" id="chaosValue">X:50 Y:50</div>

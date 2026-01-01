@@ -29,7 +29,9 @@
                 <!-- Orbit Arc (Top) -->
                 <div class="control-orbit-arc">
                     <label class="control-label">ORBIT</label>
-                    <div class="arc-slider" id="orbitControl" data-param="orbit">
+                    <div class="arc-slider" id="orbitControl" data-param="orbit"
+                         data-help-title="ORBIT"
+                         data-help-description="Controls orbital eccentricity. Low values create circular orbits, high values create highly elliptical paths with varying velocity.">
                         <div class="arc-fill"></div>
                     </div>
                     <div class="value-display" id="orbitValue">50%</div>
@@ -38,7 +40,9 @@
                 <!-- Center: Gravity Knob -->
                 <div class="control-center-section">
                     <label class="control-label">GRAVITY</label>
-                    <div class="large-knob" id="gravityKnob" data-param="gravity">
+                    <div class="large-knob" id="gravityKnob" data-param="gravity"
+                         data-help-title="GRAVITY"
+                         data-help-description="Controls how tightly notes are pulled toward the solar point. Higher values create tighter orbits and more intense velocity shaping.">
                         <div class="knob-inner">
                             <div class="knob-indicator"></div>
                             <div class="knob-rings"></div>
@@ -50,7 +54,9 @@
                 <!-- Right: Solar Point Slider -->
                 <div class="control-vertical-section">
                     <label class="control-label">SOLAR POINT</label>
-                    <div class="slider-vertical-tall solar-slider" id="solarPointSlider" data-param="solarPoint">
+                    <div class="slider-vertical-tall solar-slider" id="solarPointSlider" data-param="solarPoint"
+                         data-help-title="SOLAR POINT"
+                         data-help-description="Target velocity value (1-127) that notes are pulled toward. Acts as the gravitational center for velocity shaping.">
                         <div class="slider-track">
                             <div class="velocity-heatmap"></div>
                         </div>
@@ -64,7 +70,9 @@
                 <!-- Bottom: Inner/Outer Bias -->
                 <div class="control-bias-section">
                     <label class="control-label">INNER / OUTER BIAS</label>
-                    <div class="dual-slider" id="biasSlider" data-param="bias">
+                    <div class="dual-slider" id="biasSlider" data-param="bias"
+                         data-help-title="INNER / OUTER BIAS"
+                         data-help-description="Rotates the orbital plane. Negative values favor notes below the solar point (inner orbit), positive values favor notes above (outer orbit).">
                         <div class="bias-track">
                             <div class="bias-gradient"></div>
                         </div>

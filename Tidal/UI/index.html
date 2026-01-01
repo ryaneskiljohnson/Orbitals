@@ -33,7 +33,9 @@
                 <!-- Center: Amplitude Knob -->
                 <div class="control-wave-center">
                     <label class="control-label">AMPLITUDE</label>
-                    <div class="amplitude-knob" id="amplitudeKnob" data-param="amplitude">
+                    <div class="amplitude-knob" id="amplitudeKnob" data-param="amplitude"
+                         data-help-title="TIDE STRENGTH"
+                         data-help-description="Amplitude of the timing modulation. Higher values create more pronounced push/pull effects.">
                         <div class="knob-inner">
                             <div class="knob-indicator"></div>
                         </div>
@@ -44,7 +46,9 @@
                 <!-- Left: Frequency/Rate -->
                 <div class="control-wave-section" style="grid-column: 1; grid-row: 2;">
                     <label class="control-label">RATE</label>
-                    <div class="tempo-selector">
+                    <div class="tempo-selector"
+                         data-help-title="CYCLE LENGTH"
+                         data-help-description="Tempo-synced rate of the tidal cycle. Faster rates create quicker rhythmic modulation.">
                         <button data-tempo="1/4" class="active">1/4</button>
                         <button data-tempo="1/8">1/8</button>
                         <button data-tempo="1/16">1/16</button>
@@ -56,7 +60,9 @@
                 <!-- Right: Shape selector -->
                 <div class="control-wave-section" style="grid-column: 3; grid-row: 2;">
                     <label class="control-label">SHAPE</label>
-                    <div class="tempo-selector">
+                    <div class="tempo-selector"
+                         data-help-title="FLOW"
+                         data-help-description="Wave shape for different groove feels. SINE for smooth, TRI for balanced, SAW for ramp, SQR for stepped.">
                         <button data-shape="sine" class="active">SINE</button>
                         <button data-shape="triangle">TRI</button>
                         <button data-shape="saw">SAW</button>
@@ -68,7 +74,9 @@
                 <!-- Bottom: Phase Slider -->
                 <div class="control-wave-wide" style="grid-row: 3;">
                     <label class="control-label">PHASE OFFSET</label>
-                    <div class="phase-slider" id="phaseSlider" data-param="phase">
+                    <div class="phase-slider" id="phaseSlider" data-param="phase"
+                         data-help-title="PHASE"
+                         data-help-description="Shifts the wave pattern forward or backward (0-360°). Changes where in the cycle notes are affected.">
                         <div class="slider-track"></div>
                         <div class="slider-handle"></div>
                     </div>

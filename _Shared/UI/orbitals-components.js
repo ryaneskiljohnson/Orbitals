@@ -436,6 +436,144 @@ class OrbitalsRangeSlider {
 }
 
 /* ===================================================================
+   CONTEXTUAL HELP TOOLTIP SYSTEM
+   =================================================================== */
+
+/**
+ * @brief Tooltip manager for contextual help
+ */
+class OrbitalsTooltip {
+  constructor() {
+    this.tooltip = null;
+    this.currentElement = null;
+    this.hideTimeout = null;
+    this.init();
+  }
+  
+  /**
+   * @brief Initialize tooltip element
+   */
+  init() {
+    // Create tooltip element
+    this.tooltip = document.createElement('div');
+    this.tooltip.className = 'orbitals-tooltip';
+    this.tooltip.innerHTML = `
+      <div class="orbitals-tooltip-title"></div>
+      <div class="orbitals-tooltip-description"></div>
+    `;
+    document.body.appendChild(this.tooltip);
+  }
+  
+  /**
+   * @brief Show tooltip for an element
+   * @param {HTMLElement} element - Element to show tooltip for
+   * @param {string} title - Tooltip title
+   * @param {string} description - Tooltip description
+   */
+  show(element, title, description) {
+    if (!this.tooltip) return;
+    
+    clearTimeout(this.hideTimeout);
+    this.currentElement = element;
+    
+    // Update content
+    this.tooltip.querySelector('.orbitals-tooltip-title').textContent = title;
+    this.tooltip.querySelector('.orbitals-tooltip-description').textContent = description;
+    
+    // Position tooltip
+    const rect = element.getBoundingClientRect();
+    const tooltipRect = this.tooltip.getBoundingClientRect();
+    
+    // Position below element by default
+    let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
+    let top = rect.bottom + 12;
+    
+    // Keep tooltip within viewport
+    const padding = 16;
+    if (left < padding) left = padding;
+    if (left + tooltipRect.width > window.innerWidth - padding) {
+      left = window.innerWidth - tooltipRect.width - padding;
+    }
+    
+    // If tooltip would go off bottom, position above
+    if (top + tooltipRect.height > window.innerHeight - padding) {
+      top = rect.top - tooltipRect.height - 12;
+      // Flip arrow
+      this.tooltip.classList.add('tooltip-above');
+    } else {
+      this.tooltip.classList.remove('tooltip-above');
+    }
+    
+    this.tooltip.style.left = left + 'px';
+    this.tooltip.style.top = top + 'px';
+    
+    // Show with animation
+    requestAnimationFrame(() => {
+      this.tooltip.classList.add('visible');
+    });
+  }
+  
+  /**
+   * @brief Hide tooltip
+   */
+  hide() {
+    if (!this.tooltip) return;
+    
+    this.hideTimeout = setTimeout(() => {
+      this.tooltip.classList.remove('visible');
+      this.currentElement = null;
+    }, 100);
+  }
+  
+  /**
+   * @brief Register help text for an element
+   * @param {HTMLElement|string} element - Element or selector
+   * @param {string} title - Help title
+   * @param {string} description - Help description
+   */
+  register(element, title, description) {
+    const el = typeof element === 'string' ? document.querySelector(element) : element;
+    if (!el) return;
+    
+    // Store help data
+    el.dataset.helpTitle = title;
+    el.dataset.helpDescription = description;
+    
+    // Add event listeners
+    el.addEventListener('mouseenter', () => {
+      this.show(el, title, description);
+    });
+    
+    el.addEventListener('mouseleave', () => {
+      this.hide();
+    });
+  }
+  
+  /**
+   * @brief Auto-register all elements with data-help attributes
+   */
+  autoRegister() {
+    document.querySelectorAll('[data-help-title]').forEach(element => {
+      const title = element.dataset.helpTitle;
+      const description = element.dataset.helpDescription || '';
+      this.register(element, title, description);
+    });
+  }
+}
+
+// Create global tooltip instance
+const orbitalsTooltip = new OrbitalsTooltip();
+
+// Auto-register on DOM ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => orbitalsTooltip.autoRegister(), 100);
+  });
+} else {
+  setTimeout(() => orbitalsTooltip.autoRegister(), 100);
+}
+
+/* ===================================================================
    EXPORT FOR USE
    =================================================================== */
 
@@ -445,4 +583,6 @@ if (typeof window !== 'undefined') {
   window.OrbitalsSlider = OrbitalsSlider;
   window.OrbitalsXYPad = OrbitalsXYPad;
   window.OrbitalsRangeSlider = OrbitalsRangeSlider;
+  window.OrbitalsTooltip = OrbitalsTooltip;
+  window.orbitalsTooltip = orbitalsTooltip;
 }
