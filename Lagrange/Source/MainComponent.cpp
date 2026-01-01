@@ -32,14 +32,17 @@ MainComponent::MainComponent()
     
     webView = std::make_unique<juce::WebBrowserComponent> (options);
     
+    // Set WebView to be non-opaque so dark background shows through
+    webView->setOpaque (false);
+    
     addAndMakeVisible (webView.get());
     webView->setBounds (getLocalBounds());
     
-    // Load a minimal black HTML page immediately to prevent white flash
+    // Load a minimal dark HTML page immediately to prevent white flash
     const char* blackHTML = 
         "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Loading</title>"
-        "<style>html, body { background: #000000 !important; margin: 0; padding: 0; width: 100%; height: 100%; }</style>"
-        "</head><body style='background: #000000; margin: 0; padding: 0; width: 100%; height: 100%;'></body></html>";
+        "<style>html, body { background: #0a0a0f !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }</style>"
+        "</head><body style='background: #0a0a0f; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;'></body></html>";
     
     juce::String htmlString (blackHTML);
     auto escapedHTML = juce::URL::addEscapeChars (htmlString, true);
@@ -67,8 +70,8 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::paint (juce::Graphics& g)
 {
-    // Always paint black background initially
-    g.fillAll (juce::Colours::black);
+    // Always paint dark space background (matches --deep-space color)
+    g.fillAll (juce::Colour (0xff12121a));
     
     // Only paint text if not using WebView
     if (!useWebView)
@@ -191,6 +194,13 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
     if (sharedCSS.existsAsFile())
     {
         auto sharedCSSContent = sharedCSS.loadFileAsString();
+        
+        // Replace logo image path with relative path for temp directory
+        juce::String logoPattern = "../../_Shared/Assets/logos/nnaudio-logo.png";
+        juce::String logoOldPattern = "url('" + logoPattern + "')";
+        juce::String logoNewPattern = "url('nnaudio-logo.png')";
+        sharedCSSContent = sharedCSSContent.replace (logoOldPattern, logoNewPattern);
+        
         int headEnd = htmlContent.indexOf ("</head>");
         if (headEnd > 0)
         {
@@ -240,6 +250,15 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
         auto tempImageFile = tempDir.getChildFile ("lagrange-background.png");
         imageFile.copyFileTo (tempImageFile);
         DBG ("Copied background image to: " + tempImageFile.getFullPathName());
+    }
+    
+    // Copy logo image to temp directory if it exists
+    auto logosDir = projectRootForImage.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("logos");
+    auto logoFile = logosDir.getChildFile ("nnaudio-logo.png");
+    if (logoFile.existsAsFile())
+    {
+        auto tempLogoFile = tempDir.getChildFile ("nnaudio-logo.png");
+        logoFile.copyFileTo (tempLogoFile);
     }
     
     auto tempFile = tempDir.getChildFile ("LagrangeUI.html");

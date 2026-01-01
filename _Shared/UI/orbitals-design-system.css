@@ -182,9 +182,12 @@ body, html {
 }
 
 .orbitals-header h1 {
-  grid-column: 2;
-  justify-self: center;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   text-align: center;
+  pointer-events: none;
+  margin: 0;
 }
 
 .orbitals-logo {
