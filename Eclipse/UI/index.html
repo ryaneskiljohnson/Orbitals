@@ -39,7 +39,9 @@
                 <!-- Left: Umbra Control -->
                 <div class="control-eclipse-section" style="grid-column: 1; grid-row: 2;">
                     <label class="control-label">UMBRA<br/>(Full Shadow)</label>
-                    <div class="umbra-control" id="umbraControl" data-param="umbra">
+                    <div class="umbra-control" id="umbraControl" data-param="umbra"
+                         data-help-title="UMBRA (Full Shadow)"
+                         data-help-description="Attenuation level for fully masked notes. 100% completely silences them, lower values allow ghost notes through.">
                         <div class="knob-inner">
                             <div class="knob-indicator"></div>
                         </div>
@@ -63,7 +65,9 @@
                 <!-- Right: Penumbra Control -->
                 <div class="control-eclipse-section" style="grid-column: 3; grid-row: 2;">
                     <label class="control-label">PENUMBRA<br/>(Partial Shadow)</label>
-                    <div class="penumbra-control" id="penumbraControl" data-param="penumbra">
+                    <div class="penumbra-control" id="penumbraControl" data-param="penumbra"
+                         data-help-title="PENUMBRA (Partial Shadow)"
+                         data-help-description="Attenuation level for partially masked notes in the fade zone. Creates smooth transitions between hidden and revealed.">
                         <div class="knob-inner">
                             <div class="knob-indicator"></div>
                         </div>
@@ -73,7 +77,9 @@
 
                 <!-- Mode Toggle (Bottom) -->
                 <div class="control-eclipse-wide" style="grid-row: 3;">
-                    <div class="eclipse-mode-toggle">
+                    <div class="eclipse-mode-toggle"
+                         data-help-title="INVERT"
+                         data-help-description="Toggle between REVEAL (show notes above threshold) and HIDE (hide notes above threshold) modes.">
                         <button data-mode="reveal" class="active">REVEAL</button>
                         <button data-mode="hide">HIDE</button>
                     </div>
@@ -82,7 +88,9 @@
         </main>
 
         <footer class="orbitals-footer">
-            <button class="bypass-toggle" id="bypassToggle">BYPASS</button>
+            <button class="bypass-toggle" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Disables all processing and passes MIDI through unaffected. Use to A/B compare or temporarily disable the effect.">BYPASS</button>
             <div class="info-display">
                 <span id="noteCount">Notes: 0</span>
                 <span id="maskedNotes">Masked: 0</span>

@@ -43,7 +43,9 @@
                 <!-- Left: Key Center Selector -->
                 <div class="control-magnetic-section" style="grid-column: 1; grid-row: 2;">
                     <label class="control-label">KEY CENTER</label>
-                    <div class="key-center-selector" id="keyCenterSelector">
+                    <div class="key-center-selector" id="keyCenterSelector"
+                         data-help-title="CENTER KEY"
+                         data-help-description="Root note of the harmonic field (C, C#, D, etc.). All notes are pulled toward this key.">
                         <div class="chromatic-wheel"></div>
                     </div>
                     <div class="value-display" id="keyCenterValue">C</div>
@@ -78,7 +80,9 @@
                 <!-- Bottom: Attraction Strength Slider -->
                 <div class="control-magnetic-wide" style="grid-row: 3;">
                     <label class="control-label">ATTRACTION STRENGTH</label>
-                    <div class="attraction-slider" id="attractionSlider" data-param="attraction">
+                    <div class="attraction-slider" id="attractionSlider" data-param="attraction"
+                         data-help-title="TENSION"
+                         data-help-description="Strength of the magnetic pull toward scale notes. Higher tension snaps notes more aggressively to the nearest in-key note.">
                         <div class="slider-track"></div>
                         <div class="slider-handle"></div>
                     </div>
@@ -88,7 +92,9 @@
         </main>
 
         <footer class="orbitals-footer">
-            <button class="bypass-toggle" id="bypassToggle">BYPASS</button>
+            <button class="bypass-toggle" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Disables all processing and passes MIDI through unaffected. Use to A/B compare or temporarily disable the effect.">BYPASS</button>
             <div class="info-display">
                 <span id="noteCount">Notes: 0</span>
                 <span id="correctedNotes">Corrected: 0</span>

@@ -75,8 +75,12 @@
         </main>
 
         <footer class="orbitals-footer">
-            <button class="bypass-toggle" id="bypassToggle">BYPASS</button>
-            <div class="timing-meter" id="timingMeter">
+            <button class="bypass-toggle" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Disables all processing and passes MIDI through unaffected. Use to A/B compare or temporarily disable the effect.">BYPASS</button>
+            <div class="timing-meter" id="timingMeter"
+                 data-help-title="TIMING STABILITY METER"
+                 data-help-description="Visualizes the current timing stability. Green indicates stable timing, red indicates drift from the grid.">
                 <div class="timing-indicator"></div>
             </div>
             <div class="info-display">

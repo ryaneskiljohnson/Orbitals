@@ -88,7 +88,9 @@
             </div>
 
             <!-- Velocity Meters (Left Side) -->
-            <div class="velocity-meters">
+            <div class="velocity-meters"
+                 data-help-title="VELOCITY METERS"
+                 data-help-description="Real-time visualization of input and output velocity levels. Shows how Perihelion shapes incoming note velocities.">
                 <div class="meter-column">
                     <label class="meter-label">INPUT</label>
                     <div class="velocity-meter" id="inputMeter">
@@ -106,7 +108,9 @@
 
         <!-- Footer -->
         <footer class="orbitals-footer">
-            <button class="bypass-toggle" id="bypassToggle">BYPASS</button>
+            <button class="bypass-toggle" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Disables all processing and passes MIDI through unaffected. Use to A/B compare or temporarily disable the effect.">BYPASS</button>
             <div class="info-display">
                 <span id="noteCount">Notes: 0</span>
                 <span id="cpuLoad">CPU: 0%</span>
