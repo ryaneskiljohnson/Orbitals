@@ -235,7 +235,7 @@
    =================================================================== */
 
 .orbit-visualizer {
-  width: 300px;
+  width: 280px;
   height: 200px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
@@ -247,9 +247,145 @@
   position: relative;
 }
 
-.orbit-visualizer canvas {
+.orbit-visualizer canvas,
+#orbitVisualizerCanvas {
   width: 100%;
   height: 100%;
+}
+
+/* ===================================================================
+   PERIOD SELECTOR
+   =================================================================== */
+
+.period-selector {
+  display: flex;
+  gap: var(--spacing-xs);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--plugin-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xs);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+}
+
+.period-selector button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--comet-white);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 60px;
+}
+
+.period-selector button:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--plugin-primary);
+}
+
+.period-selector button.active {
+  background: var(--plugin-primary);
+  color: white;
+  border-color: var(--kepler-focus);
+  box-shadow: 0 0 15px var(--plugin-glow);
+}
+
+/* ===================================================================
+   DIRECTION SELECTOR
+   =================================================================== */
+
+.direction-selector {
+  display: flex;
+  gap: var(--spacing-sm);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--plugin-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.direction-selector button {
+  padding: var(--spacing-md) var(--spacing-xl);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--comet-white);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 150px;
+}
+
+.direction-selector button:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--plugin-primary);
+}
+
+.direction-selector button.active {
+  background: var(--plugin-primary);
+  color: white;
+  border-color: var(--plugin-secondary);
+  box-shadow: 0 0 20px var(--plugin-glow);
+}
+
+/* ===================================================================
+   SPREAD SLIDER (Vertical)
+   =================================================================== */
+
+.spread-slider {
+  width: 70px;
+  height: 350px;
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 3px solid var(--plugin-primary);
+  overflow: hidden;
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.3);
+}
+
+.spread-slider::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40%;
+  background: linear-gradient(to top,
+    var(--plugin-primary) 0%,
+    var(--plugin-secondary) 70%,
+    var(--kepler-focus) 100%
+  );
+  opacity: 0.4;
+  transition: height 0.2s ease;
+}
+
+.spread-slider .slider-handle {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle at 30% 30%, var(--kepler-focus), var(--plugin-secondary) 50%, var(--plugin-primary));
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 25px var(--plugin-glow),
+              inset 0 0 20px rgba(251, 191, 36, 0.3);
+  cursor: ns-resize;
+  transition: all 0.3s ease;
+}
+
+.spread-slider .slider-handle:hover {
+  transform: translate(-50%, -50%) scale(1.1);
 }
 
 /* ===================================================================

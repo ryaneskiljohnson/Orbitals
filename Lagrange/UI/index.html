@@ -13,34 +13,54 @@
         <header class="orbitals-header">
             <div class="orbitals-logo" title="NNAudio"></div>
             <h1>LAGRANGE</h1>
-            <div class="preset-browser"><span>Init Preset</span></div>
+            <div class="preset-browser">
+                <span>Init Preset</span>
+            </div>
         </header>
 
         <main class="plugin-main">
             <canvas id="lagrangeCanvas"></canvas>
 
             <div class="controls-grid">
+                <!-- Stability Slider -->
                 <div class="control-col">
-                    <label>STABILITY</label>
-                    <div class="slider-vertical" id="stabilitySlider" data-param="stability"></div>
+                    <label class="control-label">STABILITY</label>
+                    <div class="slider-vertical" id="stabilitySlider" data-param="stability">
+                        <div class="slider-track"></div>
+                        <div class="slider-handle"></div>
+                    </div>
                     <div class="value-display" id="stabilityValue">50%</div>
                 </div>
 
+                <!-- Mass Knob -->
                 <div class="control-col">
-                    <label>MASS</label>
-                    <div class="knob-medium" id="massKnob" data-param="mass"></div>
+                    <label class="control-label">MASS</label>
+                    <div class="knob-medium" id="massKnob" data-param="mass">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
+                        </div>
+                    </div>
                     <div class="value-display" id="massValue">50%</div>
                 </div>
 
+                <!-- Drift Range Slider -->
                 <div class="control-col-wide">
-                    <label>DRIFT</label>
-                    <div class="range-slider" id="driftSlider" data-param="drift"></div>
+                    <label class="control-label">DRIFT RANGE</label>
+                    <div class="range-slider" id="driftSlider" data-param="drift">
+                        <div class="range-slider-track"></div>
+                        <div class="range-slider-range"></div>
+                        <div class="range-slider-handle range-handle-min"></div>
+                        <div class="range-slider-handle range-handle-max"></div>
+                    </div>
                     <div class="value-display" id="driftValue">±25ms</div>
                 </div>
 
+                <!-- Micro Chaos XY Pad -->
                 <div class="control-col">
-                    <label>MICRO CHAOS</label>
-                    <div class="xy-pad" id="chaosP ad" data-param="microChaos"></div>
+                    <label class="control-label">MICRO CHAOS</label>
+                    <div class="xy-pad" id="chaosPad" data-param="microChaos">
+                        <div class="xy-handle"></div>
+                    </div>
                     <div class="value-display" id="chaosValue">X:50 Y:50</div>
                 </div>
             </div>
@@ -48,14 +68,16 @@
 
         <footer class="orbitals-footer">
             <button class="bypass-toggle" id="bypassToggle">BYPASS</button>
-            <div class="timing-meter" id="timingMeter"></div>
+            <div class="timing-meter" id="timingMeter">
+                <div class="timing-indicator"></div>
+            </div>
+            <div class="info-display">
+                <span id="noteCount">Notes: 0</span>
+            </div>
         </footer>
     </div>
 
-    
-    
-    
-        <script src="../../_Shared/UI/orbitals-animations.js"></script>
+    <script src="../../_Shared/UI/orbitals-animations.js"></script>
     <script src="../../_Shared/UI/orbitals-particles.js"></script>
     <script src="../../_Shared/UI/orbitals-components.js"></script>
     

@@ -1,31 +1,83 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Apogee</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apogee - Velocity & Energy Booster</title>
+    
+    <link rel="stylesheet" href="../../_Shared/UI/orbitals-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container apogee-theme">
+        <header class="orbitals-header">
+            <div class="orbitals-logo" title="NNAudio"></div>
+            <h1>APOGEE</h1>
+            <div class="preset-browser">
+                <span>Init Preset</span>
+            </div>
+        </header>
 
-<link rel="stylesheet" href="../../_Shared/UI/orbitals-design-system.css">
-    <link rel="stylesheet" href="styles.css"></head>
-<body><div class="plugin-container apogee-theme">
-<header class="orbitals-header"><div class="orbitals-logo" title="NNAudio"></div><h1>APOGEE</h1>
-<div class="preset-browser"><span>Init</span></div></header>
-<main class="plugin-main"><canvas id="trajectoryCanvas"></canvas>
-<div class="controls-layout">
-<div class="control-lift"><label>LIFT</label>
-<div class="slider-vertical-tall" id="liftSlider"></div>
-<div class="value-display" id="liftValue">50%</div></div>
-<div class="control-center"><div class="curve-selector">
-<button data-curve="linear">Linear</button><button data-curve="exp">Exponential</button>
-<button data-curve="s">S-Curve</button><button data-curve="log">Logarithmic</button></div>
-<label>CEILING</label><div class="slider-horizontal-limiter" id="ceilingSlider"></div>
-<div class="value-display" id="ceilingValue">127</div></div>
-<div class="control-momentum"><label>MOMENTUM</label>
-<div class="knob-large" id="momentumKnob"></div>
-<div class="value-display" id="momentumValue">50%</div></div></div></main>
-<footer class="orbitals-footer"><button class="bypass-toggle">BYPASS</button>
-<div class="velocity-meter-dual"></div></footer></div>
+        <main class="plugin-main">
+            <canvas id="trajectoryCanvas"></canvas>
 
+            <div class="controls-layout">
+                <!-- Left: Lift Slider -->
+                <div class="control-lift">
+                    <label class="control-label">LIFT</label>
+                    <div class="slider-vertical-tall" id="liftSlider" data-param="lift">
+                        <div class="slider-track"></div>
+                        <div class="slider-handle"></div>
+                    </div>
+                    <div class="value-display" id="liftValue">50%</div>
+                </div>
 
+                <!-- Center: Curve Selector & Ceiling -->
+                <div class="control-center">
+                    <div class="curve-selector">
+                        <button data-curve="linear" class="active">LINEAR</button>
+                        <button data-curve="exp">EXP</button>
+                        <button data-curve="s">S-CURVE</button>
+                        <button data-curve="log">LOG</button>
+                    </div>
+                    
+                    <label class="control-label">CEILING</label>
+                    <div class="slider-horizontal-limiter" id="ceilingSlider" data-param="ceiling">
+                        <div class="slider-track"></div>
+                        <div class="slider-handle"></div>
+                    </div>
+                    <div class="value-display" id="ceilingValue">127</div>
+                </div>
+
+                <!-- Right: Momentum Knob -->
+                <div class="control-momentum">
+                    <label class="control-label">MOMENTUM</label>
+                    <div class="knob-large" id="momentumKnob" data-param="momentum">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="value-display large" id="momentumValue">50%</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="orbitals-footer">
+            <button class="bypass-toggle" id="bypassToggle">BYPASS</button>
+            <div class="velocity-meter-dual">
+                <div class="meter-before"></div>
+                <div class="meter-after"></div>
+            </div>
+            <div class="info-display">
+                <span id="noteCount">Notes: 0</span>
+            </div>
+        </footer>
+    </div>
 
     <script src="../../_Shared/UI/orbitals-animations.js"></script>
     <script src="../../_Shared/UI/orbitals-particles.js"></script>
     <script src="../../_Shared/UI/orbitals-components.js"></script>
     
-    <script src="app.js"></script></body></html>
+    <script src="app.js"></script>
+</body>
+</html>

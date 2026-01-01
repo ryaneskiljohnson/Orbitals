@@ -1,51 +1,99 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Ion</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ion - Harmonic Constraint Engine</title>
+    
+    <link rel="stylesheet" href="../../_Shared/UI/orbitals-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container ion-theme">
+        <header class="orbitals-header">
+            <div class="orbitals-logo" title="NNAudio"></div>
+            <h1>ION</h1>
+            <div class="preset-browser">
+                <span>Init Preset</span>
+            </div>
+        </header>
 
-<link rel="stylesheet" href="../../_Shared/UI/orbitals-design-system.css">
-    <link rel="stylesheet" href="styles.css"></head>
-<body><div class="plugin-container ion-theme">
-<header class="orbitals-header"><div class="orbitals-logo" title="NNAudio"></div><h1>ION</h1>
-<div class="preset-browser"><span>Init</span></div></header>
-<main class="plugin-main"><canvas id="ionCanvas"></canvas>
-<div class="controls-ion">
-<div class="control-left-col">
-<label>TENSION</label>
-<div class="slider-vertical-magnetic" id="tensionSlider"></div>
-<div class="value-display" id="tensionValue">50%</div>
-<label>FIELD WIDTH</label>
-<div class="knob-zone" id="fieldKnob"></div>
-<div class="value-display" id="fieldValue">50%</div></div>
-<div class="control-center">
-<label>CENTER KEY</label>
-<div class="chromatic-wheel" id="keyWheel">
-<div class="key-segment" data-note="C">C</div>
-<div class="key-segment" data-note="C#">C#</div>
-<div class="key-segment" data-note="D">D</div>
-<div class="key-segment" data-note="D#">D#</div>
-<div class="key-segment" data-note="E">E</div>
-<div class="key-segment" data-note="F">F</div>
-<div class="key-segment" data-note="F#">F#</div>
-<div class="key-segment" data-note="G">G</div>
-<div class="key-segment" data-note="G#">G#</div>
-<div class="key-segment" data-note="A">A</div>
-<div class="key-segment" data-note="A#">A#</div>
-<div class="key-segment" data-note="B">B</div></div>
-<select class="scale-selector">
-<option>Major</option><option>Minor</option><option>Dorian</option>
-<option>Phrygian</option><option>Lydian</option><option>Mixolydian</option><option>Locrian</option>
-</select></div>
-<div class="control-right-col">
-<label>RESOLUTION BIAS</label>
-<div class="directional-pad">
-<button data-dir="up">↑</button><button data-dir="down">↓</button>
-<button data-dir="nearest">○</button><button data-dir="chromatic">♯</button></div></div></div></main>
-<footer class="orbitals-footer"><button class="bypass-toggle">BYPASS</button>
-<div class="correction-counter">Corrections: 0</div></footer></div>
+        <main class="plugin-main">
+            <canvas id="ionCanvas"></canvas>
 
+            <div class="controls-magnetic">
+                <!-- Scale Selector (Top) -->
+                <div class="control-magnetic-wide" style="grid-row: 1;">
+                    <label class="control-label">SCALE</label>
+                    <div class="scale-selector">
+                        <button data-scale="major" class="active">MAJOR</button>
+                        <button data-scale="minor">MINOR</button>
+                        <button data-scale="dorian">DORIAN</button>
+                        <button data-scale="phrygian">PHRYGIAN</button>
+                        <button data-scale="lydian">LYDIAN</button>
+                        <button data-scale="mixolydian">MIXO</button>
+                        <button data-scale="aeolian">AEOLIAN</button>
+                        <button data-scale="locrian">LOCRIAN</button>
+                        <button data-scale="chromatic">CHROMATIC</button>
+                    </div>
+                </div>
 
+                <!-- Left: Key Center Selector -->
+                <div class="control-magnetic-section" style="grid-column: 1; grid-row: 2;">
+                    <label class="control-label">KEY CENTER</label>
+                    <div class="key-center-selector" id="keyCenterSelector">
+                        <div class="chromatic-wheel"></div>
+                    </div>
+                    <div class="value-display" id="keyCenterValue">C</div>
+                </div>
+
+                <!-- Center: Field Strength Knob -->
+                <div class="control-magnetic-center">
+                    <label class="control-label">FIELD STRENGTH</label>
+                    <div class="field-strength-knob" id="fieldStrengthKnob" data-param="fieldStrength">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="value-display large" id="fieldStrengthValue">50%</div>
+                </div>
+
+                <!-- Right: Attraction Type -->
+                <div class="control-magnetic-section" style="grid-column: 3; grid-row: 2;">
+                    <label class="control-label">ATTRACTION</label>
+                    <div class="attraction-type-selector">
+                        <button data-type="snap" class="active">SNAP</button>
+                        <button data-type="pull">PULL</button>
+                        <button data-type="guide">GUIDE</button>
+                    </div>
+                    <div class="value-display" id="attractionValue">SNAP</div>
+                </div>
+
+                <!-- Bottom: Attraction Strength Slider -->
+                <div class="control-magnetic-wide" style="grid-row: 3;">
+                    <label class="control-label">ATTRACTION STRENGTH</label>
+                    <div class="attraction-slider" id="attractionSlider" data-param="attraction">
+                        <div class="slider-track"></div>
+                        <div class="slider-handle"></div>
+                    </div>
+                    <div class="value-display" id="attractionStrengthValue">50%</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="orbitals-footer">
+            <button class="bypass-toggle" id="bypassToggle">BYPASS</button>
+            <div class="info-display">
+                <span id="noteCount">Notes: 0</span>
+                <span id="correctedNotes">Corrected: 0</span>
+            </div>
+        </footer>
+    </div>
 
     <script src="../../_Shared/UI/orbitals-animations.js"></script>
     <script src="../../_Shared/UI/orbitals-particles.js"></script>
     <script src="../../_Shared/UI/orbitals-components.js"></script>
     
-    <script src="app.js"></script></body></html>
+    <script src="app.js"></script>
+</body>
+</html>

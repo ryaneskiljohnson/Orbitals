@@ -28,15 +28,17 @@
             <div class="controls-area">
                 <!-- Orbit Arc (Top) -->
                 <div class="control-orbit-arc">
-                    <label class="tooltip" data-tooltip="Amount of original variation preserved">ORBIT</label>
-                    <div class="arc-slider tooltip" id="orbitControl" data-param="orbit" data-tooltip="Higher values preserve more velocity variation"></div>
+                    <label class="control-label">ORBIT</label>
+                    <div class="arc-slider" id="orbitControl" data-param="orbit">
+                        <div class="arc-fill"></div>
+                    </div>
                     <div class="value-display" id="orbitValue">50%</div>
                 </div>
 
-                <!-- Left Side: Gravity Knob (Center) -->
+                <!-- Center: Gravity Knob -->
                 <div class="control-center-section">
-                    <label class="tooltip" data-tooltip="Pull strength toward solar point">GRAVITY</label>
-                    <div class="large-knob tooltip" id="gravityKnob" data-param="gravity" data-tooltip="Drag vertically to adjust gravity strength">
+                    <label class="control-label">GRAVITY</label>
+                    <div class="large-knob" id="gravityKnob" data-param="gravity">
                         <div class="knob-inner">
                             <div class="knob-indicator"></div>
                             <div class="knob-rings"></div>
@@ -45,10 +47,10 @@
                     <div class="value-display large" id="gravityValue">50%</div>
                 </div>
 
-                <!-- Right Side: Solar Point Slider -->
+                <!-- Right: Solar Point Slider -->
                 <div class="control-vertical-section">
-                    <label class="tooltip" data-tooltip="Target velocity (1-127)">SOLAR POINT</label>
-                    <div class="slider-vertical-tall solar-slider tooltip" id="solarPointSlider" data-param="solarPoint" data-tooltip="Set the velocity target that notes are pulled toward">
+                    <label class="control-label">SOLAR POINT</label>
+                    <div class="slider-vertical-tall solar-slider" id="solarPointSlider" data-param="solarPoint">
                         <div class="slider-track">
                             <div class="velocity-heatmap"></div>
                         </div>
@@ -61,8 +63,8 @@
 
                 <!-- Bottom: Inner/Outer Bias -->
                 <div class="control-bias-section">
-                    <label class="tooltip" data-tooltip="Asymmetric shaping curve">INNER / OUTER BIAS</label>
-                    <div class="dual-slider tooltip" id="biasSlider" data-param="bias" data-tooltip="Inner: softer pull | Outer: aggressive pull">
+                    <label class="control-label">INNER / OUTER BIAS</label>
+                    <div class="dual-slider" id="biasSlider" data-param="bias">
                         <div class="bias-track">
                             <div class="bias-gradient"></div>
                         </div>
@@ -77,15 +79,19 @@
                 </div>
             </div>
 
-            <!-- Velocity Meters (Before/After) -->
+            <!-- Velocity Meters (Left Side) -->
             <div class="velocity-meters">
                 <div class="meter-column">
-                    <label>INPUT</label>
-                    <div class="velocity-meter" id="inputMeter"></div>
+                    <label class="meter-label">INPUT</label>
+                    <div class="velocity-meter" id="inputMeter">
+                        <div class="meter-fill"></div>
+                    </div>
                 </div>
                 <div class="meter-column">
-                    <label>OUTPUT</label>
-                    <div class="velocity-meter" id="outputMeter"></div>
+                    <label class="meter-label">OUTPUT</label>
+                    <div class="velocity-meter" id="outputMeter">
+                        <div class="meter-fill"></div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -95,6 +101,7 @@
             <button class="bypass-toggle" id="bypassToggle">BYPASS</button>
             <div class="info-display">
                 <span id="noteCount">Notes: 0</span>
+                <span id="cpuLoad">CPU: 0%</span>
             </div>
         </footer>
     </div>

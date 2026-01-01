@@ -1065,3 +1065,26 @@ label {
     height: 120px;
   }
 }
+
+
+/* ===================================================================
+   CONTROL LABELS
+   =================================================================== */
+
+.control-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(232, 232, 240, 0.7);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.meter-label {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(232, 232, 240, 0.5);
+}

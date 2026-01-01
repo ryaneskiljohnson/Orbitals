@@ -1,34 +1,95 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Eclipse</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eclipse - Velocity Masking</title>
+    
+    <link rel="stylesheet" href="../../_Shared/UI/orbitals-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container eclipse-theme">
+        <header class="orbitals-header">
+            <div class="orbitals-logo" title="NNAudio"></div>
+            <h1>ECLIPSE</h1>
+            <div class="preset-browser">
+                <span>Init Preset</span>
+            </div>
+        </header>
 
-<link rel="stylesheet" href="../../_Shared/UI/orbitals-design-system.css">
-    <link rel="stylesheet" href="styles.css"></head>
-<body><div class="plugin-container eclipse-theme">
-<header class="orbitals-header"><div class="orbitals-logo" title="NNAudio"></div><h1>ECLIPSE</h1>
-<div class="preset-browser"><span>Init</span></div></header>
-<main class="plugin-main"><canvas id="eclipseCanvas"></canvas>
-<div class="controls-eclipse">
-<div class="control-threshold"><label>THRESHOLD</label>
-<div class="slider-vertical-shadow" id="thresholdSlider"></div>
-<div class="value-display" id="thresholdValue">64</div></div>
-<div class="control-center-col">
-<div class="fade-control"><label>FADE ZONE</label>
-<div class="range-slider-penumbra" id="fadeSlider"></div>
-<div class="value-display" id="fadeValue">32</div></div>
-<div class="ghost-control"><label>GHOST GAIN</label>
-<div class="knob-phantom" id="ghostKnob"></div>
-<div class="value-display" id="ghostValue">-12dB</div></div></div>
-<div class="control-invert"><label>MODE</label>
-<div class="toggle-switch-eclipse" id="invertToggle">
-<span class="active">REVEAL</span><span>HIDE</span></div></div></div>
-<div class="velocity-histogram" id="histogram"></div></main>
-<footer class="orbitals-footer"><button class="bypass-toggle">BYPASS</button>
-<div class="passthrough-meter"></div></footer></div>
+        <main class="plugin-main">
+            <canvas id="eclipseCanvas"></canvas>
 
+            <div class="controls-eclipse">
+                <!-- Shadow Zone Range (Top) -->
+                <div class="control-eclipse-wide" style="grid-row: 1;">
+                    <label class="control-label">SHADOW ZONE (Velocity Range)</label>
+                    <div class="shadow-zone-slider" id="shadowZoneSlider" data-param="shadowZone">
+                        <div class="zone-track"></div>
+                        <div class="zone-range"></div>
+                        <div class="zone-handle zone-handle-min"></div>
+                        <div class="zone-handle zone-handle-max"></div>
+                    </div>
+                    <div class="value-display" id="shadowZoneValue">40 - 80</div>
+                </div>
 
+                <!-- Left: Umbra Control -->
+                <div class="control-eclipse-section" style="grid-column: 1; grid-row: 2;">
+                    <label class="control-label">UMBRA<br/>(Full Shadow)</label>
+                    <div class="umbra-control" id="umbraControl" data-param="umbra">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="value-display" id="umbraValue">100%</div>
+                </div>
+
+                <!-- Center: Totality Knob -->
+                <div class="control-eclipse-center">
+                    <label class="control-label">TOTALITY</label>
+                    <div class="totality-knob" id="totalityKnob" data-param="totality">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="value-display large" id="totalityValue">50%</div>
+                </div>
+
+                <!-- Right: Penumbra Control -->
+                <div class="control-eclipse-section" style="grid-column: 3; grid-row: 2;">
+                    <label class="control-label">PENUMBRA<br/>(Partial Shadow)</label>
+                    <div class="penumbra-control" id="penumbraControl" data-param="penumbra">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="value-display" id="penumbraValue">50%</div>
+                </div>
+
+                <!-- Mode Toggle (Bottom) -->
+                <div class="control-eclipse-wide" style="grid-row: 3;">
+                    <div class="eclipse-mode-toggle">
+                        <button data-mode="reveal" class="active">REVEAL</button>
+                        <button data-mode="hide">HIDE</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="orbitals-footer">
+            <button class="bypass-toggle" id="bypassToggle">BYPASS</button>
+            <div class="info-display">
+                <span id="noteCount">Notes: 0</span>
+                <span id="maskedNotes">Masked: 0</span>
+            </div>
+        </footer>
+    </div>
 
     <script src="../../_Shared/UI/orbitals-animations.js"></script>
     <script src="../../_Shared/UI/orbitals-particles.js"></script>
     <script src="../../_Shared/UI/orbitals-components.js"></script>
     
-    <script src="app.js"></script></body></html>
+    <script src="app.js"></script>
+</body>
+</html>
