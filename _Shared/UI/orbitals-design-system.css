@@ -209,6 +209,43 @@ body, html {
   text-shadow: 0 0 20px var(--plugin-primary, var(--orbit-cyan));
 }
 
+.help-toggle {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-bg);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--comet-white);
+  font-family: var(--font-header);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  position: relative;
+  overflow: hidden;
+}
+
+.help-toggle:hover {
+  border-color: var(--plugin-primary, var(--orbit-cyan));
+  background: var(--glass-bg-light);
+  transform: scale(1.05);
+  box-shadow: 0 0 20px var(--plugin-glow, rgba(0, 212, 255, 0.4));
+}
+
+.help-toggle.active {
+  background: var(--plugin-primary, var(--orbit-cyan));
+  border-color: var(--plugin-primary, var(--orbit-cyan));
+  color: var(--space-black);
+  box-shadow: 0 0 25px var(--plugin-glow, rgba(0, 212, 255, 0.6));
+}
+
+.help-toggle::before {
+  content: '?';
+}
+
 .preset-browser {
   padding: var(--spacing-sm) var(--spacing-lg);
   background: 

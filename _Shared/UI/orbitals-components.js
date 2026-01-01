@@ -447,6 +447,7 @@ class OrbitalsTooltip {
     this.tooltip = null;
     this.currentElement = null;
     this.hideTimeout = null;
+    this.enabled = false; // Help is disabled by default
     this.init();
   }
   
@@ -465,13 +466,36 @@ class OrbitalsTooltip {
   }
   
   /**
+   * @brief Enable or disable help tooltips
+   * @param {boolean} enabled - Whether to enable tooltips
+   */
+  setEnabled(enabled) {
+    this.enabled = enabled;
+    if (!enabled) {
+      this.hide();
+    }
+  }
+  
+  /**
+   * @brief Toggle help on/off
+   * @returns {boolean} New enabled state
+   */
+  toggle() {
+    this.enabled = !this.enabled;
+    if (!this.enabled) {
+      this.hide();
+    }
+    return this.enabled;
+  }
+  
+  /**
    * @brief Show tooltip for an element
    * @param {HTMLElement} element - Element to show tooltip for
    * @param {string} title - Tooltip title
    * @param {string} description - Tooltip description
    */
   show(element, title, description) {
-    if (!this.tooltip) return;
+    if (!this.tooltip || !this.enabled) return; // Only show if enabled
     
     clearTimeout(this.hideTimeout);
     this.currentElement = element;
@@ -567,10 +591,36 @@ const orbitalsTooltip = new OrbitalsTooltip();
 // Auto-register on DOM ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => orbitalsTooltip.autoRegister(), 100);
+    setTimeout(() => {
+      orbitalsTooltip.autoRegister();
+      setupHelpToggle();
+    }, 100);
   });
 } else {
-  setTimeout(() => orbitalsTooltip.autoRegister(), 100);
+  setTimeout(() => {
+    orbitalsTooltip.autoRegister();
+    setupHelpToggle();
+  }, 100);
+}
+
+/**
+ * @brief Setup help toggle button
+ */
+function setupHelpToggle() {
+  const helpButton = document.querySelector('.help-toggle');
+  if (helpButton) {
+    helpButton.addEventListener('click', () => {
+      const isEnabled = orbitalsTooltip.toggle();
+      helpButton.classList.toggle('active', isEnabled);
+      
+      // Visual feedback
+      if (isEnabled) {
+        console.log('Help enabled: Hover over controls for descriptions');
+      } else {
+        console.log('Help disabled');
+      }
+    });
+  }
 }
 
 /* ===================================================================
