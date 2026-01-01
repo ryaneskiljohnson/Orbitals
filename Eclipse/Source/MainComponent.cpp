@@ -123,8 +123,6 @@ void MainComponent::loadMainUI()
     }
 }
 
-}
-
 void MainComponent::loadHTMLFile (const juce::File& htmlFile)
 {
     if (!htmlFile.existsAsFile())
@@ -156,7 +154,9 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
         htmlContent = htmlContent.replace ("<script src=\"app.js\"></script>",
                                            "<script>" + jsContent + "</script>");
         htmlContent = htmlContent.replace ("<script src='app.js'></script>",
-
+                                           "<script>" + jsContent + "</script>");
+    }
+    
     // Inline shared CSS and JS from _Shared/UI
     auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
     auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
@@ -200,9 +200,6 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
         auto componentsContent = componentsFile.loadFileAsString();
         htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-components.js\"></script>",
                                       "<script>" + componentsContent + "</script>");
-    }
-    
-                                           "<script>" + jsContent + "</script>");
     }
     
     // Write to temp file and load
