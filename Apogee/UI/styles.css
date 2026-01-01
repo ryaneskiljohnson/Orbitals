@@ -52,24 +52,29 @@
    CONTROLS LAYOUT (Optimized for 1200x750)
    =================================================================== */
 
+.apogee-theme .plugin-main {
+  padding: 0;
+}
+
 .controls-layout {
   position: relative;
   z-index: 10;
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  grid-template-rows: 1fr;
-  gap: var(--spacing-3xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
   height: 100%;
-  padding: var(--spacing-3xl);
-  align-items: center;
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  gap: var(--spacing-2xl);
+  box-sizing: border-box;
 }
 
 .control-lift {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
 }
 
 .control-center {
@@ -77,14 +82,17 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-xl);
+  gap: var(--spacing-lg);
+  flex: 1;
+  max-width: 500px;
 }
 
 .control-momentum {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
 }
 
 /* ===================================================================
@@ -92,8 +100,8 @@
    =================================================================== */
 
 .slider-vertical-tall {
-  width: 70px;
-  height: 420px;
+  width: 64px;
+  height: 380px;
   position: relative;
   border-radius: var(--radius-lg);
   background: var(--glass-bg);
@@ -102,6 +110,14 @@
   overflow: hidden;
   box-shadow: 0 0 25px rgba(0, 212, 255, 0.4),
               inset 0 0 20px rgba(0, 212, 255, 0.1);
+  transition: all var(--transition-medium);
+}
+
+.slider-vertical-tall:hover {
+  border-color: var(--plugin-accent);
+  box-shadow: 0 0 35px rgba(0, 212, 255, 0.6),
+              inset 0 0 30px rgba(0, 212, 255, 0.2);
+  transform: scale(1.02);
 }
 
 .slider-vertical-tall::before {
