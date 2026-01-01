@@ -18,36 +18,35 @@
         </header>
 
         <main class="plugin-main">
-            <canvas id="lagrangeCanvas"></canvas>
-
-            <div class="controls-grid">
-                <!-- Stability Slider -->
-                <div class="control-col">
-                    <label class="control-label">STABILITY</label>
-                    <div class="slider-vertical" id="stabilitySlider" data-param="stability"
-                         data-help-title="STABILITY"
-                         data-help-description="Controls how strongly timing is stabilized. Higher values reduce timing drift without quantization.">
-                        <div class="slider-track"></div>
-                        <div class="slider-handle"></div>
-                    </div>
-                    <div class="value-display" id="stabilityValue">50%</div>
-                </div>
-
-                <!-- Mass Knob -->
-                <div class="control-col">
-                    <label class="control-label">MASS</label>
-                    <div class="knob-medium" id="massKnob" data-param="mass"
-                         data-help-title="MASS"
-                         data-help-description="Affects the gravitational balance between grid and human feel. Higher mass increases pull toward the grid.">
-                        <div class="knob-inner">
-                            <div class="knob-indicator"></div>
+            <!-- Left: All Controls -->
+            <div class="controls-panel">
+                <!-- Stability and Mass Sliders Side by Side -->
+                <div class="control-section-sliders">
+                    <div class="control-section">
+                        <label class="control-label">STABILITY</label>
+                        <div class="slider-vertical" id="stabilitySlider" data-param="stability"
+                             data-help-title="STABILITY"
+                             data-help-description="Controls how strongly timing is stabilized. Higher values reduce timing drift without quantization.">
+                            <div class="slider-track"></div>
+                            <div class="slider-handle"></div>
                         </div>
+                        <div class="value-display" id="stabilityValue">50%</div>
                     </div>
-                    <div class="value-display" id="massValue">50%</div>
+
+                    <div class="control-section">
+                        <label class="control-label">MASS</label>
+                        <div class="slider-vertical" id="massSlider" data-param="mass"
+                             data-help-title="MASS"
+                             data-help-description="Affects the gravitational balance between grid and human feel. Higher mass increases pull toward the grid.">
+                            <div class="slider-track"></div>
+                            <div class="slider-handle"></div>
+                        </div>
+                        <div class="value-display" id="massValue">50%</div>
+                    </div>
                 </div>
 
                 <!-- Drift Range Slider -->
-                <div class="control-col-wide">
+                <div class="control-section">
                     <label class="control-label">DRIFT RANGE</label>
                     <div class="range-slider" id="driftSlider" data-param="drift"
                          data-help-title="DRIFT RANGE"
@@ -61,7 +60,7 @@
                 </div>
 
                 <!-- Micro Chaos XY Pad -->
-                <div class="control-col">
+                <div class="control-section">
                     <label class="control-label">MICRO CHAOS</label>
                     <div class="xy-pad" id="chaosPad" data-param="microChaos"
                          data-help-title="MICRO CHAOS"
@@ -70,6 +69,11 @@
                     </div>
                     <div class="value-display" id="chaosValue">X:50 Y:50</div>
                 </div>
+            </div>
+
+            <!-- Right: Animation Canvas -->
+            <div class="animation-panel">
+                <canvas id="lagrangeCanvas"></canvas>
             </div>
         </main>
 

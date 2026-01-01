@@ -20,25 +20,10 @@ function setupLagrangeVisualization(canvas) {
       };
     };
     
-    // Get center based on Mass knob position
+    // Get center of canvas (animation is on right side now)
     const getCenter = () => {
       const size = getCanvasSize();
-      const canvasRect = canvas.getBoundingClientRect();
-      
-      // Find the Mass knob (central control)
-      const massKnob = document.getElementById('massKnob');
-      if (massKnob) {
-        const knobRect = massKnob.getBoundingClientRect();
-        const knobCenterX = knobRect.left + knobRect.width / 2 - canvasRect.left;
-        const knobCenterY = knobRect.top + knobRect.height / 2 - canvasRect.top;
-        
-        return {
-          x: knobCenterX,
-          y: knobCenterY
-        };
-      }
-      
-      // Fallback to mathematical center
+      // Center the animation in the right panel
       return {
         x: size.width / 2,
         y: size.height / 2
@@ -167,32 +152,57 @@ function setupLagrangeVisualization(canvas) {
 }
 
 function setupControls() {
-  new OrbitalsSlider(document.getElementById('stabilitySlider'), {
+  const stabilitySlider = document.getElementById('stabilitySlider');
+  new OrbitalsSlider(stabilitySlider, {
     min: 0, max: 100, value: 50,
     orientation: 'vertical',
     onChange: (v) => {
       document.getElementById('stabilityValue').textContent = Math.round(v) + '%';
+      // Ensure CSS variable is set for fill
+      const percent = (v - 0) / (100 - 0);
+      stabilitySlider.style.setProperty('--slider-value', percent);
       if (window.updateStabilityValue) window.updateStabilityValue(v);
       sendToJUCE('stability', v);
     }
   });
+  // Set initial CSS variable
+  stabilitySlider.style.setProperty('--slider-value', 0.5);
   
-  new OrbitalsKnob(document.getElementById('massKnob'), {
+  const massSlider = document.getElementById('massSlider');
+  new OrbitalsSlider(massSlider, {
     min: 0, max: 100, value: 50,
+    orientation: 'vertical',
     onChange: (v) => {
       document.getElementById('massValue').textContent = Math.round(v) + '%';
+      // Ensure CSS variable is set for fill
+      const percent = (v - 0) / (100 - 0);
+      massSlider.style.setProperty('--slider-value', percent);
       if (window.updateMassValue) window.updateMassValue(v);
       sendToJUCE('mass', v);
     }
   });
+  // Set initial CSS variable
+  massSlider.style.setProperty('--slider-value', 0.5);
   
-  new OrbitalsRangeSlider(document.getElementById('driftSlider'), {
+  const driftSlider = document.getElementById('driftSlider');
+  new OrbitalsRangeSlider(driftSlider, {
     min: -50, max: 50, valueMin: -25, valueMax: 25,
     onChange: (min, max) => {
       document.getElementById('driftValue').textContent = `${Math.round(min)}ms to ${Math.round(max)}ms`;
+      
+      // Update CSS variables for fill visualization
+      const percentMin = (min - (-50)) / (50 - (-50));
+      const percentMax = (max - (-50)) / (50 - (-50));
+      driftSlider.style.setProperty('--range-min', `${percentMin * 100}%`);
+      driftSlider.style.setProperty('--range-max', `${percentMax * 100}%`);
+      
       sendToJUCE('drift', { min, max });
     }
   });
+  
+  // Set initial CSS variables
+  driftSlider.style.setProperty('--range-min', '25%');
+  driftSlider.style.setProperty('--range-max', '75%');
   
   new OrbitalsXYPad(document.getElementById('chaosPad'), {
     minX: 0, maxX: 100, minY: 0, maxY: 100,
