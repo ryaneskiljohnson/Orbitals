@@ -146,15 +146,21 @@ body, html {
    =================================================================== */
 
 .orbitals-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 120px 1fr 40px;
   align-items: center;
-  justify-content: space-between;
   padding: var(--spacing-md) var(--spacing-lg);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--glass-border);
   z-index: var(--z-header);
   position: relative;
+}
+
+.orbitals-header h1 {
+  grid-column: 2;
+  justify-self: center;
+  text-align: center;
 }
 
 .orbitals-logo {
@@ -171,6 +177,7 @@ body, html {
   opacity: 0.9;
   cursor: pointer;
   position: relative;
+  grid-column: 1;
 }
 
 .orbitals-logo:hover {
@@ -229,6 +236,8 @@ body, html {
   line-height: 1;
   padding: 0;
   margin: 0;
+  grid-column: 3;
+  justify-self: end;
 }
 
 .help-toggle::before {
