@@ -1,14 +1,286 @@
+/**
+ * @fileoverview Apogee - Velocity & Energy Booster Styles
+ * @module Apogee Styles
+ * 
+ * Ascending arc theme with trajectory-based velocity boosting
+ * Aspect Ratio: 16:10 (1200x750)
+ */
+
+/* ===================================================================
+   APOGEE THEME VARIABLES
+   =================================================================== */
+
 .apogee-theme {
-  --plugin-primary: #00d4ff;
-  --plugin-secondary: #0094ff;
-  --plugin-accent: #ffffff;
+  --plugin-primary: #00d4ff;      /* Orbit Cyan */
+  --plugin-secondary: #0094ff;    /* Stellar Blue */
+  --plugin-accent: #ffffff;       /* Peak White */
   --plugin-glow: rgba(0, 212, 255, 0.7);
+  
+  /* Enhanced ascent theme */
+  --apogee-peak: #ffffff;
+  --trajectory-line: rgba(0, 212, 255, 0.5);
+  --boost-glow: rgba(0, 212, 255, 0.8);
+  
+  /* Enhanced gradients */
+  --ascent-gradient: linear-gradient(180deg, #ffffff 0%, #00d4ff 40%, #0094ff 100%);
+  --trajectory-gradient: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.2) 0%, rgba(0, 212, 255, 0.1) 50%, transparent 100%);
 }
-#trajectoryCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-.controls-layout { position: relative; z-index: 10; display: flex; gap: var(--spacing-2xl); 
-  align-items: center; justify-content: center; width: 100%; height: 100%; padding: var(--spacing-xl); }
-.control-lift, .control-momentum { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-md); }
-.control-center { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-lg); flex: 1; }
-.curve-selector button.active { background: var(--plugin-primary); color: var(--space-black); }
-.slider-horizontal-limiter { width: 300px; height: 40px; background: var(--glass-bg); 
-  border: 2px solid var(--glass-border); border-radius: var(--radius-md); position: relative; }
+
+/* ===================================================================
+   APOGEE CANVAS
+   =================================================================== */
+
+#trajectoryCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at top center, rgba(0, 30, 50, 0.3) 0%, transparent 60%);
+}
+
+/* ===================================================================
+   CONTROLS LAYOUT (Optimized for 1200x750)
+   =================================================================== */
+
+.controls-layout {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: 1fr;
+  gap: var(--spacing-3xl);
+  width: 100%;
+  height: 100%;
+  padding: var(--spacing-3xl);
+  align-items: center;
+}
+
+.control-lift {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.control-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xl);
+}
+
+.control-momentum {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* ===================================================================
+   LIFT SLIDER (Vertical)
+   =================================================================== */
+
+.slider-vertical-tall {
+  width: 70px;
+  height: 420px;
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 3px solid var(--plugin-primary);
+  overflow: hidden;
+  box-shadow: 0 0 25px rgba(0, 212, 255, 0.4),
+              inset 0 0 20px rgba(0, 212, 255, 0.1);
+}
+
+.slider-vertical-tall::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: linear-gradient(to top,
+    var(--plugin-secondary) 0%,
+    var(--plugin-primary) 50%,
+    var(--apogee-peak) 100%
+  );
+  opacity: 0.3;
+  transition: height 0.2s ease;
+}
+
+/* ===================================================================
+   MOMENTUM KNOB (Large)
+   =================================================================== */
+
+.knob-large {
+  width: 170px;
+  height: 170px;
+  position: relative;
+  cursor: ns-resize;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.25), rgba(0, 212, 255, 0.15) 50%, rgba(0, 148, 255, 0.05) 80%, transparent),
+              var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 4px solid var(--plugin-primary);
+  box-shadow: 0 0 40px var(--plugin-glow),
+              0 0 65px rgba(0, 212, 255, 0.4),
+              inset 0 0 30px rgba(255, 255, 255, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.knob-large:hover {
+  transform: scale(1.08);
+  border-color: var(--apogee-peak);
+  box-shadow: 0 0 50px var(--plugin-glow),
+              0 0 85px rgba(0, 212, 255, 0.6),
+              inset 0 0 40px rgba(255, 255, 255, 0.25);
+}
+
+.knob-large::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 44%;
+  background: linear-gradient(to bottom, #ffffff, var(--plugin-primary), transparent);
+  border-radius: 3px;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.9),
+              0 0 25px rgba(0, 212, 255, 0.6);
+  transform-origin: bottom center;
+}
+
+/* ===================================================================
+   CEILING SLIDER (Horizontal Limiter)
+   =================================================================== */
+
+.slider-horizontal-limiter {
+  width: 400px;
+  height: 60px;
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--plugin-primary);
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3),
+              inset 0 0 15px rgba(0, 212, 255, 0.1);
+}
+
+.slider-horizontal-limiter::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 80%;
+  height: 100%;
+  background: linear-gradient(to right,
+    var(--plugin-secondary) 0%,
+    var(--plugin-primary) 70%,
+    var(--apogee-peak) 100%
+  );
+  opacity: 0.3;
+  transition: width 0.2s ease;
+}
+
+/* ===================================================================
+   CURVE SELECTOR
+   =================================================================== */
+
+.curve-selector {
+  display: flex;
+  gap: var(--spacing-xs);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--plugin-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xs);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+.curve-selector button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--comet-white);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.curve-selector button:hover {
+  background: rgba(0, 212, 255, 0.15);
+  border-color: var(--plugin-primary);
+}
+
+.curve-selector button.active {
+  background: var(--plugin-primary);
+  color: var(--space-black);
+  border-color: var(--plugin-primary);
+  box-shadow: 0 0 15px var(--plugin-glow),
+              inset 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* ===================================================================
+   VELOCITY METER DUAL
+   =================================================================== */
+
+.velocity-meter-dual {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.velocity-meter-dual::before,
+.velocity-meter-dual::after {
+  content: '';
+  width: 150px;
+  height: 24px;
+  background: var(--glass-bg-dark);
+  border: 2px solid var(--plugin-primary);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 15px rgba(0, 212, 255, 0.1);
+}
+
+/* ===================================================================
+   VALUE DISPLAYS
+   =================================================================== */
+
+.value-display {
+  background: var(--glass-bg-dark);
+  border: 1px solid var(--plugin-primary);
+  box-shadow: 0 0 10px var(--plugin-glow);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--plugin-secondary);
+  text-align: center;
+  min-width: 70px;
+}
+
+/* ===================================================================
+   ANIMATIONS
+   =================================================================== */
+
+@keyframes ascent-pulse {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 50px rgba(0, 212, 255, 0.7);
+  }
+}
+
+.knob-large {
+  animation: ascent-pulse 2.5s ease-in-out infinite;
+}

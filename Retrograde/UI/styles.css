@@ -1,16 +1,279 @@
+/**
+ * @fileoverview Retrograde - MIDI Motion Reversal Styles
+ * @module Retrograde Styles
+ * 
+ * Reverse orbit theme with purple/magenta gradients
+ * Aspect Ratio: 16:10 (1200x750)
+ */
+
+/* ===================================================================
+   RETROGRADE THEME VARIABLES
+   =================================================================== */
+
 .retrograde-theme {
-  --plugin-primary: #6b2fb5;
-  --plugin-secondary: #a855f7;
-  --plugin-accent: #ec4899;
+  --plugin-primary: #6b2fb5;      /* Nebula Purple */
+  --plugin-secondary: #a855f7;    /* Bright Magenta */
+  --plugin-accent: #ec4899;       /* Pink Accent */
   --plugin-glow: rgba(168, 85, 247, 0.6);
+  
+  /* Enhanced reverse theme */
+  --retrograde-dark: #1a0a20;
+  --reverse-trail: rgba(168, 85, 247, 0.4);
+  --inversion-glow: rgba(236, 72, 153, 0.5);
+  
+  /* Enhanced gradients */
+  --reverse-gradient: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #6b2fb5 100%);
+  --nebula-gradient: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(107, 47, 181, 0.15) 50%, transparent 100%);
 }
-#retrogradeCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-.controls-retrograde { position: relative; z-index: 10; display: flex; flex-direction: column; 
-  gap: var(--spacing-2xl); align-items: center; justify-content: center; width: 100%; height: 100%; }
-.control-row { display: flex; gap: var(--spacing-2xl); align-items: center; }
-.control-scope, .control-symmetry, .control-echo { display: flex; flex-direction: column; 
-  align-items: center; gap: var(--spacing-md); }
-.knob-ringed { width: 100px; height: 100px; border-radius: 50%; background: var(--glass-bg); 
-  border: 3px solid var(--plugin-primary); box-shadow: 0 0 20px var(--plugin-glow), 
-  inset 0 0 30px rgba(107, 47, 181, 0.3); position: relative; }
-.direction-indicator { font-size: 24px; color: var(--plugin-primary); animation: pulse 2s infinite; }
+
+/* ===================================================================
+   RETROGRADE CANVAS
+   =================================================================== */
+
+#retrogradeCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(26, 10, 32, 0.4) 0%, transparent 70%);
+}
+
+/* ===================================================================
+   CONTROLS LAYOUT (Optimized for 1200x750)
+   =================================================================== */
+
+.controls-reverse {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto 1fr auto;
+  gap: var(--spacing-3xl);
+  width: 100%;
+  height: 100%;
+  padding: var(--spacing-3xl);
+  align-items: center;
+}
+
+.control-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.control-section-center {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xl);
+}
+
+.control-section-wide {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* ===================================================================
+   REVERSE MODE SELECTOR
+   =================================================================== */
+
+.mode-selector {
+  display: flex;
+  gap: var(--spacing-sm);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--plugin-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+}
+
+.mode-selector button {
+  padding: var(--spacing-md) var(--spacing-xl);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--comet-white);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.mode-selector button:hover {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: var(--plugin-primary);
+}
+
+.mode-selector button.active {
+  background: var(--plugin-primary);
+  color: var(--space-black);
+  border-color: var(--plugin-secondary);
+  box-shadow: 0 0 20px var(--plugin-glow),
+              inset 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+/* ===================================================================
+   DEPTH KNOB (Large Central Control)
+   =================================================================== */
+
+.depth-knob {
+  width: 180px;
+  height: 180px;
+  position: relative;
+  cursor: ns-resize;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.2) 50%, rgba(107, 47, 181, 0.1) 80%, transparent),
+              var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 5px solid var(--plugin-primary);
+  box-shadow: 0 0 45px var(--plugin-glow),
+              0 0 75px rgba(168, 85, 247, 0.4),
+              inset 0 0 35px rgba(236, 72, 153, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.depth-knob:hover {
+  transform: scale(1.08);
+  border-color: var(--plugin-secondary);
+  box-shadow: 0 0 55px var(--plugin-glow),
+              0 0 95px rgba(168, 85, 247, 0.6),
+              inset 0 0 45px rgba(236, 72, 153, 0.3);
+}
+
+.depth-knob::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 44%;
+  background: linear-gradient(to bottom, #ffffff, var(--plugin-accent), transparent);
+  border-radius: 3px;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.9),
+              0 0 25px rgba(236, 72, 153, 0.7);
+  transform-origin: bottom center;
+}
+
+/* Rotating rings animation */
+.depth-knob::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  border: 2px solid var(--plugin-secondary);
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: reverse-rotate 8s linear infinite;
+}
+
+@keyframes reverse-rotate {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+/* ===================================================================
+   TIME WINDOW SLIDER
+   =================================================================== */
+
+.time-window-slider {
+  width: 500px;
+  height: 70px;
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--plugin-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3),
+              inset 0 0 15px rgba(168, 85, 247, 0.1);
+}
+
+.time-window-slider .slider-track {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 10px;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+}
+
+.time-window-slider .slider-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 56px;
+  background: linear-gradient(180deg, var(--plugin-accent), var(--plugin-primary));
+  border: 3px solid white;
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 25px var(--plugin-glow),
+              0 4px 15px rgba(0, 0, 0, 0.5);
+  cursor: ew-resize;
+  transition: all 0.3s ease;
+}
+
+.time-window-slider .slider-handle:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 0 35px var(--plugin-glow),
+              0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* ===================================================================
+   VALUE DISPLAYS
+   =================================================================== */
+
+.value-display {
+  background: var(--glass-bg-dark);
+  border: 1px solid var(--plugin-primary);
+  box-shadow: 0 0 10px var(--plugin-glow);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--plugin-secondary);
+  text-align: center;
+  min-width: 70px;
+}
+
+.value-display.large {
+  font-size: var(--font-size-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  min-width: 90px;
+}
+
+/* ===================================================================
+   ANIMATIONS
+   =================================================================== */
+
+@keyframes retrograde-pulse {
+  0%, 100% {
+    box-shadow: 0 0 35px rgba(168, 85, 247, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 60px rgba(168, 85, 247, 0.7);
+  }
+}
+
+.depth-knob {
+  animation: retrograde-pulse 3s ease-in-out infinite;
+}

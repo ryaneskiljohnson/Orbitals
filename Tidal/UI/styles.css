@@ -1,15 +1,284 @@
+/**
+ * @fileoverview Tidal - Rhythmic Push & Pull Styles
+ * @module Tidal Styles
+ * 
+ * Ocean wave theme with cyclic timing modulation
+ * Aspect Ratio: 16:10 (1200x750)
+ */
+
+/* ===================================================================
+   TIDAL THEME VARIABLES
+   =================================================================== */
+
 .tidal-theme {
-  --plugin-primary: #1e40af;
-  --plugin-secondary: #3b82f6;
-  --plugin-accent: #cbd5e1;
-  --plugin-glow: rgba(59, 130, 246, 0.5);
+  --plugin-primary: #1e40af;      /* Deep Ocean Blue */
+  --plugin-secondary: #3b82f6;    /* Wave Blue */
+  --plugin-accent: #cbd5e1;       /* Lunar Silver */
+  --plugin-glow: rgba(59, 130, 246, 0.6);
+  
+  /* Enhanced wave theme */
+  --tidal-deep: #0c1e3f;
+  --wave-crest: #60a5fa;
+  --lunar-glow: rgba(203, 213, 225, 0.5);
+  
+  /* Enhanced gradients */
+  --wave-gradient: linear-gradient(180deg, #cbd5e1 0%, #3b82f6 30%, #1e40af 100%);
+  --ocean-gradient: radial-gradient(ellipse at bottom, rgba(30, 64, 175, 0.3) 0%, rgba(12, 30, 63, 0.2) 50%, transparent 100%);
 }
-#tidalCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-.controls-tidal { position: relative; z-index: 10; display: flex; flex-direction: column;
-  gap: var(--spacing-xl); align-items: center; justify-content: center; width: 100%; height: 100%; }
-.control-row-center { display: flex; gap: var(--spacing-2xl); align-items: center; }
-.control-phase, .control-strength, .control-flow { display: flex; flex-direction: column;
-  align-items: center; gap: var(--spacing-md); }
-.knob-large-wave { width: 140px; height: 140px; border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%, #3b82f6, #1e40af); border: 4px solid var(--plugin-primary);
-  box-shadow: 0 0 30px var(--plugin-glow), inset 0 0 40px rgba(59, 130, 246, 0.3); }
+
+/* ===================================================================
+   TIDAL CANVAS
+   =================================================================== */
+
+#tidalCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at bottom center, rgba(12, 30, 63, 0.4) 0%, transparent 70%);
+}
+
+/* ===================================================================
+   CONTROLS LAYOUT (Optimized for 1200x750)
+   =================================================================== */
+
+.controls-wave {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--spacing-3xl);
+  width: 100%;
+  height: 100%;
+  padding: var(--spacing-3xl);
+  align-items: center;
+}
+
+.control-wave-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.control-wave-center {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xl);
+}
+
+.control-wave-wide {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* ===================================================================
+   AMPLITUDE KNOB (Large)
+   =================================================================== */
+
+.amplitude-knob {
+  width: 170px;
+  height: 170px;
+  position: relative;
+  cursor: ns-resize;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(203, 213, 225, 0.25), rgba(59, 130, 246, 0.15) 50%, rgba(30, 64, 175, 0.1) 80%, transparent),
+              var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 5px solid var(--plugin-primary);
+  box-shadow: 0 0 40px var(--plugin-glow),
+              0 0 70px rgba(59, 130, 246, 0.4),
+              inset 0 0 30px rgba(203, 213, 225, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.amplitude-knob:hover {
+  transform: scale(1.08);
+  border-color: var(--wave-crest);
+  box-shadow: 0 0 50px var(--plugin-glow),
+              0 0 90px rgba(59, 130, 246, 0.6),
+              inset 0 0 40px rgba(203, 213, 225, 0.25);
+}
+
+.amplitude-knob::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 44%;
+  background: linear-gradient(to bottom, #ffffff, var(--wave-crest), transparent);
+  border-radius: 3px;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.9),
+              0 0 25px rgba(96, 165, 250, 0.6);
+  transform-origin: bottom center;
+}
+
+/* Lunar rings */
+.amplitude-knob::after {
+  content: '';
+  position: absolute;
+  top: -25px;
+  left: -25px;
+  right: -25px;
+  bottom: -25px;
+  border: 2px solid var(--plugin-accent);
+  border-radius: 50%;
+  opacity: 0.2;
+  animation: lunar-pulse 4s ease-in-out infinite;
+}
+
+@keyframes lunar-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.4;
+  }
+}
+
+/* ===================================================================
+   WAVE SHAPE DISPLAY
+   =================================================================== */
+
+.wave-shape-display {
+  width: 500px;
+  height: 150px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 3px solid var(--plugin-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.3),
+              inset 0 0 20px rgba(59, 130, 246, 0.1);
+  position: relative;
+}
+
+.wave-shape-display canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* ===================================================================
+   TEMPO SYNC SELECTOR
+   =================================================================== */
+
+.tempo-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-xs);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--plugin-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xs);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+}
+
+.tempo-selector button {
+  padding: var(--spacing-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--comet-white);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tempo-selector button:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--plugin-primary);
+}
+
+.tempo-selector button.active {
+  background: var(--plugin-primary);
+  color: white;
+  border-color: var(--plugin-secondary);
+  box-shadow: 0 0 12px var(--plugin-glow);
+}
+
+/* ===================================================================
+   PHASE SLIDER
+   =================================================================== */
+
+.phase-slider {
+  width: 400px;
+  height: 60px;
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--plugin-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.phase-slider .slider-handle {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 52px;
+  background: linear-gradient(180deg, var(--plugin-accent), var(--plugin-secondary));
+  border: 3px solid white;
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 25px var(--plugin-glow),
+              0 4px 15px rgba(0, 0, 0, 0.5);
+  cursor: ew-resize;
+  transition: all 0.3s ease;
+}
+
+.phase-slider .slider-handle:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* ===================================================================
+   VALUE DISPLAYS
+   =================================================================== */
+
+.value-display {
+  background: var(--glass-bg-dark);
+  border: 1px solid var(--plugin-primary);
+  box-shadow: 0 0 10px var(--plugin-glow);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--plugin-secondary);
+  text-align: center;
+  min-width: 70px;
+}
+
+/* ===================================================================
+   ANIMATIONS
+   =================================================================== */
+
+@keyframes tidal-flow {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 50px rgba(59, 130, 246, 0.7);
+  }
+}
+
+.amplitude-knob {
+  animation: tidal-flow 3.5s ease-in-out infinite;
+}

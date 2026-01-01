@@ -12,7 +12,7 @@
 //==============================================================================
 MainComponent::MainComponent()
 {
-    setSize (1000, 800);
+    setSize (1200, 750);
     setVisible (true);
     setOpaque (true);
     

@@ -1,9 +1,34 @@
+/**
+ * @fileoverview Lagrange - Timing Stabilizer Styles
+ * @module Lagrange Styles
+ * 
+ * Equilibrium-themed timing stabilization with Lagrange point visualization
+ * Aspect Ratio: 16:10 (1200x750)
+ */
+
+/* ===================================================================
+   LAGRANGE THEME VARIABLES
+   =================================================================== */
+
 .lagrange-theme {
-  --plugin-primary: #0094ff;
-  --plugin-secondary: #00d4ff;
-  --plugin-accent: #6b2fb5;
-  --plugin-glow: rgba(0, 212, 255, 0.5);
+  --plugin-primary: #0094ff;      /* Stellar Blue */
+  --plugin-secondary: #00d4ff;    /* Orbit Cyan */
+  --plugin-accent: #6b2fb5;       /* Nebula Purple */
+  --plugin-glow: rgba(0, 212, 255, 0.6);
+  
+  /* Enhanced equilibrium theme */
+  --lagrange-point: #00d4ff;
+  --balance-line: rgba(0, 212, 255, 0.4);
+  --equilibrium-glow: rgba(107, 47, 181, 0.5);
+  
+  /* Enhanced gradients */
+  --stellar-gradient: linear-gradient(135deg, #00d4ff 0%, #0094ff 50%, #6b2fb5 100%);
+  --balance-gradient: radial-gradient(ellipse at center, rgba(0, 212, 255, 0.2) 0%, rgba(0, 148, 255, 0.1) 50%, transparent 100%);
 }
+
+/* ===================================================================
+   LAGRANGE CANVAS
+   =================================================================== */
 
 #lagrangeCanvas {
   position: absolute;
@@ -12,17 +37,25 @@
   width: 100%;
   height: 100%;
   z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(0, 20, 40, 0.4) 0%, transparent 70%);
 }
+
+/* ===================================================================
+   CONTROLS LAYOUT (Optimized for 1200x750)
+   =================================================================== */
 
 .controls-grid {
   position: relative;
   z-index: 10;
-  display: flex;
-  gap: var(--spacing-2xl);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-3xl);
   align-items: center;
-  justify-content: center;
+  justify-items: center;
   width: 100%;
   height: 100%;
+  padding: var(--spacing-3xl);
 }
 
 .control-col {
@@ -33,28 +66,271 @@
 }
 
 .control-col-wide {
+  grid-column: span 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-md);
-  flex: 1;
-  max-width: 400px;
+  width: 100%;
+  max-width: 500px;
 }
+
+/* ===================================================================
+   MEDIUM KNOB (Mass Control)
+   =================================================================== */
+
+.knob-medium {
+  width: 140px;
+  height: 140px;
+  position: relative;
+  cursor: ns-resize;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(0, 212, 255, 0.2), rgba(0, 148, 255, 0.1) 60%, transparent),
+              var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 4px solid var(--plugin-primary);
+  box-shadow: 0 0 35px var(--plugin-glow),
+              0 0 55px rgba(0, 212, 255, 0.3),
+              inset 0 0 25px rgba(0, 212, 255, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.knob-medium:hover {
+  transform: scale(1.08);
+  border-color: var(--plugin-secondary);
+  box-shadow: 0 0 45px var(--plugin-glow),
+              0 0 75px rgba(0, 212, 255, 0.5),
+              inset 0 0 35px rgba(0, 212, 255, 0.25);
+}
+
+.knob-medium::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 40%;
+  background: linear-gradient(to bottom, #ffffff, var(--plugin-secondary), transparent);
+  border-radius: 3px;
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.8),
+              0 0 20px rgba(0, 148, 255, 0.4);
+  transform-origin: bottom center;
+}
+
+/* ===================================================================
+   VERTICAL SLIDER (Stability)
+   =================================================================== */
+
+.slider-vertical {
+  width: 60px;
+  height: 350px;
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--plugin-primary);
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3),
+              inset 0 0 15px rgba(0, 148, 255, 0.1);
+}
+
+.slider-vertical::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: linear-gradient(to top,
+    var(--plugin-primary) 0%,
+    var(--plugin-secondary) 100%
+  );
+  opacity: 0.4;
+  transition: height 0.2s ease;
+}
+
+/* ===================================================================
+   RANGE SLIDER (Drift Control)
+   =================================================================== */
 
 .range-slider {
   width: 100%;
-  height: 50px;
+  height: 60px;
   position: relative;
   background: var(--glass-bg);
-  border: 2px solid var(--glass-border);
-  border-radius: var(--radius-md);
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--plugin-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3),
+              inset 0 0 15px rgba(0, 148, 255, 0.1);
 }
 
-.timing-meter {
-  width: 200px;
-  height: 30px;
+.range-slider-track {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 8px;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+}
+
+.range-slider-range {
+  position: absolute;
+  top: 50%;
+  left: 25%;
+  width: 50%;
+  height: 12px;
+  transform: translateY(-50%);
+  background: linear-gradient(to right, var(--plugin-primary), var(--plugin-secondary));
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 15px var(--plugin-glow);
+  transition: all 0.2s ease;
+}
+
+.range-slider-handle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 48px;
+  background: linear-gradient(180deg, var(--plugin-secondary), var(--plugin-primary));
+  border: 3px solid white;
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 20px var(--plugin-glow),
+              0 4px 12px rgba(0, 0, 0, 0.4);
+  cursor: ew-resize;
+  transition: all 0.3s ease;
+}
+
+.range-slider-handle:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 0 30px var(--plugin-glow),
+              0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.range-handle-min {
+  left: 25%;
+}
+
+.range-handle-max {
+  left: 75%;
+}
+
+/* ===================================================================
+   XY PAD (Micro Chaos)
+   =================================================================== */
+
+.xy-pad {
+  width: 180px;
+  height: 180px;
+  position: relative;
   background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 3px solid var(--plugin-primary);
+  border-radius: var(--radius-lg);
+  cursor: crosshair;
+  overflow: hidden;
+  box-shadow: 0 0 25px rgba(0, 212, 255, 0.3),
+              inset 0 0 20px rgba(0, 148, 255, 0.1);
+}
+
+/* Crosshairs */
+.xy-pad::before,
+.xy-pad::after {
+  content: '';
+  position: absolute;
+  background: rgba(0, 212, 255, 0.3);
+}
+
+.xy-pad::before {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.xy-pad::after {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+}
+
+.xy-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, white, var(--plugin-secondary));
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 20px var(--plugin-glow),
+              0 0 35px rgba(0, 212, 255, 0.5);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* ===================================================================
+   TIMING METER
+   =================================================================== */
+
+.timing-meter {
+  width: 300px;
+  height: 30px;
+  background: var(--glass-bg-dark);
   border: 2px solid var(--plugin-primary);
   border-radius: var(--radius-md);
-  box-shadow: 0 0 15px var(--plugin-glow);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 15px rgba(0, 148, 255, 0.2);
+}
+
+.timing-meter::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--plugin-secondary);
+  box-shadow: 0 0 10px var(--plugin-glow);
+}
+
+/* ===================================================================
+   VALUE DISPLAYS
+   =================================================================== */
+
+.value-display {
+  background: var(--glass-bg-dark);
+  border: 1px solid var(--plugin-primary);
+  box-shadow: 0 0 10px var(--plugin-glow);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--plugin-secondary);
+  text-align: center;
+  min-width: 70px;
+}
+
+/* ===================================================================
+   ANIMATIONS
+   =================================================================== */
+
+@keyframes equilibrium-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(0, 212, 255, 0.6);
+  }
+}
+
+.xy-pad {
+  animation: equilibrium-pulse 3s ease-in-out infinite;
 }

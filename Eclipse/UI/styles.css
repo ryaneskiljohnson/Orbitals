@@ -1,35 +1,302 @@
+/**
+ * @fileoverview Eclipse - Velocity Masking Styles
+ * @module Eclipse Styles
+ * 
+ * Solar eclipse theme with black/gold contrast and shadow masking
+ * Aspect Ratio: 16:10 (1200x750)
+ */
+
+/* ===================================================================
+   ECLIPSE THEME VARIABLES
+   =================================================================== */
+
 .eclipse-theme {
-  --plugin-primary: #000000;
-  --plugin-secondary: #fbbf24;
-  --plugin-accent: #78716c;
-  --plugin-glow: rgba(251, 191, 36, 0.8);
+  --plugin-primary: #000000;      /* Eclipse Black */
+  --plugin-secondary: #fbbf24;    /* Corona Gold */
+  --plugin-accent: #78716c;       /* Shadow Gray */
+  --plugin-glow: rgba(251, 191, 36, 0.7);
+  
+  /* Enhanced eclipse theme */
+  --corona-bright: #fef3c7;
+  --umbra-dark: #0a0a0a;
+  --penumbra: rgba(120, 113, 108, 0.5);
+  
+  /* Enhanced gradients */
+  --eclipse-gradient: radial-gradient(circle, #000000 30%, #fbbf24 31%, #fef3c7 32%, transparent 50%);
+  --corona-gradient: radial-gradient(circle, transparent 40%, #fbbf24 70%, #fef3c7 85%, transparent 100%);
 }
-#eclipseCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-.controls-eclipse { position: relative; z-index: 10; display: flex; gap: var(--spacing-2xl);
-  align-items: center; justify-content: center; width: 100%; height: 100%; }
-.control-threshold, .control-invert { display: flex; flex-direction: column;
-  align-items: center; gap: var(--spacing-md); }
-.control-center-col { display: flex; flex-direction: column; align-items: center;
-  gap: var(--spacing-xl); }
-.slider-vertical-shadow { width: 60px; height: 350px; background: var(--glass-bg);
-  border: 2px solid var(--plugin-secondary); border-radius: var(--radius-lg);
-  box-shadow: 0 0 20px var(--plugin-glow); position: relative; overflow: hidden; }
-.slider-vertical-shadow::before { content: ''; position: absolute; top: 0; left: 0;
-  width: 100%; height: 50%; background: linear-gradient(to bottom, #fbbf24, rgba(251, 191, 36, 0));
-  opacity: 0.5; }
-.slider-vertical-shadow::after { content: ''; position: absolute; bottom: 0; left: 0;
-  width: 100%; height: 50%; background: linear-gradient(to top, #000000, rgba(0, 0, 0, 0));
-  opacity: 0.7; }
-.knob-phantom { width: 100px; height: 100px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(120, 113, 108, 0.8), rgba(120, 113, 108, 0.3));
-  border: 3px solid var(--plugin-accent); opacity: 0.7;
-  box-shadow: 0 0 20px rgba(120, 113, 108, 0.5); }
-.toggle-switch-eclipse { display: flex; gap: var(--spacing-sm); }
-.toggle-switch-eclipse span { padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--glass-bg); border: 2px solid var(--glass-border);
-  border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast); }
-.toggle-switch-eclipse span.active { background: var(--plugin-secondary);
-  color: var(--space-black); border-color: var(--plugin-secondary);
-  box-shadow: 0 0 15px var(--plugin-glow); }
-.velocity-histogram { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
-  width: 400px; height: 60px; display: flex; gap: 2px; align-items: flex-end; z-index: 5; }
+
+/* ===================================================================
+   ECLIPSE CANVAS
+   =================================================================== */
+
+#eclipseCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(10, 10, 10, 0.6) 0%, transparent 60%);
+}
+
+/* ===================================================================
+   CONTROLS LAYOUT (Optimized for 1200x750)
+   =================================================================== */
+
+.controls-eclipse {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--spacing-3xl);
+  width: 100%;
+  height: 100%;
+  padding: var(--spacing-3xl);
+  align-items: center;
+}
+
+.control-eclipse-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.control-eclipse-center {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xl);
+}
+
+.control-eclipse-wide {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* ===================================================================
+   TOTALITY KNOB (Large Central)
+   =================================================================== */
+
+.totality-knob {
+  width: 180px;
+  height: 180px;
+  position: relative;
+  cursor: ns-resize;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, #000000 0%, #1a1a1a 40%, #2a2a2a 70%, transparent),
+              var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 5px solid var(--plugin-secondary);
+  box-shadow: 0 0 50px var(--plugin-glow),
+              0 0 80px rgba(251, 191, 36, 0.5),
+              inset 0 0 40px rgba(0, 0, 0, 0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible;
+}
+
+/* Corona effect */
+.totality-knob::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  background: radial-gradient(circle,
+    transparent 45%,
+    rgba(251, 191, 36, 0.3) 48%,
+    rgba(254, 243, 199, 0.5) 50%,
+    rgba(251, 191, 36, 0.2) 52%,
+    transparent 55%
+  );
+  border-radius: 50%;
+  animation: corona-flare 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes corona-flare {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+.totality-knob:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 60px var(--plugin-glow),
+              0 0 100px rgba(251, 191, 36, 0.7),
+              inset 0 0 50px rgba(0, 0, 0, 0.9);
+}
+
+.totality-knob::after {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 44%;
+  background: linear-gradient(to bottom, var(--corona-bright), var(--plugin-secondary), transparent);
+  border-radius: 3px;
+  box-shadow: 0 0 20px rgba(254, 243, 199, 1),
+              0 0 35px rgba(251, 191, 36, 0.8);
+  transform-origin: bottom center;
+}
+
+/* ===================================================================
+   SHADOW ZONE RANGE SLIDER
+   =================================================================== */
+
+.shadow-zone-slider {
+  width: 700px;
+  height: 80px;
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 3px solid var(--plugin-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 0 25px rgba(251, 191, 36, 0.3),
+              inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.shadow-zone-slider .zone-track {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 12px;
+  transform: translateY(-50%);
+  background: linear-gradient(to right,
+    #000000 0%,
+    var(--plugin-accent) 30%,
+    var(--plugin-secondary) 70%,
+    var(--corona-bright) 100%
+  );
+  border-radius: var(--radius-full);
+  opacity: 0.6;
+}
+
+.shadow-zone-slider .zone-range {
+  position: absolute;
+  top: 50%;
+  left: 30%;
+  width: 40%;
+  height: 16px;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid var(--plugin-secondary);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 20px var(--plugin-glow),
+              inset 0 0 15px rgba(251, 191, 36, 0.2);
+}
+
+.shadow-zone-slider .zone-handle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 60px;
+  background: linear-gradient(180deg, var(--corona-bright), var(--plugin-secondary), #000000);
+  border: 3px solid var(--plugin-secondary);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 25px var(--plugin-glow),
+              0 4px 15px rgba(0, 0, 0, 0.6);
+  cursor: ew-resize;
+  transition: all 0.3s ease;
+}
+
+.shadow-zone-slider .zone-handle:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.zone-handle-min {
+  left: 30%;
+}
+
+.zone-handle-max {
+  left: 70%;
+}
+
+/* ===================================================================
+   UMBRA/PENUMBRA CONTROLS
+   =================================================================== */
+
+.umbra-control,
+.penumbra-control {
+  width: 140px;
+  height: 140px;
+  position: relative;
+  cursor: ns-resize;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 4px solid var(--plugin-secondary);
+  box-shadow: 0 0 30px rgba(251, 191, 36, 0.3),
+              inset 0 0 25px rgba(0, 0, 0, 0.6);
+  transition: all 0.3s ease;
+}
+
+.umbra-control {
+  background: radial-gradient(circle, #000000 0%, #1a1a1a 60%, transparent),
+              var(--glass-bg);
+}
+
+.penumbra-control {
+  background: radial-gradient(circle, var(--plugin-accent) 0%, rgba(120, 113, 108, 0.3) 60%, transparent),
+              var(--glass-bg);
+}
+
+.umbra-control:hover,
+.penumbra-control:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 40px rgba(251, 191, 36, 0.5);
+}
+
+/* ===================================================================
+   VALUE DISPLAYS
+   =================================================================== */
+
+.value-display {
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--plugin-secondary);
+  box-shadow: 0 0 10px var(--plugin-glow);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--plugin-secondary);
+  text-align: center;
+  min-width: 70px;
+}
+
+/* ===================================================================
+   ANIMATIONS
+   =================================================================== */
+
+@keyframes eclipse-pulse {
+  0%, 100% {
+    box-shadow: 0 0 40px rgba(251, 191, 36, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 70px rgba(251, 191, 36, 0.8);
+  }
+}
+
+.totality-knob {
+  animation: eclipse-pulse 4s ease-in-out infinite;
+}
