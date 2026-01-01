@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Eclipse</title>
+
+<link rel="stylesheet" href="../../_Shared/UI/orbitals-design-system.css">
+    <link rel="stylesheet" href="styles.css"></head>
+<body><div class="plugin-container eclipse-theme">
+<header class="orbitals-header"><div class="orbitals-logo" title="NNAudio"></div><h1>ECLIPSE</h1>
+<div class="preset-browser"><span>Init</span></div></header>
+<main class="plugin-main"><canvas id="eclipseCanvas"></canvas>
+<div class="controls-eclipse">
+<div class="control-threshold"><label>THRESHOLD</label>
+<div class="slider-vertical-shadow" id="thresholdSlider"></div>
+<div class="value-display" id="thresholdValue">64</div></div>
+<div class="control-center-col">
+<div class="fade-control"><label>FADE ZONE</label>
+<div class="range-slider-penumbra" id="fadeSlider"></div>
+<div class="value-display" id="fadeValue">32</div></div>
+<div class="ghost-control"><label>GHOST GAIN</label>
+<div class="knob-phantom" id="ghostKnob"></div>
+<div class="value-display" id="ghostValue">-12dB</div></div></div>
+<div class="control-invert"><label>MODE</label>
+<div class="toggle-switch-eclipse" id="invertToggle">
+<span class="active">REVEAL</span><span>HIDE</span></div></div></div>
+<div class="velocity-histogram" id="histogram"></div></main>
+<footer class="orbitals-footer"><button class="bypass-toggle">BYPASS</button>
+<div class="passthrough-meter"></div></footer></div>
+
+
+
+    <script src="../../_Shared/UI/orbitals-animations.js"></script>
+    <script src="../../_Shared/UI/orbitals-particles.js"></script>
+    <script src="../../_Shared/UI/orbitals-components.js"></script>
+    
+    <script src="app.js"></script></body></html>

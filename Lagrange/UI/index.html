@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lagrange - Timing Stabilizer</title>
+    
+    <link rel="stylesheet" href="../../_Shared/UI/orbitals-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container lagrange-theme">
+        <header class="orbitals-header">
+            <div class="orbitals-logo" title="NNAudio"></div>
+            <h1>LAGRANGE</h1>
+            <div class="preset-browser"><span>Init Preset</span></div>
+        </header>
+
+        <main class="plugin-main">
+            <canvas id="lagrangeCanvas"></canvas>
+
+            <div class="controls-grid">
+                <div class="control-col">
+                    <label>STABILITY</label>
+                    <div class="slider-vertical" id="stabilitySlider" data-param="stability"></div>
+                    <div class="value-display" id="stabilityValue">50%</div>
+                </div>
+
+                <div class="control-col">
+                    <label>MASS</label>
+                    <div class="knob-medium" id="massKnob" data-param="mass"></div>
+                    <div class="value-display" id="massValue">50%</div>
+                </div>
+
+                <div class="control-col-wide">
+                    <label>DRIFT</label>
+                    <div class="range-slider" id="driftSlider" data-param="drift"></div>
+                    <div class="value-display" id="driftValue">±25ms</div>
+                </div>
+
+                <div class="control-col">
+                    <label>MICRO CHAOS</label>
+                    <div class="xy-pad" id="chaosP ad" data-param="microChaos"></div>
+                    <div class="value-display" id="chaosValue">X:50 Y:50</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="orbitals-footer">
+            <button class="bypass-toggle" id="bypassToggle">BYPASS</button>
+            <div class="timing-meter" id="timingMeter"></div>
+        </footer>
+    </div>
+
+    
+    
+    
+        <script src="../../_Shared/UI/orbitals-animations.js"></script>
+    <script src="../../_Shared/UI/orbitals-particles.js"></script>
+    <script src="../../_Shared/UI/orbitals-components.js"></script>
+    
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1067 @@
+/**
+ * @fileoverview Orbitals Design System - Shared CSS Variables and Base Styles
+ * @module Orbitals Design System
+ * 
+ * Master stylesheet for the Orbitals MIDI FX plugin line.
+ * Provides unified branding, color system, typography, and reusable components.
+ */
+
+/* ===================================================================
+   CSS VARIABLES - ORBITALS DESIGN SYSTEM
+   =================================================================== */
+
+:root {
+  /* === BASE PALETTE === */
+  --space-black: #0a0a0f;
+  --nebula-purple: #6b2fb5;
+  --stellar-blue: #0094ff;
+  --orbit-cyan: #00d4ff;
+  --solar-gold: #ffa500;
+  --comet-white: #e8e8f0;
+  --deep-space: #12121a;
+  
+  /* === SPACING SYSTEM === */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  
+  /* === BORDER RADIUS === */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  
+  /* === GLASSMORPHISM === */
+  --glass-bg: rgba(18, 18, 26, 0.7);
+  --glass-bg-light: rgba(18, 18, 26, 0.5);
+  --glass-bg-dark: rgba(18, 18, 26, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border-bright: rgba(255, 255, 255, 0.2);
+  --glass-blur: blur(12px);
+  
+  /* === SHADOWS === */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px var(--plugin-primary, var(--orbit-cyan));
+  --shadow-glow-lg: 0 0 40px var(--plugin-primary, var(--orbit-cyan));
+  --shadow-elevation: 0 8px 32px rgba(0, 0, 0, 0.4);
+  
+  /* === TRANSITIONS === */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-medium: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* === TYPOGRAPHY === */
+  --font-header: 'Orbitron', 'Space Mono', monospace;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  
+  --font-size-xs: 10px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 32px;
+  --font-size-3xl: 48px;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  
+  /* === Z-INDEX === */
+  --z-base: 1;
+  --z-controls: 10;
+  --z-header: 50;
+  --z-modal: 100;
+  --z-tooltip: 200;
+}
+
+/* ===================================================================
+   RESET & BASE STYLES
+   =================================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  color: var(--comet-white);
+  background: var(--space-black);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===================================================================
+   PLUGIN CONTAINER BASE
+   =================================================================== */
+
+.plugin-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--deep-space);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Starfield background (all plugins) */
+.plugin-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(1px 1px at 20% 30%, white, transparent),
+    radial-gradient(1px 1px at 60% 70%, white, transparent),
+    radial-gradient(1px 1px at 50% 50%, white, transparent),
+    radial-gradient(1px 1px at 80% 10%, white, transparent),
+    radial-gradient(1px 1px at 90% 60%, white, transparent);
+  background-size: 200% 200%;
+  background-position: 0% 0%;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===================================================================
+   HEADER (Common across all plugins)
+   =================================================================== */
+
+.orbitals-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--glass-border);
+  z-index: var(--z-header);
+  position: relative;
+}
+
+.orbitals-logo {
+  width: 120px;
+  height: 32px;
+  background-image: url('../../_Shared/Assets/logos/nnaudio-logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: left center;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  transition: var(--transition-medium);
+  opacity: 0.9;
+  cursor: pointer;
+  position: relative;
+}
+
+.orbitals-logo:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* Fallback text if logo image not found */
+.orbitals-logo::after {
+  content: 'NNAudio';
+  font-family: var(--font-header);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--comet-white);
+  letter-spacing: 2px;
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Show fallback text only if image fails to load */
+.orbitals-logo:not([style*="background-image"])::after,
+.orbitals-logo[data-logo-error="true"]::after {
+  display: block;
+}
+
+.orbitals-header h1 {
+  font-family: var(--font-header);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--plugin-primary, var(--orbit-cyan));
+  text-shadow: 0 0 20px var(--plugin-primary, var(--orbit-cyan));
+}
+
+.preset-browser {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: 
+    linear-gradient(135deg,
+      var(--glass-bg-light),
+      var(--glass-bg)),
+    var(--glass-bg);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--comet-white);
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  position: relative;
+  overflow: hidden;
+  min-width: 150px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.preset-browser::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent);
+  transition: left var(--transition-slow);
+}
+
+.preset-browser:hover::before {
+  left: 100%;
+}
+
+.preset-browser:hover {
+  background: 
+    linear-gradient(135deg,
+      var(--glass-bg),
+      var(--glass-bg-dark));
+  border-color: var(--plugin-primary, var(--orbit-cyan));
+  box-shadow: 
+    var(--shadow-md),
+    0 0 20px var(--plugin-glow);
+  transform: translateY(-1px);
+}
+
+.preset-browser:active {
+  transform: translateY(0);
+  box-shadow: 
+    var(--shadow-sm),
+    inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.preset-browser span {
+  position: relative;
+  z-index: 1;
+}
+
+/* Preset dropdown (when open) */
+.preset-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: var(--glass-bg-dark);
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--glass-border-bright);
+  border-radius: var(--radius-lg);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 20px var(--plugin-glow);
+  padding: var(--spacing-sm);
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: all var(--transition-medium);
+}
+
+.preset-dropdown.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.preset-item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.preset-item:hover {
+  background: var(--glass-bg-light);
+  color: var(--comet-white);
+  padding-left: calc(var(--spacing-md) + 4px);
+}
+
+.preset-item.active {
+  background: var(--plugin-primary, var(--orbit-cyan));
+  color: var(--space-black);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ===================================================================
+   MAIN CONTENT AREA
+   =================================================================== */
+
+.plugin-main {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  padding: var(--spacing-lg);
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===================================================================
+   FOOTER (Common controls)
+   =================================================================== */
+
+.orbitals-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border-top: 1px solid var(--glass-border);
+  z-index: var(--z-header);
+  position: relative;
+}
+
+.bypass-toggle {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--glass-bg-light);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--comet-white);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.bypass-toggle:hover {
+  background: var(--glass-bg);
+  border-color: var(--plugin-primary, var(--orbit-cyan));
+  box-shadow: 0 0 12px var(--plugin-primary, var(--orbit-cyan));
+}
+
+.bypass-toggle.active {
+  background: var(--plugin-primary, var(--orbit-cyan));
+  color: var(--space-black);
+  border-color: var(--plugin-primary, var(--orbit-cyan));
+  box-shadow: var(--shadow-glow);
+}
+
+/* ===================================================================
+   CONTROL COMPONENTS BASE STYLES
+   =================================================================== */
+
+.controls-area,
+.controls-grid,
+.controls-layout {
+  position: relative;
+  z-index: var(--z-controls);
+  display: flex;
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+.control-col,
+.control-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+label {
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.value-display {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--plugin-primary, var(--orbit-cyan));
+  text-shadow: 0 0 10px var(--plugin-primary, var(--orbit-cyan));
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--glass-bg-dark);
+  border-radius: var(--radius-sm);
+  min-width: 60px;
+  text-align: center;
+}
+
+/* ===================================================================
+   KNOB BASE STYLES
+   =================================================================== */
+
+.knob-medium,
+.knob-large,
+.large-knob {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-full);
+  background: 
+    radial-gradient(circle at 30% 30%, 
+      rgba(255, 255, 255, 0.15), 
+      transparent 50%),
+    var(--glass-bg);
+  border: 3px solid var(--glass-border);
+  box-shadow: 
+    var(--shadow-md),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.5);
+  position: relative;
+  cursor: grab;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.knob-large,
+.large-knob {
+  width: 120px;
+  height: 120px;
+  border-width: 4px;
+}
+
+.knob-medium:hover,
+.knob-large:hover,
+.large-knob:hover {
+  border-color: var(--plugin-primary, var(--orbit-cyan));
+  box-shadow: 
+    var(--shadow-glow),
+    0 0 30px var(--plugin-glow),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  transform: scale(1.02);
+}
+
+.knob-medium:active,
+.knob-large:active,
+.large-knob:active {
+  cursor: grabbing;
+  transform: scale(0.98);
+  box-shadow: 
+    var(--shadow-glow),
+    inset 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Knob indicator line */
+.knob-medium::after,
+.knob-large::after,
+.large-knob::after {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  width: 4px;
+  height: 40%;
+  background: linear-gradient(to bottom, 
+    white,
+    var(--plugin-primary, var(--orbit-cyan)));
+  border-radius: var(--radius-full);
+  transform-origin: bottom center;
+  box-shadow: 
+    0 0 12px var(--plugin-primary, var(--orbit-cyan)),
+    0 0 6px white;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
+}
+
+/* Knob center dot */
+.knob-medium::before,
+.knob-large::before,
+.large-knob::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: var(--plugin-primary, var(--orbit-cyan));
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--plugin-primary, var(--orbit-cyan));
+  z-index: 2;
+}
+
+/* ===================================================================
+   SLIDER BASE STYLES
+   =================================================================== */
+
+.slider-vertical,
+.slider-vertical-tall,
+.slider-horizontal {
+  position: relative;
+  cursor: pointer;
+}
+
+.slider-vertical {
+  width: 40px;
+  height: 200px;
+}
+
+.slider-vertical-tall {
+  width: 40px;
+  height: 300px;
+}
+
+.slider-horizontal {
+  width: 200px;
+  height: 40px;
+}
+
+/* Slider track */
+.slider-vertical::before,
+.slider-vertical-tall::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 6px;
+  height: 100%;
+  background: 
+    linear-gradient(to right, 
+      rgba(255, 255, 255, 0.05),
+      var(--glass-bg),
+      rgba(0, 0, 0, 0.3));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  transform: translateX(-50%);
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.slider-horizontal::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: 
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.05),
+      var(--glass-bg),
+      rgba(0, 0, 0, 0.3));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  transform: translateY(-50%);
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Slider handle (will be created by JS but style it here) */
+.slider-handle {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background: 
+    radial-gradient(circle at 30% 30%,
+      rgba(255, 255, 255, 0.8),
+      var(--plugin-primary, var(--orbit-cyan)));
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 
+    0 0 15px var(--plugin-glow),
+    0 2px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+  cursor: grab;
+  transition: all var(--transition-fast);
+  z-index: 10;
+}
+
+.slider-handle:hover {
+  transform: scale(1.15);
+  box-shadow: 
+    0 0 25px var(--plugin-glow),
+    0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.slider-handle:active {
+  cursor: grabbing;
+  transform: scale(1.05);
+}
+
+/* ===================================================================
+   XY PAD BASE STYLES
+   =================================================================== */
+
+.xy-pad,
+.xy-pad-orbit {
+  width: 150px;
+  height: 150px;
+  background: 
+    radial-gradient(circle at center,
+      rgba(255, 255, 255, 0.02),
+      var(--glass-bg)),
+    repeating-linear-gradient(0deg,
+      transparent,
+      transparent 9px,
+      rgba(255, 255, 255, 0.02) 10px),
+    repeating-linear-gradient(90deg,
+      transparent,
+      transparent 9px,
+      rgba(255, 255, 255, 0.02) 10px);
+  border: 3px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  position: relative;
+  cursor: crosshair;
+  box-shadow: 
+    var(--shadow-md),
+    inset 0 0 20px rgba(0, 0, 0, 0.5);
+  transition: all var(--transition-fast);
+  overflow: hidden;
+}
+
+.xy-pad:hover,
+.xy-pad-orbit:hover {
+  border-color: var(--plugin-primary, var(--orbit-cyan));
+  box-shadow: 
+    var(--shadow-glow),
+    0 0 30px var(--plugin-glow),
+    inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* XY pad crosshairs with glow */
+.xy-pad::before,
+.xy-pad::after {
+  content: '';
+  position: absolute;
+  background: linear-gradient(to bottom,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+.xy-pad::before {
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  transform: translateX(-50%);
+}
+
+.xy-pad::after {
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  transform: translateY(-50%);
+  background: linear-gradient(to right,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent);
+}
+
+/* XY pad handle styling */
+.xy-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: 
+    radial-gradient(circle at 30% 30%,
+      white,
+      var(--plugin-primary, var(--orbit-cyan)));
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 
+    0 0 20px var(--plugin-glow),
+    0 0 40px var(--plugin-glow),
+    0 4px 12px rgba(0, 0, 0, 0.6),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+  transition: all var(--transition-fast);
+}
+
+.xy-pad:active .xy-handle {
+  transform: scale(1.2);
+  box-shadow: 
+    0 0 30px var(--plugin-glow),
+    0 0 60px var(--plugin-glow),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* ===================================================================
+   TOGGLE/BUTTON STYLES
+   =================================================================== */
+
+.mode-selector,
+.tempo-selector,
+.curve-selector {
+  display: flex;
+  gap: var(--spacing-sm);
+  background: var(--glass-bg);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+}
+
+.mode-selector button,
+.tempo-selector button,
+.curve-selector button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mode-selector button:hover,
+.tempo-selector button:hover,
+.curve-selector button:hover {
+  color: var(--comet-white);
+  background: var(--glass-bg-light);
+}
+
+.mode-selector button.active,
+.tempo-selector button.active,
+.curve-selector button.active {
+  color: var(--space-black);
+  background: var(--plugin-primary, var(--orbit-cyan));
+  border-color: var(--plugin-primary, var(--orbit-cyan));
+  box-shadow: 0 0 12px var(--plugin-primary, var(--orbit-cyan));
+}
+
+/* ===================================================================
+   UTILITY CLASSES
+   =================================================================== */
+
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.glow {
+  box-shadow: var(--shadow-glow);
+}
+
+.glow-lg {
+  box-shadow: var(--shadow-glow-lg);
+}
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+/* ===================================================================
+   ANIMATIONS
+   =================================================================== */
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.rotate {
+  animation: rotate 10s linear infinite;
+}
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ===================================================================
+   TOOLTIPS
+   =================================================================== */
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-5px);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--glass-bg-dark);
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--plugin-primary, var(--orbit-cyan));
+  border-radius: var(--radius-md);
+  color: var(--comet-white);
+  font-family: var(--font-body);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.6),
+    0 0 20px var(--plugin-glow);
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--transition-medium);
+  z-index: var(--z-tooltip);
+}
+
+.tooltip[data-tooltip]::after {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--plugin-primary, var(--orbit-cyan));
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--transition-medium);
+  z-index: var(--z-tooltip);
+}
+
+.tooltip[data-tooltip]:hover::before,
+.tooltip[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===================================================================
+   RANGE SLIDER ENHANCEMENTS
+   =================================================================== */
+
+.range-slider-track {
+  width: 100%;
+  height: 8px;
+  background: 
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.05),
+      var(--glass-bg-dark),
+      rgba(0, 0, 0, 0.3));
+  border-radius: var(--radius-full);
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.range-slider-range {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg,
+    var(--plugin-secondary, var(--stellar-blue)),
+    var(--plugin-primary, var(--orbit-cyan)));
+  border-radius: var(--radius-full);
+  box-shadow: 
+    0 0 15px var(--plugin-glow),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  transition: all var(--transition-fast);
+}
+
+.range-slider-handle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 28px;
+  background: 
+    linear-gradient(135deg,
+      rgba(255, 255, 255, 0.9),
+      var(--plugin-primary, var(--orbit-cyan)));
+  border: 2px solid white;
+  border-radius: var(--radius-sm);
+  box-shadow: 
+    0 0 15px var(--plugin-glow),
+    0 2px 8px rgba(0, 0, 0, 0.4);
+  cursor: ew-resize;
+  transition: all var(--transition-fast);
+}
+
+.range-slider-handle:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 
+    0 0 25px var(--plugin-glow),
+    0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* ===================================================================
+   METER DISPLAYS
+   =================================================================== */
+
+.meter-bar {
+  width: 40px;
+  height: 200px;
+  background: var(--glass-bg-dark);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.meter-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  background: linear-gradient(to top,
+    #00ff00 0%,
+    #88ff00 20%,
+    #ffff00 50%,
+    #ff8800 80%,
+    #ff0000 100%);
+  transition: height 50ms linear;
+  box-shadow: 0 0 15px currentColor;
+}
+
+.meter-peak {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: white;
+  box-shadow: 0 0 8px white;
+  transition: top 100ms linear;
+}
+
+/* ===================================================================
+   LOADING STATES
+   =================================================================== */
+
+.skeleton {
+  background: linear-gradient(90deg,
+    var(--glass-bg) 0%,
+    var(--glass-bg-light) 50%,
+    var(--glass-bg) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--glass-border);
+  border-top-color: var(--plugin-primary, var(--orbit-cyan));
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===================================================================
+   RESPONSIVE
+   =================================================================== */
+
+@media (max-width: 768px) {
+  :root {
+    --font-size-base: 12px;
+    --font-size-xl: 20px;
+    --spacing-lg: 16px;
+  }
+  
+  .plugin-main {
+    padding: var(--spacing-md);
+  }
+  
+  .knob-large,
+  .large-knob {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .xy-pad,
+  .xy-pad-orbit {
+    width: 120px;
+    height: 120px;
+  }
+}

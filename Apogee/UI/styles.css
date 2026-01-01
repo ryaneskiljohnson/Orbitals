@@ -1,0 +1,14 @@
+.apogee-theme {
+  --plugin-primary: #00d4ff;
+  --plugin-secondary: #0094ff;
+  --plugin-accent: #ffffff;
+  --plugin-glow: rgba(0, 212, 255, 0.7);
+}
+#trajectoryCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+.controls-layout { position: relative; z-index: 10; display: flex; gap: var(--spacing-2xl); 
+  align-items: center; justify-content: center; width: 100%; height: 100%; padding: var(--spacing-xl); }
+.control-lift, .control-momentum { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-md); }
+.control-center { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-lg); flex: 1; }
+.curve-selector button.active { background: var(--plugin-primary); color: var(--space-black); }
+.slider-horizontal-limiter { width: 300px; height: 40px; background: var(--glass-bg); 
+  border: 2px solid var(--glass-border); border-radius: var(--radius-md); position: relative; }

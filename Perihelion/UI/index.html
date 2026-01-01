@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perihelion - Velocity Sculptor</title>
+    
+    <link rel="stylesheet" href="../../_Shared/UI/orbitals-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container perihelion-theme">
+        <!-- Header -->
+        <header class="orbitals-header">
+            <div class="orbitals-logo" title="NNAudio"></div>
+            <h1>PERIHELION</h1>
+            <div class="preset-browser">
+                <span>Init Preset</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="plugin-main">
+            <!-- Background Canvas for Solar Animation -->
+            <canvas id="solarCanvas"></canvas>
+
+            <!-- Controls Area -->
+            <div class="controls-area">
+                <!-- Orbit Arc (Top) -->
+                <div class="control-orbit-arc">
+                    <label class="tooltip" data-tooltip="Amount of original variation preserved">ORBIT</label>
+                    <div class="arc-slider tooltip" id="orbitControl" data-param="orbit" data-tooltip="Higher values preserve more velocity variation"></div>
+                    <div class="value-display" id="orbitValue">50%</div>
+                </div>
+
+                <!-- Left Side: Gravity Knob (Center) -->
+                <div class="control-center-section">
+                    <label class="tooltip" data-tooltip="Pull strength toward solar point">GRAVITY</label>
+                    <div class="large-knob tooltip" id="gravityKnob" data-param="gravity" data-tooltip="Drag vertically to adjust gravity strength">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-rings"></div>
+                        </div>
+                    </div>
+                    <div class="value-display large" id="gravityValue">50%</div>
+                </div>
+
+                <!-- Right Side: Solar Point Slider -->
+                <div class="control-vertical-section">
+                    <label class="tooltip" data-tooltip="Target velocity (1-127)">SOLAR POINT</label>
+                    <div class="slider-vertical-tall solar-slider tooltip" id="solarPointSlider" data-param="solarPoint" data-tooltip="Set the velocity target that notes are pulled toward">
+                        <div class="slider-track">
+                            <div class="velocity-heatmap"></div>
+                        </div>
+                        <div class="slider-handle">
+                            <div class="sun-icon">☀</div>
+                        </div>
+                    </div>
+                    <div class="value-display" id="solarPointValue">64</div>
+                </div>
+
+                <!-- Bottom: Inner/Outer Bias -->
+                <div class="control-bias-section">
+                    <label class="tooltip" data-tooltip="Asymmetric shaping curve">INNER / OUTER BIAS</label>
+                    <div class="dual-slider tooltip" id="biasSlider" data-param="bias" data-tooltip="Inner: softer pull | Outer: aggressive pull">
+                        <div class="bias-track">
+                            <div class="bias-gradient"></div>
+                        </div>
+                        <div class="bias-handle"></div>
+                        <div class="bias-labels">
+                            <span class="label-inner">INNER</span>
+                            <span class="label-center">CENTER</span>
+                            <span class="label-outer">OUTER</span>
+                        </div>
+                    </div>
+                    <div class="value-display" id="biasValue">0</div>
+                </div>
+            </div>
+
+            <!-- Velocity Meters (Before/After) -->
+            <div class="velocity-meters">
+                <div class="meter-column">
+                    <label>INPUT</label>
+                    <div class="velocity-meter" id="inputMeter"></div>
+                </div>
+                <div class="meter-column">
+                    <label>OUTPUT</label>
+                    <div class="velocity-meter" id="outputMeter"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="orbitals-footer">
+            <button class="bypass-toggle" id="bypassToggle">BYPASS</button>
+            <div class="info-display">
+                <span id="noteCount">Notes: 0</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Load shared libraries -->
+    <script src="../../_Shared/UI/orbitals-animations.js"></script>
+    <script src="../../_Shared/UI/orbitals-particles.js"></script>
+    <script src="../../_Shared/UI/orbitals-components.js"></script>
+    
+    <script src="app.js"></script>
+</body>
+</html>

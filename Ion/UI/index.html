@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Ion</title>
+
+<link rel="stylesheet" href="../../_Shared/UI/orbitals-design-system.css">
+    <link rel="stylesheet" href="styles.css"></head>
+<body><div class="plugin-container ion-theme">
+<header class="orbitals-header"><div class="orbitals-logo" title="NNAudio"></div><h1>ION</h1>
+<div class="preset-browser"><span>Init</span></div></header>
+<main class="plugin-main"><canvas id="ionCanvas"></canvas>
+<div class="controls-ion">
+<div class="control-left-col">
+<label>TENSION</label>
+<div class="slider-vertical-magnetic" id="tensionSlider"></div>
+<div class="value-display" id="tensionValue">50%</div>
+<label>FIELD WIDTH</label>
+<div class="knob-zone" id="fieldKnob"></div>
+<div class="value-display" id="fieldValue">50%</div></div>
+<div class="control-center">
+<label>CENTER KEY</label>
+<div class="chromatic-wheel" id="keyWheel">
+<div class="key-segment" data-note="C">C</div>
+<div class="key-segment" data-note="C#">C#</div>
+<div class="key-segment" data-note="D">D</div>
+<div class="key-segment" data-note="D#">D#</div>
+<div class="key-segment" data-note="E">E</div>
+<div class="key-segment" data-note="F">F</div>
+<div class="key-segment" data-note="F#">F#</div>
+<div class="key-segment" data-note="G">G</div>
+<div class="key-segment" data-note="G#">G#</div>
+<div class="key-segment" data-note="A">A</div>
+<div class="key-segment" data-note="A#">A#</div>
+<div class="key-segment" data-note="B">B</div></div>
+<select class="scale-selector">
+<option>Major</option><option>Minor</option><option>Dorian</option>
+<option>Phrygian</option><option>Lydian</option><option>Mixolydian</option><option>Locrian</option>
+</select></div>
+<div class="control-right-col">
+<label>RESOLUTION BIAS</label>
+<div class="directional-pad">
+<button data-dir="up">↑</button><button data-dir="down">↓</button>
+<button data-dir="nearest">○</button><button data-dir="chromatic">♯</button></div></div></div></main>
+<footer class="orbitals-footer"><button class="bypass-toggle">BYPASS</button>
+<div class="correction-counter">Corrections: 0</div></footer></div>
+
+
+
+    <script src="../../_Shared/UI/orbitals-animations.js"></script>
+    <script src="../../_Shared/UI/orbitals-particles.js"></script>
+    <script src="../../_Shared/UI/orbitals-components.js"></script>
+    
+    <script src="app.js"></script></body></html>

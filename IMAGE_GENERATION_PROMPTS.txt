@@ -1,0 +1,87 @@
+=================================================================
+ORBITALS - IMAGE GENERATION PROMPTS
+Ready to use with DALL-E, Midjourney, or Stable Diffusion
+=================================================================
+
+SETTINGS (for all images):
+- Size: 1024x1024
+- Quality: High
+- Style: Vivid
+- Format: PNG
+
+=================================================================
+1. ORBITALS MAIN LOGO
+=================================================================
+
+A premium futuristic logo for "ORBITALS" audio software. Large glowing cyan blue letter "O" with an orbital ring wrapping around it at an angle. Deep space black background with subtle stars. Sleek modern design, glowing neon cyan and blue colors, professional tech aesthetic, high contrast, minimalist style, vector-style clean edges, perfect for audio plugin branding
+
+=================================================================
+2. PERIHELION ICON (Velocity Sculptor)
+=================================================================
+
+Solar system icon for PERIHELION audio plugin. Glowing golden sun with radiating corona, orbital particles spiraling inward, warm orange and yellow gradient, gravitational pull effect visualization, space background, professional music software icon style, high detail, vibrant colors, 3D depth, perfect square composition
+
+=================================================================
+3. LAGRANGE ICON (Timing Stabilizer)
+=================================================================
+
+Five glowing Lagrange equilibrium points (L1-L5) floating in space for LAGRANGE audio plugin. Stellar blue and cyan colors, balanced symmetric arrangement, two larger celestial bodies with five bright points between them, professional tech visualization, space physics diagram aesthetic, clean geometric design, deep space background
+
+=================================================================
+4. APOGEE ICON (Energy Booster)
+=================================================================
+
+Ascending rocket trajectory for APOGEE audio plugin. Bright cyan and white gradient arc showing upward motion from ground to peak, trajectory path with particles, altitude markers, reaching the highest point, dynamic upward energy, professional tech visualization, clean modern design, space background with stars
+
+=================================================================
+5. RETROGRADE ICON (Motion Reversal)
+=================================================================
+
+Reverse orbital motion for RETROGRADE audio plugin. Purple and magenta colored orbital path with arrows showing counter-clockwise rotation, mirror symmetry effect, celestial body moving backwards, professional music software icon, vibrant purple nebula colors, clean geometric design, space background
+
+=================================================================
+6. TIDAL ICON (Rhythmic Push & Pull)
+=================================================================
+
+Ocean wave with lunar cycle for TIDAL audio plugin. Deep blue flowing sine wave with silver moon phases above, rhythmic wave pattern, tidal force visualization, lunar influence on waves, professional music software aesthetic, serene cosmic ocean, wave blue and lunar silver colors, clean design
+
+=================================================================
+7. ION ICON (Harmonic Constraint)
+=================================================================
+
+Magnetic field with chromatic circle for ION audio plugin. Electric purple and plasma cyan colors, 12-note chromatic wheel with glowing magnetic field lines, harmonic attraction visualization, ion particles being pulled toward center, professional music theory visualization, vibrant purple and cyan, futuristic tech aesthetic
+
+=================================================================
+8. ECLIPSE ICON (Velocity Masking)
+=================================================================
+
+Solar eclipse with corona for ECLIPSE audio plugin. Moon silhouette blocking golden sun, brilliant corona rays bursting around edges, umbra and penumbra shadow zones, dramatic high contrast black and gold, celestial event, professional astronomy visualization, perfect eclipse alignment, space background
+
+=================================================================
+9. KEPLER ICON (Orbit Generator)
+=================================================================
+
+Multiple elliptical orbits with planets for KEPLER audio plugin. Celestial blue orbital paths, several planets at different positions showing Kepler's laws, elliptical paths with varying eccentricity, golden sun at focus point, orbital mechanics diagram, professional space physics visualization, clean geometric design, deep space background
+
+=================================================================
+BONUS: BUNDLE PROMO IMAGE (1920x1080)
+=================================================================
+
+Promotional banner for ORBITALS MIDI FX plugin bundle. All 8 plugin icons arranged in a circular orbital pattern around glowing "ORBITALS" logo, each with their unique colors (gold, blue, cyan, purple, ocean blue, electric purple, black-gold, celestial blue), space background with nebula, professional audio software marketing image, premium tech aesthetic, "by NNAudio" branding, modern typography
+
+=================================================================
+USAGE INSTRUCTIONS:
+=================================================================
+
+1. Copy each prompt section
+2. Paste into your preferred AI image generator
+3. Generate at 1024x1024 (or 1920x1080 for promo)
+4. Save to the specified locations in the project
+5. Use PNG format with transparency where applicable
+
+FILE LOCATIONS:
+- Logo: _Shared/Assets/orbitals-logo.png
+- Plugin Icons: [PluginFolder]/UI/[plugin-name]-icon.png
+- Marketing: marketing/[filename].png
+
+=================================================================

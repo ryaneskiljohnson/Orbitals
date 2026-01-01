@@ -1,0 +1,24 @@
+.ion-theme {
+  --plugin-primary: #8b5cf6;
+  --plugin-secondary: #06b6d4;
+  --plugin-accent: #f0abfc;
+  --plugin-glow: rgba(139, 92, 246, 0.6);
+}
+#ionCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+.controls-ion { position: relative; z-index: 10; display: flex; gap: var(--spacing-2xl);
+  align-items: center; justify-content: center; width: 100%; height: 100%; }
+.control-left-col, .control-right-col { display: flex; flex-direction: column;
+  align-items: center; gap: var(--spacing-lg); }
+.control-center { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-lg); }
+.chromatic-wheel { width: 200px; height: 200px; border-radius: 50%; background: var(--glass-bg);
+  border: 3px solid var(--plugin-primary); display: grid; grid-template-columns: repeat(12, 1fr);
+  place-items: center; position: relative; box-shadow: 0 0 30px var(--plugin-glow); }
+.key-segment { cursor: pointer; padding: var(--spacing-xs); font-size: var(--font-size-xs);
+  transition: all var(--transition-fast); }
+.key-segment:hover { color: var(--plugin-primary); transform: scale(1.2); }
+.key-segment.active { color: var(--plugin-primary); text-shadow: 0 0 10px var(--plugin-primary); }
+.directional-pad { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-sm); }
+.directional-pad button { width: 50px; height: 50px; background: var(--glass-bg);
+  border: 2px solid var(--glass-border); border-radius: var(--radius-md); color: var(--comet-white);
+  font-size: 20px; cursor: pointer; transition: all var(--transition-fast); }
+.directional-pad button:hover { border-color: var(--plugin-primary); box-shadow: 0 0 15px var(--plugin-glow); }

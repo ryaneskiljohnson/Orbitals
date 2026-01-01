@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORBITALS - Interactive Showcase</title>
+    <link rel="stylesheet" href="_Shared/UI/orbitals-design-system.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background: #0a0a0f;
+            font-family: var(--font-body);
+        }
+        
+        .showcase-hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .showcase-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%,
+                rgba(0, 148, 255, 0.1) 0%,
+                transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        .hero-logo {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle at 40% 40%, #00d4ff, #0094ff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 120px;
+            font-weight: bold;
+            color: #0a0a0f;
+            font-family: var(--font-header);
+            box-shadow: 
+                0 0 80px rgba(0, 212, 255, 0.8),
+                0 0 150px rgba(0, 212, 255, 0.4);
+            margin-bottom: 40px;
+            animation: float 6s ease-in-out infinite;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 80px;
+            font-weight: 700;
+            letter-spacing: 16px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #00d4ff, #0094ff, #00d4ff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-subtitle {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .plugin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            padding: 80px 60px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .plugin-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            transition: all var(--transition-medium);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .plugin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg,
+                var(--card-primary),
+                var(--card-secondary));
+            opacity: 0.8;
+        }
+        
+        .plugin-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--card-primary);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.6),
+                0 0 40px var(--card-glow);
+        }
+        
+        .plugin-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            border-radius: var(--radius-full);
+            background: radial-gradient(circle at 40% 40%,
+                var(--card-primary),
+                var(--card-secondary));
+            box-shadow: 0 0 30px var(--card-glow);
+        }
+        
+        .plugin-name {
+            font-family: var(--font-header);
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-align: center;
+            color: var(--card-primary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        
+        .plugin-tagline {
+            font-size: 16px;
+            font-style: italic;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+        }
+        
+        .plugin-description {
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .plugin-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .plugin-features li {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 8px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .plugin-features li::before {
+            content: '→';
+            color: var(--card-primary);
+            margin-right: 8px;
+            font-weight: bold;
+        }
+        
+        .cta-section {
+            padding: 100px 60px;
+            text-align: center;
+            background: linear-gradient(180deg,
+                transparent 0%,
+                rgba(0, 148, 255, 0.05) 100%);
+        }
+        
+        .cta-title {
+            font-family: var(--font-header);
+            font-size: 48px;
+            color: var(--orbit-cyan);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+        }
+        
+        .cta-text {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .cta-button {
+            padding: 16px 48px;
+            font-family: var(--font-body);
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border: none;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all var(--transition-medium);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-button.primary {
+            background: linear-gradient(135deg, #00d4ff, #0094ff);
+            color: #0a0a0f;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.4);
+        }
+        
+        .cta-button.primary:hover {
+            box-shadow: 0 12px 48px rgba(0, 212, 255, 0.6);
+            transform: translateY(-4px);
+        }
+        
+        .cta-button.secondary {
+            background: var(--glass-bg);
+            color: var(--orbit-cyan);
+            border: 2px solid var(--orbit-cyan);
+        }
+        
+        .cta-button.secondary:hover {
+            background: rgba(0, 212, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            transform: translateY(-4px);
+        }
+        
+        /* Plugin-specific colors */
+        .card-perihelion { --card-primary: #ffa500; --card-secondary: #ff6b00; --card-glow: rgba(255, 165, 0, 0.5); }
+        .card-lagrange { --card-primary: #0094ff; --card-secondary: #00d4ff; --card-glow: rgba(0, 212, 255, 0.5); }
+        .card-apogee { --card-primary: #00d4ff; --card-secondary: #ffffff; --card-glow: rgba(0, 212, 255, 0.6); }
+        .card-retrograde { --card-primary: #6b2fb5; --card-secondary: #a855f7; --card-glow: rgba(168, 85, 247, 0.5); }
+        .card-tidal { --card-primary: #3b82f6; --card-secondary: #cbd5e1; --card-glow: rgba(59, 130, 246, 0.5); }
+        .card-ion { --card-primary: #8b5cf6; --card-secondary: #f0abfc; --card-glow: rgba(139, 92, 246, 0.5); }
+        .card-eclipse { --card-primary: #fbbf24; --card-secondary: #000000; --card-glow: rgba(251, 191, 36, 0.6); }
+        .card-kepler { --card-primary: #3b82f6; --card-secondary: #60a5fa; --card-glow: rgba(59, 130, 246, 0.5); }
+        
+        footer {
+            padding: 60px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="showcase-hero">
+        <div class="hero-logo">O</div>
+        <h1 class="hero-title">ORBITALS</h1>
+        <p class="hero-subtitle">MIDI FX Plugin Line by NNAudio</p>
+    </section>
+
+    <!-- Plugin Grid -->
+    <section class="plugin-grid">
+        <!-- Perihelion -->
+        <div class="plugin-card card-perihelion">
+            <div class="plugin-icon">☀️</div>
+            <h2 class="plugin-name">PERIHELION</h2>
+            <p class="plugin-tagline">"Bring notes closer to the sun"</p>
+            <p class="plugin-description">
+                Shapes MIDI velocity dynamically toward a gravitational center point using musical physics.
+            </p>
+            <ul class="plugin-features">
+                <li>Gravity-based velocity sculpting</li>
+                <li>Preserves performance feel</li>
+                <li>Solar point targeting</li>
+                <li>Orbital variation control</li>
+            </ul>
+        </div>
+
+        <!-- Lagrange -->
+        <div class="plugin-card card-lagrange">
+            <div class="plugin-icon">⚖️</div>
+            <h2 class="plugin-name">LAGRANGE</h2>
+            <p class="plugin-tagline">"Perfectly unstable"</p>
+            <p class="plugin-description">
+                Finds balance between grid and human feel using Lagrange point physics.
+            </p>
+            <ul class="plugin-features">
+                <li>No grid snapping</li>
+                <li>Maintains groove integrity</li>
+                <li>Micro chaos control</li>
+                <li>Drift window adjustment</li>
+            </ul>
+        </div>
+
+        <!-- Apogee -->
+        <div class="plugin-card card-apogee">
+            <div class="plugin-icon">🚀</div>
+            <h2 class="plugin-name">APOGEE</h2>
+            <p class="plugin-tagline">"Raise the ceiling"</p>
+            <p class="plugin-description">
+                Expands expressive range upward with trajectory-based velocity boosting.
+            </p>
+            <ul class="plugin-features">
+                <li>Multiple boost curves</li>
+                <li>Velocity ceiling control</li>
+                <li>Energy momentum builder</li>
+                <li>Dynamic range expansion</li>
+            </ul>
+        </div>
+
+        <!-- Retrograde -->
+        <div class="plugin-card card-retrograde">
+            <div class="plugin-icon">🔄</div>
+            <h2 class="plugin-name">RETROGRADE</h2>
+            <p class="plugin-tagline">"What moves forward can move back"</p>
+            <p class="plugin-description">
+                Reverses velocity, timing, or note order musically for creative effects.
+            </p>
+            <ul class="plugin-features">
+                <li>3 reversal modes</li>
+                <li>Adjustable scope</li>
+                <li>Partial symmetry control</li>
+                <li>Echo repetitions</li>
+            </ul>
+        </div>
+
+        <!-- Tidal -->
+        <div class="plugin-card card-tidal">
+            <div class="plugin-icon">🌊</div>
+            <h2 class="plugin-name">TIDAL</h2>
+            <p class="plugin-tagline">"Let the beat breathe"</p>
+            <p class="plugin-description">
+                Adds cyclic timing movement with wave-based groove modulation.
+            </p>
+            <ul class="plugin-features">
+                <li>LFO-driven timing</li>
+                <li>Tempo-synced cycles</li>
+                <li>Phase control</li>
+                <li>Smooth/stepped flow</li>
+            </ul>
+        </div>
+
+        <!-- Ion -->
+        <div class="plugin-card card-ion">
+            <div class="plugin-icon">🧲</div>
+            <h2 class="plugin-name">ION</h2>
+            <p class="plugin-tagline">"Every note belongs"</p>
+            <p class="plugin-description">
+                Keeps MIDI within harmonic field using magnetic attraction physics.
+            </p>
+            <ul class="plugin-features">
+                <li>Smart scale locking</li>
+                <li>Tension control</li>
+                <li>Field width adjustment</li>
+                <li>Resolution bias</li>
+            </ul>
+        </div>
+
+        <!-- Eclipse -->
+        <div class="plugin-card card-eclipse">
+            <div class="plugin-icon">🌑</div>
+            <h2 class="plugin-name">ECLIPSE</h2>
+            <p class="plugin-tagline">"Hide power in shadow"</p>
+            <p class="plugin-description">
+                Reveals/suppresses notes based on velocity zones with eclipse physics.
+            </p>
+            <ul class="plugin-features">
+                <li>Velocity masking</li>
+                <li>Fade zone (penumbra)</li>
+                <li>Invert mode</li>
+                <li>Ghost gain control</li>
+            </ul>
+        </div>
+
+        <!-- Kepler -->
+        <div class="plugin-card card-kepler">
+            <div class="plugin-icon">🪐</div>
+            <h2 class="plugin-name">KEPLER</h2>
+            <p class="plugin-tagline">"Patterns in motion"</p>
+            <p class="plugin-description">
+                Repositions notes rhythmically using Kepler's orbital mechanics laws.
+            </p>
+            <ul class="plugin-features">
+                <li>Multiple orbit paths</li>
+                <li>Eccentricity control</li>
+                <li>Tempo-synced rotation</li>
+                <li>Stability/chaos balance</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <h2 class="cta-title">Ready to Transform Your MIDI?</h2>
+        <p class="cta-text">
+            The complete Orbitals line offers 8 unique MIDI FX plugins with stunning visual interfaces
+            and powerful transformation capabilities. Individual plugins or bundle pricing available.
+        </p>
+        <div class="cta-buttons">
+            <button class="cta-button primary">Get Orbitals Bundle</button>
+            <button class="cta-button secondary">View Individual Plugins</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>ORBITALS - MIDI FX Plugin Line</p>
+        <p>© 2024 NNAudio - Premium Music Production Tools</p>
+        <p style="margin-top: 20px; font-size: 12px;">Design Phase Complete | DSP Implementation In Progress</p>
+    </footer>
+
+    <script>
+        // Add click handlers for plugin cards
+        document.querySelectorAll('.plugin-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const pluginName = card.querySelector('.plugin-name').textContent;
+                console.log(`Opening ${pluginName}...`);
+                // Future: Navigate to individual plugin pages
+            });
+        });
+        
+        // CTA button handlers
+        document.querySelectorAll('.cta-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                console.log(`Button clicked: ${btn.textContent}`);
+                // Future: Handle purchase/navigation
+            });
+        });
+    </script>
+</body>
+</html>

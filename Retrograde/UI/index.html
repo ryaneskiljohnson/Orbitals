@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Retrograde</title>
+
+<link rel="stylesheet" href="../../_Shared/UI/orbitals-design-system.css">
+    <link rel="stylesheet" href="styles.css"></head>
+<body><div class="plugin-container retrograde-theme">
+<header class="orbitals-header"><div class="orbitals-logo" title="NNAudio"></div><h1>RETROGRADE</h1>
+<div class="preset-browser"><span>Init</span></div></header>
+<main class="plugin-main"><canvas id="retrogradeCanvas"></canvas>
+<div class="controls-retrograde">
+<div class="mode-selector">
+<button data-mode="velocity" class="active">VELOCITY</button>
+<button data-mode="timing">TIMING</button>
+<button data-mode="phrase">PHRASE</button></div>
+<div class="control-row">
+<div class="control-scope"><label>SCOPE</label>
+<div class="knob-ringed" id="scopeKnob"></div>
+<div class="value-display" id="scopeValue">1 Bar</div></div>
+<div class="control-symmetry"><label>SYMMETRY</label>
+<div class="slider-horizontal-mirror" id="symmetrySlider"></div>
+<div class="value-display" id="symmetryValue">50%</div></div>
+<div class="control-echo"><label>ECHO</label>
+<div class="knob-echo" id="echoKnob"></div>
+<div class="value-display" id="echoValue">0</div></div>
+</div></div></main>
+<footer class="orbitals-footer"><button class="bypass-toggle">BYPASS</button>
+<div class="direction-indicator">→ ← </div></footer></div>
+
+
+
+    <script src="../../_Shared/UI/orbitals-animations.js"></script>
+    <script src="../../_Shared/UI/orbitals-particles.js"></script>
+    <script src="../../_Shared/UI/orbitals-components.js"></script>
+    
+    <script src="app.js"></script></body></html>
