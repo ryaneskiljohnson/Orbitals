@@ -24,6 +24,10 @@
   /* Enhanced gradients */
   --reverse-gradient: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #6b2fb5 100%);
   --nebula-gradient: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(107, 47, 181, 0.15) 50%, transparent 100%);
+  
+  /* Background image */
+  --plugin-background-image: url('../../_Shared/Assets/backgrounds/retrograde-background.png');
+  --plugin-background-opacity: 0.6;
 }
 
 /* ===================================================================

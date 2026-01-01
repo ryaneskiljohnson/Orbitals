@@ -24,6 +24,10 @@
   /* Enhanced gradients */
   --wave-gradient: linear-gradient(180deg, #cbd5e1 0%, #3b82f6 30%, #1e40af 100%);
   --ocean-gradient: radial-gradient(ellipse at bottom, rgba(30, 64, 175, 0.3) 0%, rgba(12, 30, 63, 0.2) 50%, transparent 100%);
+  
+  /* Background image */
+  --plugin-background-image: url('../../_Shared/Assets/backgrounds/tidal-background.png');
+  --plugin-background-opacity: 0.6;
 }
 
 /* ===================================================================

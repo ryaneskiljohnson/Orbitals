@@ -123,8 +123,6 @@ void MainComponent::loadMainUI()
     }
 }
 
-}
-
 void MainComponent::loadHTMLFile (const juce::File& htmlFile)
 {
     if (!htmlFile.existsAsFile())
@@ -142,6 +140,22 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
     if (cssFile.existsAsFile())
     {
         auto cssContent = cssFile.loadFileAsString();
+        
+        // Replace relative background image paths with relative path for temp directory
+        auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+        auto backgroundsDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("backgrounds");
+        
+        // Find and replace background image URLs - copy to temp dir and use relative path
+        juce::String searchPattern = "../../_Shared/Assets/backgrounds/retrograde-background.png";
+        auto imageFile = backgroundsDir.getChildFile ("retrograde-background.png");
+        
+        if (imageFile.existsAsFile())
+        {
+            juce::String oldPattern = "url('" + searchPattern + "')";
+            juce::String newPattern = "url('retrograde-background.png')";
+            cssContent = cssContent.replace (oldPattern, newPattern);
+        }
+        
         htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"styles.css\">",
                                            "<style>" + cssContent + "</style>");
         htmlContent = htmlContent.replace ("<link rel='stylesheet' href='styles.css'>",
@@ -156,7 +170,9 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
         htmlContent = htmlContent.replace ("<script src=\"app.js\"></script>",
                                            "<script>" + jsContent + "</script>");
         htmlContent = htmlContent.replace ("<script src='app.js'></script>",
-
+                                           "<script>" + jsContent + "</script>");
+    }
+    
     // Inline shared CSS and JS from _Shared/UI
     auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
     auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
@@ -202,12 +218,19 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
                                       "<script>" + componentsContent + "</script>");
     }
     
-                                           "<script>" + jsContent + "</script>");
-    }
-    
     // Write to temp file and load
     auto tempDir = juce::File::getSpecialLocation (juce::File::tempDirectory).getChildFile ("Orbitals");
     tempDir.createDirectory();
+    
+    // Copy background image to temp directory if it exists
+    auto projectRootForImage = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+    auto backgroundsDirForImage = projectRootForImage.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("backgrounds");
+    auto imageFile = backgroundsDirForImage.getChildFile ("retrograde-background.png");
+    if (imageFile.existsAsFile())
+    {
+        auto tempImageFile = tempDir.getChildFile ("retrograde-background.png");
+        imageFile.copyFileTo (tempImageFile);
+    }
     
     auto tempFile = tempDir.getChildFile ("RetrogradeUI.html");
     tempFile.replaceWithText (htmlContent);

@@ -123,8 +123,6 @@ void MainComponent::loadMainUI()
     }
 }
 
-}
-
 void MainComponent::loadHTMLFile (const juce::File& htmlFile)
 {
     if (!htmlFile.existsAsFile())
@@ -142,6 +140,31 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
     if (cssFile.existsAsFile())
     {
         auto cssContent = cssFile.loadFileAsString();
+        
+        // Replace relative background image paths with absolute file:// URLs
+        auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+        auto backgroundsDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("backgrounds");
+        
+        // Find and replace background image URLs - copy to temp dir and use relative path
+        juce::String searchPattern = "../../_Shared/Assets/backgrounds/lagrange-background.png";
+        auto imageFile = backgroundsDir.getChildFile ("lagrange-background.png");
+        
+        if (imageFile.existsAsFile())
+        {
+            // Copy image to temp directory (will be created later, but we'll copy it there)
+            // We'll do the actual copy when we create the temp directory for the HTML
+            // For now, just replace the path to use a relative path from the temp HTML location
+            juce::String oldPattern = "url('" + searchPattern + "')";
+            juce::String newPattern = "url('lagrange-background.png')";
+            
+            DBG ("Replacing background image path: " + oldPattern + " -> " + newPattern);
+            cssContent = cssContent.replace (oldPattern, newPattern);
+        }
+        else
+        {
+            DBG ("Background image file not found: " + imageFile.getFullPathName());
+        }
+        
         htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"styles.css\">",
                                            "<style>" + cssContent + "</style>");
         htmlContent = htmlContent.replace ("<link rel='stylesheet' href='styles.css'>",
@@ -156,7 +179,9 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
         htmlContent = htmlContent.replace ("<script src=\"app.js\"></script>",
                                            "<script>" + jsContent + "</script>");
         htmlContent = htmlContent.replace ("<script src='app.js'></script>",
-
+                                           "<script>" + jsContent + "</script>");
+    }
+    
     // Inline shared CSS and JS from _Shared/UI
     auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
     auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
@@ -202,12 +227,20 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
                                       "<script>" + componentsContent + "</script>");
     }
     
-                                           "<script>" + jsContent + "</script>");
-    }
-    
     // Write to temp file and load
     auto tempDir = juce::File::getSpecialLocation (juce::File::tempDirectory).getChildFile ("Orbitals");
     tempDir.createDirectory();
+    
+    // Copy background image to temp directory if it exists
+    auto projectRootForImage = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+    auto backgroundsDirForImage = projectRootForImage.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("backgrounds");
+    auto imageFile = backgroundsDirForImage.getChildFile ("lagrange-background.png");
+    if (imageFile.existsAsFile())
+    {
+        auto tempImageFile = tempDir.getChildFile ("lagrange-background.png");
+        imageFile.copyFileTo (tempImageFile);
+        DBG ("Copied background image to: " + tempImageFile.getFullPathName());
+    }
     
     auto tempFile = tempDir.getChildFile ("LagrangeUI.html");
     tempFile.replaceWithText (htmlContent);

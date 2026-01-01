@@ -101,7 +101,7 @@ body, html {
   font-family: var(--font-body);
   font-size: var(--font-size-base);
   color: var(--comet-white);
-  background: var(--space-black);
+  background: var(--deep-space);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -115,7 +115,7 @@ body, html {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--deep-space);
+  background: transparent;
   position: relative;
   overflow: hidden;
 }
@@ -128,15 +128,39 @@ body, html {
   left: 0;
   right: 0;
   bottom: 0;
+  background: var(--deep-space);
   background-image: 
+    var(--plugin-background-image, none),
     radial-gradient(1px 1px at 20% 30%, white, transparent),
     radial-gradient(1px 1px at 60% 70%, white, transparent),
     radial-gradient(1px 1px at 50% 50%, white, transparent),
     radial-gradient(1px 1px at 80% 10%, white, transparent),
     radial-gradient(1px 1px at 90% 60%, white, transparent);
-  background-size: 200% 200%;
-  background-position: 0% 0%;
-  opacity: 0.3;
+  background-size: 
+    var(--plugin-background-size, cover),
+    200% 200%;
+  background-position: 
+    var(--plugin-background-position, center),
+    0% 0%;
+  background-repeat: no-repeat;
+  opacity: 1;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Background image layer - separate from base background for better control */
+.plugin-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--plugin-background-image, none);
+  background-size: var(--plugin-background-size, cover);
+  background-position: var(--plugin-background-position, center);
+  background-repeat: no-repeat;
+  opacity: var(--plugin-background-opacity, 0.6);
   pointer-events: none;
   z-index: 0;
 }
@@ -224,7 +248,7 @@ body, html {
   justify-content: center;
   background: var(--glass-bg);
   border: 2px solid var(--glass-border);
-  border-radius: var(--radius-md);
+  border-radius: 50%;
   color: var(--comet-white);
   font-family: var(--font-header);
   font-size: var(--font-size-xl);

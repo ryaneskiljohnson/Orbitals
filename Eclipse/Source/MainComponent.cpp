@@ -140,6 +140,22 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
     if (cssFile.existsAsFile())
     {
         auto cssContent = cssFile.loadFileAsString();
+        
+        // Replace relative background image paths with relative path for temp directory
+        auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+        auto backgroundsDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("backgrounds");
+        
+        // Find and replace background image URLs - copy to temp dir and use relative path
+        juce::String searchPattern = "../../_Shared/Assets/backgrounds/eclipse-background.png";
+        auto imageFile = backgroundsDir.getChildFile ("eclipse-background.png");
+        
+        if (imageFile.existsAsFile())
+        {
+            juce::String oldPattern = "url('" + searchPattern + "')";
+            juce::String newPattern = "url('eclipse-background.png')";
+            cssContent = cssContent.replace (oldPattern, newPattern);
+        }
+        
         htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"styles.css\">",
                                            "<style>" + cssContent + "</style>");
         htmlContent = htmlContent.replace ("<link rel='stylesheet' href='styles.css'>",
@@ -205,6 +221,16 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
     // Write to temp file and load
     auto tempDir = juce::File::getSpecialLocation (juce::File::tempDirectory).getChildFile ("Orbitals");
     tempDir.createDirectory();
+    
+    // Copy background image to temp directory if it exists
+    auto projectRootForImage = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+    auto backgroundsDirForImage = projectRootForImage.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("backgrounds");
+    auto imageFile = backgroundsDirForImage.getChildFile ("eclipse-background.png");
+    if (imageFile.existsAsFile())
+    {
+        auto tempImageFile = tempDir.getChildFile ("eclipse-background.png");
+        imageFile.copyFileTo (tempImageFile);
+    }
     
     auto tempFile = tempDir.getChildFile ("EclipseUI.html");
     tempFile.replaceWithText (htmlContent);

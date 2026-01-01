@@ -12,6 +12,9 @@
       <FILE id="index_html" name="index.html" compile="0" resource="1" file="UI/index.html" />
       <FILE id="styles_css" name="styles.css" compile="0" resource="1" file="UI/styles.css" />
     </GROUP>
+    <GROUP id="{B2C3D4E5-F6A7-8901-BCDE-F23456789012}" name="SharedAssets">
+      <FILE id="eclipse_bg" name="eclipse-background.png" compile="0" resource="1" file="../_Shared/Assets/backgrounds/eclipse-background.png" />
+    </GROUP>
   </MAINGROUP>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />

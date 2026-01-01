@@ -25,6 +25,10 @@
   /* Enhanced gradients */
   --solar-gradient: linear-gradient(135deg, #ffcc00 0%, #ffa500 50%, #ff6b00 100%);
   --corona-gradient: radial-gradient(circle, #ffff88 0%, #ffa500 40%, #ff6b00 70%, transparent 100%);
+  
+  /* Background image */
+  --plugin-background-image: url('../../_Shared/Assets/backgrounds/perihelion-background.png');
+  --plugin-background-opacity: 0.6;
 }
 
 /* ===================================================================

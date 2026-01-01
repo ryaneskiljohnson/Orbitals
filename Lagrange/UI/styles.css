@@ -24,6 +24,10 @@
   /* Enhanced gradients */
   --stellar-gradient: linear-gradient(135deg, #00d4ff 0%, #0094ff 50%, #6b2fb5 100%);
   --balance-gradient: radial-gradient(ellipse at center, rgba(0, 212, 255, 0.2) 0%, rgba(0, 148, 255, 0.1) 50%, transparent 100%);
+  
+  /* Background image */
+  --plugin-background-image: url('../../_Shared/Assets/backgrounds/lagrange-background.png');
+  --plugin-background-opacity: 0.6;
 }
 
 /* ===================================================================
