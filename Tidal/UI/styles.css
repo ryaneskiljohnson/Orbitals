@@ -343,3 +343,80 @@
   transform-origin: bottom center;
   transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+
+/* ===================================================================
+   TIDAL-SPECIFIC ANIMATIONS
+   =================================================================== */
+
+@keyframes wave-flow {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50px);
+  }
+}
+
+@keyframes lunar-shimmer {
+  0%, 100% {
+    box-shadow: 0 0 40px rgba(203, 213, 225, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 60px rgba(203, 213, 225, 0.6);
+  }
+}
+
+/* Wave shape display - animated waves */
+.wave-shape-display::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 20px,
+    rgba(59, 130, 246, 0.1) 20px,
+    rgba(59, 130, 246, 0.1) 40px
+  );
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.wave-shape-display:hover::before {
+  opacity: 1;
+  animation: wave-flow 2s linear infinite;
+}
+
+/* Amplitude knob - lunar tide effect */
+.amplitude-knob:hover::after {
+  animation: lunar-shimmer 3s ease-in-out infinite;
+}
+
+/* Phase slider - flow indicator */
+.phase-slider .slider-handle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -20px;
+  width: 15px;
+  height: 3px;
+  background: var(--plugin-secondary);
+  box-shadow: 0 0 10px var(--plugin-glow);
+  opacity: 0;
+  transition: all var(--transition-medium);
+}
+
+.phase-slider:hover .slider-handle::before {
+  opacity: 1;
+  left: -25px;
+  animation: pulse-subtle 1.5s ease-in-out infinite;
+}
+
+/* Tempo selector - beat pulse */
+.tempo-selector button.active {
+  animation: pulse-subtle 1s ease-in-out infinite;
+}

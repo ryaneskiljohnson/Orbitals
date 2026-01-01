@@ -298,3 +298,93 @@
 .field-strength-knob {
   animation: magnetic-pulse 3s ease-in-out infinite;
 }
+
+
+/* ===================================================================
+   ION-SPECIFIC ANIMATIONS
+   =================================================================== */
+
+@keyframes magnetic-attract {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes field-shimmer {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Field strength knob - magnetic pulse */
+.field-strength-knob:hover {
+  animation: magnetic-pulse 3s ease-in-out infinite,
+             magnetic-attract 1.5s ease-in-out infinite;
+}
+
+/* Key center selector - note highlight */
+.key-segment {
+  position: relative;
+}
+
+.key-segment::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, var(--plugin-primary), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+  border-radius: inherit;
+}
+
+.key-segment:hover::before {
+  opacity: 0.5;
+  animation: pulse-subtle 1s ease-in-out infinite;
+}
+
+.key-segment.active {
+  animation: magnetic-attract 2s ease-in-out infinite;
+}
+
+/* Scale selector - magnetic snap effect */
+.scale-selector button:hover {
+  transform: scale(1.08);
+}
+
+.scale-selector button.active {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Attraction slider - field lines */
+.attraction-slider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 8px,
+    rgba(139, 92, 246, 0.1) 8px,
+    rgba(139, 92, 246, 0.1) 9px
+  );
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.attraction-slider:hover::before {
+  opacity: 1;
+  animation: field-shimmer 2s ease-in-out infinite;
+}

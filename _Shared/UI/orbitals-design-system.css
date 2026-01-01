@@ -1088,3 +1088,545 @@ label {
   letter-spacing: 1px;
   color: rgba(232, 232, 240, 0.5);
 }
+
+/* ===================================================================
+   ENHANCED HOVER EFFECTS (Unified across all plugins)
+   =================================================================== */
+
+/* Button hover enhancements */
+button {
+  position: relative;
+  overflow: hidden;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Bypass toggle enhanced */
+.bypass-toggle {
+  position: relative;
+  padding: var(--spacing-md) var(--spacing-2xl);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--comet-white);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all var(--transition-medium);
+}
+
+.bypass-toggle:hover {
+  border-color: var(--plugin-primary, var(--orbit-cyan));
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3),
+              0 0 20px var(--plugin-glow, rgba(0, 212, 255, 0.3));
+}
+
+.bypass-toggle:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.bypass-toggle.active {
+  background: #ff3333;
+  border-color: #ff6666;
+  color: white;
+  box-shadow: 0 0 25px rgba(255, 51, 51, 0.6),
+              inset 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.bypass-toggle.active:hover {
+  background: #ff4444;
+  box-shadow: 0 0 35px rgba(255, 51, 51, 0.8),
+              0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ===================================================================
+   MICRO-ANIMATIONS (Feedback on interaction)
+   =================================================================== */
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes glow-intensify {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.3);
+  }
+}
+
+/* Click ripple effect */
+.has-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+  animation: ripple 0.6s ease-out;
+}
+
+/* ===================================================================
+   CONTROL INTERACTION ENHANCEMENTS
+   =================================================================== */
+
+/* All knobs get enhanced hover */
+[class*="knob"] {
+  position: relative;
+  transition: all var(--transition-medium);
+}
+
+[class*="knob"]:hover {
+  cursor: grab;
+  filter: brightness(1.1);
+}
+
+[class*="knob"]:active {
+  cursor: grabbing;
+  filter: brightness(1.05);
+}
+
+/* All sliders get enhanced hover */
+[class*="slider"]:not(.slider-handle) {
+  transition: all var(--transition-medium);
+}
+
+[class*="slider"]:hover {
+  transform: scale(1.02);
+  filter: brightness(1.08);
+}
+
+/* XY pads enhanced */
+[class*="xy-pad"],
+[class*="-pad"] {
+  transition: all var(--transition-medium);
+}
+
+[class*="xy-pad"]:hover,
+[class*="-pad"]:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 30px var(--plugin-glow, rgba(0, 212, 255, 0.5)),
+              inset 0 0 25px rgba(255, 255, 255, 0.1);
+}
+
+/* ===================================================================
+   VALUE DISPLAY ENHANCEMENTS
+   =================================================================== */
+
+.value-display {
+  transition: all var(--transition-fast);
+}
+
+.value-display:hover {
+  border-color: var(--plugin-primary, var(--orbit-cyan));
+  box-shadow: 0 0 15px var(--plugin-glow, rgba(0, 212, 255, 0.5)),
+              inset 0 0 8px rgba(255, 255, 255, 0.05);
+  transform: scale(1.05);
+}
+
+/* Animate value changes */
+@keyframes value-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.value-display.changing {
+  animation: value-pulse 0.3s ease-out;
+}
+
+/* ===================================================================
+   LOADING ANIMATIONS
+   =================================================================== */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.plugin-container > * {
+  animation: fade-in 0.6s ease-out backwards;
+}
+
+.orbitals-header {
+  animation-delay: 0.1s;
+}
+
+.plugin-main {
+  animation-delay: 0.2s;
+}
+
+.orbitals-footer {
+  animation-delay: 0.3s;
+}
+
+/* ===================================================================
+   STARFIELD ANIMATION (Background)
+   =================================================================== */
+
+@keyframes starfield-drift {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 100% 100%;
+  }
+}
+
+.plugin-container::before {
+  animation: starfield-drift 120s linear infinite;
+}
+
+/* ===================================================================
+   ORBITALS LOGO ANIMATION
+   =================================================================== */
+
+@keyframes logo-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.orbitals-logo {
+  position: relative;
+  overflow: visible;
+}
+
+.orbitals-logo::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid transparent;
+  border-top-color: var(--plugin-primary, var(--orbit-cyan));
+  border-radius: 50%;
+  animation: logo-rotate 8s linear infinite;
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.orbitals-logo:hover::after {
+  opacity: 0.6;
+}
+
+/* ===================================================================
+   PRESET BROWSER HOVER
+   =================================================================== */
+
+.preset-browser {
+  transition: all var(--transition-medium);
+  cursor: pointer;
+}
+
+.preset-browser:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--plugin-primary, var(--orbit-cyan));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3),
+              0 0 20px var(--plugin-glow, rgba(0, 212, 255, 0.3));
+}
+
+.preset-browser:active {
+  transform: translateY(0);
+}
+
+/* ===================================================================
+   FOCUS STATES (Accessibility)
+   =================================================================== */
+
+button:focus-visible,
+[class*="knob"]:focus-visible,
+[class*="slider"]:focus-visible,
+[class*="pad"]:focus-visible {
+  outline: 3px solid var(--plugin-primary, var(--orbit-cyan));
+  outline-offset: 4px;
+  box-shadow: 0 0 25px var(--plugin-glow, rgba(0, 212, 255, 0.5));
+}
+
+/* ===================================================================
+   TOOLTIP ENHANCEMENTS
+   =================================================================== */
+
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(0, 0, 0, 0.95);
+  color: var(--comet-white);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--plugin-primary, var(--orbit-cyan));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6),
+              0 0 15px var(--plugin-glow, rgba(0, 212, 255, 0.3));
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--transition-medium);
+  z-index: var(--z-tooltip);
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--plugin-primary, var(--orbit-cyan));
+  opacity: 0;
+  transition: all var(--transition-medium);
+  z-index: var(--z-tooltip);
+}
+
+.tooltip:hover::after,
+.tooltip:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===================================================================
+   ACTIVE/PRESSED STATES
+   =================================================================== */
+
+[class*="knob"]:active,
+[class*="slider-handle"]:active,
+[class*="pad"]:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* ===================================================================
+   DISABLED STATES
+   =================================================================== */
+
+[class*="knob"].disabled,
+[class*="slider"].disabled,
+button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(0.8);
+}
+
+/* ===================================================================
+   SELECTION GLOW (When control is being adjusted)
+   =================================================================== */
+
+.adjusting {
+  box-shadow: 0 0 40px var(--plugin-glow, rgba(0, 212, 255, 0.8)),
+              0 0 60px var(--plugin-glow, rgba(0, 212, 255, 0.4)),
+              inset 0 0 30px rgba(255, 255, 255, 0.15) !important;
+  border-color: var(--plugin-accent, white) !important;
+}
+
+
+
+/* ===================================================================
+   SMOOTH TRANSITIONS (Applied globally)
+   =================================================================== */
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth property transitions for all interactive elements */
+button,
+[class*="knob"],
+[class*="slider"],
+[class*="pad"],
+.value-display,
+[class*="selector"] {
+  will-change: transform;
+}
+
+/* ===================================================================
+   INTERACTION FEEDBACK ENHANCEMENTS
+   =================================================================== */
+
+/* Mouse cursor enhancements */
+button,
+[class*="selector"] button {
+  cursor: pointer;
+}
+
+[class*="knob"] {
+  cursor: grab;
+  user-select: none;
+}
+
+[class*="knob"]:active {
+  cursor: grabbing;
+}
+
+[class*="slider-handle"] {
+  cursor: grab;
+  user-select: none;
+}
+
+[class*="slider-handle"]:active {
+  cursor: grabbing;
+}
+
+.xy-pad,
+[class*="-pad"] {
+  cursor: crosshair;
+  user-select: none;
+}
+
+/* ===================================================================
+   GLOW INTENSITY LEVELS (Unified system)
+   =================================================================== */
+
+.glow-low {
+  box-shadow: 0 0 15px var(--plugin-glow, rgba(0, 212, 255, 0.3));
+}
+
+.glow-medium {
+  box-shadow: 0 0 25px var(--plugin-glow, rgba(0, 212, 255, 0.5));
+}
+
+.glow-high {
+  box-shadow: 0 0 40px var(--plugin-glow, rgba(0, 212, 255, 0.7)),
+              0 0 60px var(--plugin-glow, rgba(0, 212, 255, 0.3));
+}
+
+.glow-extreme {
+  box-shadow: 0 0 60px var(--plugin-glow, rgba(0, 212, 255, 0.9)),
+              0 0 90px var(--plugin-glow, rgba(0, 212, 255, 0.5)),
+              0 0 120px var(--plugin-glow, rgba(0, 212, 255, 0.2));
+}
+
+/* ===================================================================
+   PARAMETER AUTOMATION INDICATOR
+   =================================================================== */
+
+@keyframes automation-pulse {
+  0%, 100% {
+    border-color: var(--plugin-primary);
+  }
+  50% {
+    border-color: var(--plugin-accent);
+  }
+}
+
+.automated {
+  position: relative;
+}
+
+.automated::before {
+  content: 'A';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  background: var(--plugin-primary);
+  color: var(--space-black);
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px var(--plugin-glow);
+  animation: automation-pulse 2s ease-in-out infinite;
+  z-index: 10;
+}
+
+/* ===================================================================
+   PERFORMANCE OPTIMIZATIONS
+   =================================================================== */
+
+/* Hardware acceleration for animated elements */
+@keyframes accelerate {
+  from {
+    transform: translateZ(0);
+  }
+}
+
+canvas,
+[class*="knob"],
+[class*="slider"],
+.orbitals-logo {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

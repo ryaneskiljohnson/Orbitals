@@ -412,3 +412,54 @@
   transform-origin: bottom center;
   transition: transform 0.15s ease;
 }
+
+
+/* ===================================================================
+   LAGRANGE-SPECIFIC ANIMATIONS
+   =================================================================== */
+
+@keyframes equilibrium-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.knob-medium:hover {
+  animation: equilibrium-float 2s ease-in-out infinite,
+             equilibrium-pulse 3s ease-in-out infinite;
+}
+
+/* Balance point indicator */
+.range-slider-range::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 120%;
+  background: var(--plugin-secondary);
+  box-shadow: 0 0 15px var(--plugin-glow);
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.range-slider:hover .range-slider-range::after {
+  opacity: 0.8;
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* XY pad crosshairs glow */
+.xy-pad:hover::before,
+.xy-pad:hover::after {
+  background: var(--plugin-secondary);
+  box-shadow: 0 0 10px var(--plugin-glow);
+}
+
+/* Stability slider wave effect */
+.slider-vertical:hover::before {
+  animation: glow-intensify 1.5s ease-in-out infinite;
+}

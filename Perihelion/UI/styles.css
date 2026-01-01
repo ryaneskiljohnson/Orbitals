@@ -604,3 +604,75 @@
   letter-spacing: 1px;
   color: rgba(255, 165, 0, 0.7);
 }
+
+
+/* ===================================================================
+   PERIHELION-SPECIFIC ANIMATIONS
+   =================================================================== */
+
+@keyframes solar-flare {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.large-knob::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  left: -40px;
+  right: -40px;
+  bottom: -40px;
+  background: radial-gradient(circle at 50% 50%,
+    transparent 40%,
+    rgba(255, 204, 0, 0.3) 45%,
+    transparent 50%);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-medium);
+}
+
+.large-knob:hover::after {
+  animation: solar-flare 2s ease-in-out infinite;
+}
+
+/* Solar particles on hover */
+.solar-slider:hover .sun-icon {
+  animation: pulse-sun 1s ease-in-out infinite,
+             rotate 10s linear infinite;
+}
+
+/* Arc glow on hover */
+.arc-slider:hover {
+  filter: drop-shadow(0 0 30px rgba(255, 165, 0, 0.6));
+}
+
+/* Bias handle glow trail */
+.bias-handle:hover {
+  box-shadow: 0 0 35px var(--plugin-glow),
+              0 0 50px rgba(255, 204, 0, 0.5),
+              0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.bias-handle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 140%;
+  height: 140%;
+  background: radial-gradient(circle, rgba(255, 165, 0, 0.3), transparent 70%);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.bias-handle:hover::before {
+  opacity: 1;
+  animation: pulse-subtle 1.5s ease-in-out infinite;
+}

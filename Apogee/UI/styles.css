@@ -345,3 +345,87 @@
   transform-origin: bottom center;
   transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+
+/* ===================================================================
+   APOGEE-SPECIFIC ANIMATIONS
+   =================================================================== */
+
+@keyframes ascent-trail {
+  0% {
+    transform: translateY(100%) scaleY(0);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0%) scaleY(1);
+    opacity: 0;
+  }
+}
+
+.slider-vertical-tall::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top,
+    var(--plugin-primary),
+    var(--plugin-secondary),
+    transparent
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+.slider-vertical-tall:hover::after {
+  animation: ascent-trail 2s ease-in-out infinite;
+}
+
+/* Momentum knob orbital rings */
+.knob-large::after {
+  content: '';
+  position: absolute;
+  top: -25px;
+  left: -25px;
+  right: -25px;
+  bottom: -25px;
+  border: 2px solid var(--plugin-secondary);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.knob-large:hover::after {
+  opacity: 0.4;
+  animation: ascent-trail 3s ease-in-out infinite;
+}
+
+/* Curve selector highlight */
+.curve-selector button {
+  position: relative;
+}
+
+.curve-selector button::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0%;
+  height: 2px;
+  background: var(--plugin-secondary);
+  transition: width var(--transition-medium);
+}
+
+.curve-selector button:hover::before {
+  width: 80%;
+  box-shadow: 0 0 10px var(--plugin-glow);
+}
+
+.curve-selector button.active::before {
+  width: 100%;
+}

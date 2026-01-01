@@ -364,3 +364,83 @@
 .totality-knob {
   animation: eclipse-pulse 4s ease-in-out infinite;
 }
+
+
+/* ===================================================================
+   ECLIPSE-SPECIFIC ANIMATIONS
+   =================================================================== */
+
+@keyframes corona-burst {
+  0% {
+    transform: scale(0.9) rotate(0deg);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.9) rotate(360deg);
+    opacity: 0.5;
+  }
+}
+
+@keyframes shadow-creep {
+  0%, 100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(1.1);
+  }
+}
+
+/* Totality knob - enhanced corona on hover */
+.totality-knob:hover::before {
+  animation: corona-burst 3s ease-in-out infinite;
+}
+
+/* Shadow zone - creeping shadow effect */
+.shadow-zone-slider:hover .zone-range {
+  animation: shadow-creep 2s ease-in-out infinite;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8),
+              0 0 40px var(--plugin-glow);
+}
+
+/* Umbra control - total darkness pulse */
+.umbra-control:hover {
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9),
+              0 0 60px var(--plugin-glow),
+              inset 0 0 40px rgba(0, 0, 0, 0.9);
+}
+
+/* Penumbra control - partial shadow shimmer */
+.penumbra-control:hover {
+  box-shadow: 0 0 40px rgba(120, 113, 108, 0.6),
+              0 0 60px var(--plugin-glow);
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Eclipse mode toggle - dramatic transition */
+.eclipse-mode-toggle button {
+  position: relative;
+  overflow: hidden;
+}
+
+.eclipse-mode-toggle button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(251, 191, 36, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.eclipse-mode-toggle button:hover::after {
+  left: 100%;
+}

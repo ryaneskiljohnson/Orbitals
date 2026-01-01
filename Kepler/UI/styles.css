@@ -427,3 +427,93 @@
 .eccentricity-knob {
   animation: kepler-pulse 3s ease-in-out infinite;
 }
+
+
+/* ===================================================================
+   KEPLER-SPECIFIC ANIMATIONS
+   =================================================================== */
+
+@keyframes orbit-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes planet-drift {
+  0%, 100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(180deg);
+  }
+}
+
+/* Eccentricity knob - orbital sweep on hover */
+.eccentricity-knob:hover::after {
+  animation: orbit-sweep 6s linear infinite;
+  opacity: 0.5;
+}
+
+/* Orbit visualizer - live preview */
+.orbit-visualizer {
+  position: relative;
+}
+
+.orbit-visualizer::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle, var(--kepler-focus), var(--plugin-secondary));
+  border-radius: 50%;
+  box-shadow: 0 0 15px var(--planet-glow);
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.orbit-visualizer:hover::after {
+  opacity: 1;
+  animation: planet-drift 8s ease-in-out infinite;
+}
+
+/* Period selector - tempo pulse */
+.period-selector button.active {
+  animation: pulse-subtle 1s ease-in-out infinite;
+}
+
+.period-selector button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
+              0 0 20px var(--plugin-glow);
+}
+
+/* Direction selector - arrow indicators */
+.direction-selector button[data-dir="cw"]::before {
+  content: '↻';
+  margin-right: var(--spacing-xs);
+}
+
+.direction-selector button[data-dir="ccw"]::before {
+  content: '↺';
+  margin-right: var(--spacing-xs);
+}
+
+.direction-selector button[data-dir="alt"]::before {
+  content: '⇄';
+  margin-right: var(--spacing-xs);
+}
+
+.direction-selector button:hover::before {
+  animation: pulse-subtle 1s ease-in-out infinite;
+}
+
+/* Semi-major axis - ellipse stretch visualization */
+.semi-major-slider:hover {
+  transform: scaleY(1.02);
+  transition: transform var(--transition-medium);
+}
