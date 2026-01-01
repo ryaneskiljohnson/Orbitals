@@ -70,8 +70,8 @@ public:
            #if JUCE_ANDROID || JUCE_IOS
             setFullScreen (true);
            #else
-            setResizable (true, true);
-            centreWithSize (1000, 800);
+            setResizable (false, false);  // Fixed size - no resizing
+            centreWithSize (1200, 750);  // Match MainComponent size
            #endif
 
             setVisible (true);
