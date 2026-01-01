@@ -162,18 +162,16 @@ input, textarea, [contenteditable="true"] {
   right: 0;
   bottom: 0;
   background: var(--deep-space);
+  /* Removed background-image from here - it's handled by ::after */
   background-image: 
-    var(--plugin-background-image, none),
     radial-gradient(1px 1px at 20% 30%, white, transparent),
     radial-gradient(1px 1px at 60% 70%, white, transparent),
     radial-gradient(1px 1px at 50% 50%, white, transparent),
     radial-gradient(1px 1px at 80% 10%, white, transparent),
     radial-gradient(1px 1px at 90% 60%, white, transparent);
   background-size: 
-    var(--plugin-background-size, cover),
     200% 200%;
   background-position: 
-    var(--plugin-background-position, center),
     0% 0%;
   background-repeat: no-repeat;
   opacity: 1;
