@@ -10,7 +10,7 @@ function setupEclipseVisualization(canvas) {
     let ctx = CanvasUtils.setupHiDPI(canvas);
     
     const getCanvasSize = () => {
-      const rect = canvas.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect();
       return { width: rect.width, height: rect.height };
     };
     
@@ -394,8 +394,8 @@ function setupControls() {
         const mode = button.dataset.mode;
         if (window.updateMode) window.updateMode(mode);
         sendToJUCE('mode', mode);
-      });
-    });
+  });
+});
   }
 }
 

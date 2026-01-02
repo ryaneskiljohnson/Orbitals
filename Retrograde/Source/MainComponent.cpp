@@ -123,7 +123,7 @@ void MainComponent::loadMainUI()
     {
         DBG ("UI file not found, showing fallback");
         showFallbackUI();
-    }
+     }
 }
 
 void MainComponent::loadHTMLFile (const juce::File& htmlFile)

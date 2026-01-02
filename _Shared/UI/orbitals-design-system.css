@@ -159,8 +159,12 @@ input, textarea, [contenteditable="true"] {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 1200px; /* Fixed width - must match ::after exactly */
+  height: 750px; /* Fixed height - must match ::after exactly */
+  min-width: 1200px;
+  min-height: 750px;
+  max-width: 1200px;
+  max-height: 750px;
   background: var(--deep-space);
   /* Background image must be here too for backdrop-filter visibility (e.g., Totality knob) */
   background-image: 
@@ -171,15 +175,18 @@ input, textarea, [contenteditable="true"] {
     radial-gradient(1px 1px at 80% 10%, white, transparent),
     radial-gradient(1px 1px at 90% 60%, white, transparent);
   background-size: 
-    100% 100%,
+    cover, /* Preserve aspect ratio - must match ::after exactly */
     200% 200%;
   background-position: 
-    0 0,
+    center, /* Center positioning - must match ::after exactly */
     0% 0%;
   background-repeat: no-repeat;
   opacity: 1;
   pointer-events: none;
   z-index: 0;
+  box-sizing: border-box;
+  transform: translateZ(0); /* Match ::after transform to prevent rendering differences */
+  backface-visibility: hidden; /* Match ::after to prevent rendering shifts */
 }
 
 /* Background image layer - separate from base background for better control */
@@ -194,15 +201,15 @@ input, textarea, [contenteditable="true"] {
   min-height: 750px;
   max-width: 1200px;
   max-height: 750px;
+  background: var(--deep-space); /* Match ::before background */
   background-image: var(--plugin-background-image, none);
-  background-size: 100% 100% !important; /* Fill container exactly - no aspect ratio changes */
-  background-position: 0 0 !important; /* Fixed position - top-left, no centering that can shift */
+  background-size: cover !important; /* Preserve aspect ratio - must match ::before exactly */
+  background-position: center !important; /* Center positioning - must match ::before exactly */
   background-repeat: no-repeat;
   opacity: var(--plugin-background-opacity, 0.6);
   pointer-events: none;
   z-index: 0;
   animation: fadeOutBackground 2s ease-out 1.5s forwards; /* Fade out after 1.5s, takes 2s */
-  will-change: opacity; /* Only animate opacity, not position */
   transform: translateZ(0); /* Force hardware acceleration, prevent layout shifts */
   backface-visibility: hidden; /* Prevent rendering shifts */
   box-sizing: border-box;

@@ -18,11 +18,15 @@
         </header>
 
         <main class="plugin-main">
-            <canvas id="ionCanvas"></canvas>
+            <!-- Animation Canvas - Right side -->
+            <div class="animation-panel">
+                <canvas id="ionCanvas"></canvas>
+            </div>
 
-            <div class="controls-magnetic">
+            <!-- Controls Panel - Left side -->
+            <div class="controls-panel">
                 <!-- Scale Selector (Top) -->
-                <div class="control-magnetic-wide" style="grid-row: 1;">
+                <div class="control-section">
                     <label class="control-label">SCALE</label>
                     <div class="scale-selector"
                          data-help-title="SCALE"
@@ -39,32 +43,29 @@
                     </div>
                 </div>
 
-                <!-- Left: Key Center Selector -->
-                <div class="control-magnetic-section" style="grid-column: 1; grid-row: 2;">
-                    <label class="control-label">KEY CENTER</label>
-                    <div class="key-center-selector" id="keyCenterSelector"
-                         data-help-title="CENTER KEY"
-                         data-help-description="Root note of the harmonic field (C, C#, D, etc.). All notes are pulled toward this key.">
-                        <div class="chromatic-wheel"></div>
+                <!-- Root Selector -->
+                <div class="control-section">
+                    <label class="control-label">ROOT</label>
+                    <div class="root-selector" id="rootSelector"
+                         data-help-title="ROOT"
+                         data-help-description="Root note of the scale/mode (C, C#, D, etc.). All notes are pulled toward this root.">
+                        <button data-note="0" class="active">C</button>
+                        <button data-note="1">C#</button>
+                        <button data-note="2">D</button>
+                        <button data-note="3">D#</button>
+                        <button data-note="4">E</button>
+                        <button data-note="5">F</button>
+                        <button data-note="6">F#</button>
+                        <button data-note="7">G</button>
+                        <button data-note="8">G#</button>
+                        <button data-note="9">A</button>
+                        <button data-note="10">A#</button>
+                        <button data-note="11">B</button>
                     </div>
-                    <div class="value-display" id="keyCenterValue">C</div>
                 </div>
 
-                <!-- Center: Field Strength Knob -->
-                <div class="control-magnetic-center">
-                    <label class="control-label">FIELD STRENGTH</label>
-                    <div class="field-strength-knob" id="fieldStrengthKnob" data-param="fieldStrength"
-                         data-help-title="FIELD WIDTH"
-                         data-help-description="Size of the harmonic attraction field. Wider fields allow more note deviation before correction.">
-                        <div class="knob-inner">
-                            <div class="knob-indicator"></div>
-                        </div>
-                    </div>
-                    <div class="value-display large" id="fieldStrengthValue">50%</div>
-                </div>
-
-                <!-- Right: Attraction Type -->
-                <div class="control-magnetic-section" style="grid-column: 3; grid-row: 2;">
+                <!-- Attraction Type -->
+                <div class="control-section">
                     <label class="control-label">ATTRACTION</label>
                     <div class="attraction-type-selector"
                          data-help-title="ATTRACTION"
@@ -73,11 +74,10 @@
                         <button data-type="pull">PULL</button>
                         <button data-type="guide">GUIDE</button>
                     </div>
-                    <div class="value-display" id="attractionValue">SNAP</div>
                 </div>
 
-                <!-- Bottom: Attraction Strength Slider -->
-                <div class="control-magnetic-wide" style="grid-row: 3;">
+                <!-- Attraction Strength Slider -->
+                <div class="control-section">
                     <label class="control-label">ATTRACTION STRENGTH</label>
                     <div class="attraction-slider" id="attractionSlider" data-param="attraction"
                          data-help-title="TENSION"
@@ -86,6 +86,18 @@
                         <div class="slider-handle"></div>
                     </div>
                     <div class="value-display" id="attractionStrengthValue">50%</div>
+                </div>
+
+                <!-- Field Strength Slider -->
+                <div class="control-section">
+                    <label class="control-label">FIELD STRENGTH</label>
+                    <div class="field-strength-slider" id="fieldStrengthSlider" data-param="fieldStrength"
+                         data-help-title="FIELD WIDTH"
+                         data-help-description="Size of the harmonic attraction field. Wider fields allow more note deviation before correction.">
+                        <div class="slider-track"></div>
+                        <div class="slider-handle"></div>
+                    </div>
+                    <div class="value-display" id="fieldStrengthValue">50%</div>
                 </div>
             </div>
         </main>
