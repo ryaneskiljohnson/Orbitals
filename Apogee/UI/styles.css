@@ -30,6 +30,12 @@
   --plugin-background-opacity: 0.6;
 }
 
+/* Keep background image visible at all times (no fade-out) */
+.apogee-theme.plugin-container::after {
+  animation: none !important;
+  opacity: var(--plugin-background-opacity, 0.6) !important;
+}
+
 /* ===================================================================
    APOGEE CANVAS
    =================================================================== */
