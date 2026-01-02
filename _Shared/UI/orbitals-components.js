@@ -822,6 +822,50 @@ function setupHelpToggle() {
   }
 }
 
+/**
+ * @brief Setup bypass toggle button with ON/OFF state
+ * @param {Function} sendToJUCE - Function to send parameter to JUCE
+ */
+function setupBypassToggle(sendToJUCE) {
+  const toggle = document.getElementById('bypassToggle');
+  if (!toggle) return;
+  
+  const textSpan = toggle.querySelector('.bypass-text');
+  if (!textSpan) return;
+  
+  // Initialize state (not bypassed = ON by default)
+  let bypassed = false;
+  updateBypassState(bypassed);
+  
+  toggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    bypassed = !bypassed;
+    updateBypassState(bypassed);
+    
+    // Send to JUCE
+    if (sendToJUCE) {
+      sendToJUCE('bypass', bypassed ? 1 : 0);
+    }
+  });
+  
+  function updateBypassState(isBypassed) {
+    if (isBypassed) {
+      toggle.classList.add('active');
+      textSpan.textContent = 'OFF';
+    } else {
+      toggle.classList.remove('active');
+      textSpan.textContent = 'ON';
+    }
+  }
+  
+  // Expose method to update from JUCE
+  toggle.updateFromJUCE = function(value) {
+    bypassed = value > 0.5;
+    updateBypassState(bypassed);
+  };
+}
+
 /* ===================================================================
    EXPORT FOR USE
    =================================================================== */
@@ -834,4 +878,5 @@ if (typeof window !== 'undefined') {
   window.OrbitalsRangeSlider = OrbitalsRangeSlider;
   window.OrbitalsTooltip = OrbitalsTooltip;
   window.orbitalsTooltip = orbitalsTooltip;
+  window.setupBypassToggle = setupBypassToggle;
 }

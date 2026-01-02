@@ -338,6 +338,11 @@ function setupControls() {
       sendToJUCE('shape', currentShape);
     });
   });
+  
+  // Setup bypass toggle
+  if (window.setupBypassToggle) {
+    window.setupBypassToggle(sendToJUCE);
+  }
 }
 
 /**

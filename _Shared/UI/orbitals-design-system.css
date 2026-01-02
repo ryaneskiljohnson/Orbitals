@@ -1284,7 +1284,10 @@ button:hover::before {
 /* Bypass toggle enhanced */
 .bypass-toggle {
   position: relative;
-  padding: var(--spacing-md) var(--spacing-2xl);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   border: 2px solid var(--glass-border);
@@ -1296,33 +1299,96 @@ button:hover::before {
   letter-spacing: 2px;
   cursor: pointer;
   transition: all var(--transition-medium);
+  user-select: none;
 }
 
+/* Power button icon */
+.bypass-toggle .power-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-medium);
+  flex-shrink: 0;
+}
+
+.bypass-toggle .power-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: all var(--transition-medium);
+}
+
+/* OFF state (bypass ON = processing OFF) - Grey icon */
+.bypass-toggle.active .power-icon svg {
+  stroke: #888888;
+  opacity: 0.6;
+  filter: none;
+  animation: none;
+}
+
+.bypass-toggle.active .bypass-text {
+  color: #888888;
+}
+
+/* ON state (bypass OFF = processing ON) - Colored icon with glow */
+.bypass-toggle:not(.active) .power-icon svg {
+  stroke: var(--plugin-primary, var(--orbit-cyan));
+  opacity: 1;
+  filter: drop-shadow(0 0 6px var(--plugin-glow, rgba(0, 212, 255, 0.5)))
+          drop-shadow(0 0 10px var(--plugin-glow, rgba(0, 212, 255, 0.3)));
+  animation: power-pulse 2s ease-in-out infinite;
+}
+
+.bypass-toggle:not(.active) .bypass-text {
+  color: var(--plugin-primary, var(--orbit-cyan));
+  text-shadow: 0 0 8px var(--plugin-glow, rgba(0, 212, 255, 0.5));
+}
+
+@keyframes power-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px var(--plugin-glow, rgba(0, 212, 255, 0.5)))
+            drop-shadow(0 0 10px var(--plugin-glow, rgba(0, 212, 255, 0.3)));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px var(--plugin-glow, rgba(0, 212, 255, 0.6)))
+            drop-shadow(0 0 14px var(--plugin-glow, rgba(0, 212, 255, 0.4)));
+  }
+}
+
+/* Hover - reduced brightness */
 .bypass-toggle:hover {
   border-color: var(--plugin-primary, var(--orbit-cyan));
-  background: rgba(255, 255, 255, 0.05);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3),
-              0 0 20px var(--plugin-glow, rgba(0, 212, 255, 0.3));
+  background: rgba(255, 255, 255, 0.03);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2),
+              0 0 12px var(--plugin-glow, rgba(0, 212, 255, 0.2));
+}
+
+.bypass-toggle:hover:not(.active) .power-icon svg {
+  filter: drop-shadow(0 0 8px var(--plugin-glow, rgba(0, 212, 255, 0.5)))
+          drop-shadow(0 0 12px var(--plugin-glow, rgba(0, 212, 255, 0.3)));
 }
 
 .bypass-toggle:active {
   transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* Active state = bypass ON (processing disabled) */
 .bypass-toggle.active {
-  background: #ff3333;
-  border-color: #ff6666;
-  color: white;
-  box-shadow: 0 0 25px rgba(255, 51, 51, 0.6),
-              inset 0 0 15px rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--glass-border);
 }
 
 .bypass-toggle.active:hover {
-  background: #ff4444;
-  box-shadow: 0 0 35px rgba(255, 51, 51, 0.8),
-              0 4px 12px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--glass-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* ===================================================================
@@ -1393,13 +1459,18 @@ button:hover::before {
 }
 
 /* All sliders get enhanced hover */
-[class*="slider"]:not(.slider-handle) {
+[class*="slider"]:not(.slider-handle):not(.slider-track) {
   transition: all var(--transition-medium);
 }
 
-[class*="slider"]:hover {
+[class*="slider"]:hover:not(.slider-handle):not(.slider-track) {
   transform: scale(1.02);
   filter: brightness(1.08);
+}
+
+/* Hide track line on hover for horizontal sliders */
+.slider-horizontal:hover::before {
+  opacity: 0;
 }
 
 /* XY pads enhanced */

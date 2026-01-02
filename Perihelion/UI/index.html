@@ -116,7 +116,14 @@
         <footer class="orbitals-footer">
             <button class="bypass-toggle" id="bypassToggle"
                     data-help-title="BYPASS"
-                    data-help-description="Disables all processing and passes MIDI through unaffected. Use to A/B compare or temporarily disable the effect.">BYPASS</button>
+                    data-help-description="Disables all processing and passes MIDI through unaffected. Use to A/B compare or temporarily disable the effect.">
+                <span class="power-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2v10M18 6a9 9 0 1 1-12 0"/>
+                    </svg>
+                </span>
+                <span class="bypass-text">ON</span>
+            </button>
             <div class="info-display">
                 <span id="noteCount">Notes: 0</span>
                 <span id="cpuLoad">CPU: 0%</span>

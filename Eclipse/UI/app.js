@@ -3,7 +3,133 @@ document.addEventListener('DOMContentLoaded', () => {
   if (canvas) setupEclipseVisualization(canvas);
   
   setupControls();
+  setupBackgroundImageMonitoring();
 });
+
+/**
+ * @brief Monitor background image changes to detect scaling, aspect ratio, or position shifts
+ * @note Creates test elements that mirror ::before and ::after pseudo-elements to detect changes
+ */
+function setupBackgroundImageMonitoring() {
+  const container = document.querySelector('.plugin-container');
+  if (!container) return;
+  
+  // Create test elements that mirror the pseudo-elements
+  const testBefore = document.createElement('div');
+  const testAfter = document.createElement('div');
+  
+  // Copy styles from computed styles (we'll set them manually to match pseudo-elements)
+  testBefore.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1200px;
+    height: 750px;
+    background: var(--deep-space);
+    background-image: var(--plugin-background-image, none);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 1;
+    pointer-events: none;
+    z-index: -1000;
+    visibility: hidden;
+  `;
+  
+  testAfter.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1200px;
+    height: 750px;
+    background: var(--deep-space);
+    background-image: var(--plugin-background-image, none);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: -1000;
+    visibility: hidden;
+  `;
+  
+  container.appendChild(testBefore);
+  container.appendChild(testAfter);
+  
+  let lastBeforeSize = null;
+  let lastBeforePosition = null;
+  let lastAfterSize = null;
+  let lastAfterPosition = null;
+  
+  function checkChanges() {
+    const beforeStyle = window.getComputedStyle(testBefore);
+    const afterStyle = window.getComputedStyle(testAfter);
+    
+    const beforeSize = beforeStyle.backgroundSize;
+    const beforePosition = beforeStyle.backgroundPosition;
+    const afterSize = afterStyle.backgroundSize;
+    const afterPosition = afterStyle.backgroundPosition;
+    
+    // Check for changes
+    if (lastBeforeSize && (beforeSize !== lastBeforeSize || beforePosition !== lastBeforePosition)) {
+      console.log('🔴 ::before BACKGROUND CHANGED:', {
+        size: { from: lastBeforeSize, to: beforeSize },
+        position: { from: lastBeforePosition, to: beforePosition },
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    if (lastAfterSize && (afterSize !== lastAfterSize || afterPosition !== lastAfterPosition)) {
+      console.log('🔴 ::after BACKGROUND CHANGED:', {
+        size: { from: lastAfterSize, to: afterSize },
+        position: { from: lastAfterPosition, to: afterPosition },
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    // Log initial values and differences
+    if (!lastBeforeSize) {
+      console.log('📊 Initial ::before background:', { size: beforeSize, position: beforePosition });
+      console.log('📊 Initial ::after background:', { size: afterSize, position: afterPosition });
+      
+      if (beforeSize !== afterSize || beforePosition !== afterPosition) {
+        console.warn('⚠️ INITIAL MISMATCH between ::before and ::after:', {
+          before: { size: beforeSize, position: beforePosition },
+          after: { size: afterSize, position: afterPosition }
+        });
+      }
+    } else {
+      // Check if they differ
+      if (beforeSize !== afterSize || beforePosition !== afterPosition) {
+        console.warn('⚠️ CURRENT MISMATCH between ::before and ::after:', {
+          before: { size: beforeSize, position: beforePosition },
+          after: { size: afterSize, position: afterPosition },
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+    
+    lastBeforeSize = beforeSize;
+    lastBeforePosition = beforePosition;
+    lastAfterSize = afterSize;
+    lastAfterPosition = afterPosition;
+  }
+  
+  // Check immediately and then periodically
+  setTimeout(checkChanges, 100); // Initial check after styles are applied
+  setTimeout(checkChanges, 1600); // Check right before fade starts (1.5s + 100ms)
+  setTimeout(checkChanges, 2000); // Check during fade (1.5s + 500ms)
+  setTimeout(checkChanges, 4000); // Check after fade completes (1.5s + 2s + 500ms)
+  
+  // Also monitor continuously during the fade period
+  let checkInterval = null;
+  setTimeout(() => {
+    checkInterval = setInterval(checkChanges, 100); // Check every 100ms during fade
+    setTimeout(() => {
+      if (checkInterval) clearInterval(checkInterval);
+    }, 4000); // Stop after fade completes
+  }, 1500); // Start monitoring right before fade
+}
 
 function setupEclipseVisualization(canvas) {
   const initCanvas = () => {

@@ -261,4 +261,9 @@ function setupControls() {
       if (window.updateCurveType) window.updateCurveType(curve);
     });
   });
+  
+  // Setup bypass toggle
+  if (window.setupBypassToggle) {
+    window.setupBypassToggle(sendToJUCE);
+  }
 }

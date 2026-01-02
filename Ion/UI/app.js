@@ -426,6 +426,11 @@ function setupControls() {
       sendToJUCE('attractionType', type);
     });
   });
+  
+  // Setup bypass toggle
+  if (window.setupBypassToggle) {
+    window.setupBypassToggle(sendToJUCE);
+  }
 }
 
 

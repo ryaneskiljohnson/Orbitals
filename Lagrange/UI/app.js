@@ -406,6 +406,11 @@ function setupControls() {
       sendToJUCE('microChaos', { x, y });
     }
   });
+  
+  // Setup bypass toggle
+  if (window.setupBypassToggle) {
+    window.setupBypassToggle(sendToJUCE);
+  }
 }
 
 function sendToJUCE(param, value) {

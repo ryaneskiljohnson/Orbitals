@@ -584,4 +584,4 @@ PluginName/
 
 ---
 
-**© 2024 NNAudio - Premium Music Production Tools**
+**© 2026 NNAudio - Premium Music Production Tools**

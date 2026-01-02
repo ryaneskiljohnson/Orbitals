@@ -737,14 +737,10 @@ function setupBiasSlider() {
  * @brief Setup bypass toggle
  */
 function setupBypassToggle() {
-  const toggle = document.getElementById('bypassToggle');
-  let bypassed = false;
-  
-  toggle.addEventListener('click', () => {
-    bypassed = !bypassed;
-    toggle.classList.toggle('active', bypassed);
-    sendParameterToJUCE('bypass', bypassed ? 1 : 0);
-  });
+  // Use shared bypass toggle implementation
+  if (window.setupBypassToggle) {
+    window.setupBypassToggle(sendParameterToJUCE);
+  }
 }
 
 /* ===================================================================

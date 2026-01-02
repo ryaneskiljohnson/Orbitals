@@ -1,10 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
-<JUCERPROJECT id="Apog1" name="Apogee" projectType="guiapp" useAppConfig="0" addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1" version="1.0.0" companyName="YourCompany" companyCopyright="Copyright (c) 2024" companyWebsite="https://yoursite.com" companyEmail="your@email.com" cppLanguageStandard="17">
+<JUCERPROJECT id="Apog1" name="Apogee" projectType="audioplug" useAppConfig="0" addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1" version="1.0.0" companyName="NNAudio" companyCopyright="Copyright (c) 2026" companyWebsite="https://nnaud.io" companyEmail="info@nnaudio.com" cppLanguageStandard="17" pluginFormats="buildAU,buildVST3" pluginCharacteristicsValue="pluginIsMidiEffectPlugin" pluginManufacturerCode="NNau" pluginCode="Apog" bundleIdentifier="com.nnaudio.apogee">
   <MAINGROUP id="Apog1" name="Apogee">
     <GROUP id="{D7F8A864-8ECA-4FE0-8FEC-20B87407D899}" name="Source">
-      <FILE id="Main.cpp" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp" />
-      <FILE id="MainComponent.h" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h" />
-      <FILE id="MainComponent.cpp" name="MainComponent.cpp" compile="1" resource="0" file="Source/MainComponent.cpp" />
+      <FILE id="PluginProcessor.h" name="PluginProcessor.h" compile="0" resource="0" file="Source/PluginProcessor.h" />
+      <FILE id="PluginProcessor.cpp" name="PluginProcessor.cpp" compile="1" resource="0" file="Source/PluginProcessor.cpp" />
+      <FILE id="PluginEditor.h" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h" />
+      <FILE id="PluginEditor.cpp" name="PluginEditor.cpp" compile="1" resource="0" file="Source/PluginEditor.cpp" />
     </GROUP>
     
     <GROUP id="{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}" name="UI">
