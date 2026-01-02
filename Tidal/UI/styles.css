@@ -30,18 +30,24 @@
   --plugin-background-opacity: 0.6;
 }
 
+/* Keep background image visible at all times (no fade-out) */
+.tidal-theme.plugin-container::after {
+  animation: none !important;
+  opacity: var(--plugin-background-opacity, 0.6) !important;
+}
+
 /* ===================================================================
    TIDAL CANVAS
    =================================================================== */
 
 #tidalCanvas {
   position: absolute;
-  top: 0;
+  top: -30px;
   left: 0;
   right: 0;
   bottom: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% + 30px);
   z-index: 0;
   pointer-events: none;
   background: radial-gradient(ellipse at bottom center, rgba(12, 30, 63, 0.4) 0%, transparent 70%);
@@ -61,7 +67,7 @@
   z-index: 10;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr;
   gap: var(--spacing-3xl);
   width: 100%;
   height: 100%;
@@ -74,6 +80,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-md);
+  margin-top: 60px;
 }
 
 .control-wave-center {
@@ -83,7 +90,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-xl);
+  gap: var(--spacing-lg);
 }
 
 .control-wave-wide {
@@ -94,23 +101,34 @@
   gap: var(--spacing-md);
 }
 
+.control-wave-display {
+  grid-column: 1;
+  grid-row: 1 / 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding-top: 0;
+  margin-top: -80px;
+}
+
 /* ===================================================================
    AMPLITUDE KNOB (Large)
    =================================================================== */
 
 .amplitude-knob {
-  width: 170px;
-  height: 170px;
+  width: 120px;
+  height: 120px;
   position: relative;
   cursor: ns-resize;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, rgba(203, 213, 225, 0.25), rgba(59, 130, 246, 0.15) 50%, rgba(30, 64, 175, 0.1) 80%, transparent),
               var(--glass-bg);
   backdrop-filter: var(--glass-blur);
-  border: 5px solid var(--plugin-primary);
-  box-shadow: 0 0 40px var(--plugin-glow),
-              0 0 70px rgba(59, 130, 246, 0.4),
-              inset 0 0 30px rgba(203, 213, 225, 0.15);
+  border: 4px solid var(--plugin-primary);
+  box-shadow: 0 0 30px var(--plugin-glow),
+              0 0 50px rgba(59, 130, 246, 0.4),
+              inset 0 0 20px rgba(203, 213, 225, 0.15);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -120,21 +138,6 @@
   box-shadow: 0 0 50px var(--plugin-glow),
               0 0 90px rgba(59, 130, 246, 0.6),
               inset 0 0 40px rgba(203, 213, 225, 0.25);
-}
-
-.amplitude-knob::before {
-  content: '';
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  height: 44%;
-  background: linear-gradient(to bottom, #ffffff, var(--wave-crest), transparent);
-  border-radius: 3px;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.9),
-              0 0 25px rgba(96, 165, 250, 0.6);
-  transform-origin: bottom center;
 }
 
 /* Lunar rings */
@@ -167,7 +170,7 @@
    =================================================================== */
 
 .wave-shape-display {
-  width: 500px;
+  width: 300px;
   height: 150px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
@@ -177,11 +180,19 @@
   box-shadow: 0 0 25px rgba(59, 130, 246, 0.3),
               inset 0 0 20px rgba(59, 130, 246, 0.1);
   position: relative;
+  transition: all 0.3s ease;
+}
+
+.wave-shape-display:hover {
+  box-shadow: 0 0 35px rgba(59, 130, 246, 0.5),
+              inset 0 0 30px rgba(59, 130, 246, 0.15);
+  border-color: var(--wave-crest);
 }
 
 .wave-shape-display canvas {
   width: 100%;
   height: 100%;
+  display: block;
 }
 
 /* ===================================================================
@@ -205,23 +216,51 @@
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  color: var(--comet-white);
-  font-size: var(--font-size-xs);
+  color: #60a5fa; /* Brighter blue */
+  font-size: var(--font-size-sm); /* Larger font */
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 0 8px rgba(96, 165, 250, 0.5); /* Add glow for legibility */
+}
+
+.tempo-selector button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.tempo-selector button:hover::before {
+  width: 100%;
+  height: 100%;
 }
 
 .tempo-selector button:hover {
   background: rgba(59, 130, 246, 0.15);
   border-color: var(--plugin-primary);
+  transform: scale(1.05);
 }
 
 .tempo-selector button.active {
   background: var(--plugin-primary);
-  color: white;
+  color: #ffffff;
   border-color: var(--plugin-secondary);
   box-shadow: 0 0 12px var(--plugin-glow);
+  transform: scale(1);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.tempo-selector button.active:hover {
+  box-shadow: 0 0 18px var(--plugin-glow);
 }
 
 /* ===================================================================
@@ -229,15 +268,48 @@
    =================================================================== */
 
 .phase-slider {
-  width: 400px;
-  height: 60px;
+  width: 280px;
+  height: 50px;
   position: relative;
-  background: var(--glass-bg);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: var(--glass-blur);
-  border: 2px solid var(--plugin-primary);
+  border: 3px solid var(--plugin-primary);
   border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  overflow: visible;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3),
+              inset 0 0 20px rgba(0, 0, 0, 0.6);
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+/* Fill visualization for phase slider */
+.phase-slider::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--slider-value, 0) * 100%);
+  height: 100%;
+  background: linear-gradient(90deg,
+    rgba(59, 130, 246, 0.3) 0%,
+    rgba(96, 165, 250, 0.5) 50%,
+    rgba(203, 213, 225, 0.6) 100%
+  );
+  border-radius: var(--radius-md);
+  pointer-events: none;
+  transition: none;
+}
+
+.phase-slider .slider-track {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  height: 4px;
+  background: rgba(59, 130, 246, 0.3);
+  pointer-events: none;
 }
 
 .phase-slider .slider-handle {
@@ -245,19 +317,24 @@
   top: 50%;
   left: 0%;
   transform: translate(-50%, -50%);
-  width: 36px;
-  height: 52px;
-  background: linear-gradient(180deg, var(--plugin-accent), var(--plugin-secondary));
+  width: 28px;
+  height: 50px;
+  background: linear-gradient(180deg, #ffffff, var(--wave-crest), var(--plugin-primary));
   border: 3px solid white;
   border-radius: var(--radius-md);
   box-shadow: 0 0 25px var(--plugin-glow),
-              0 4px 15px rgba(0, 0, 0, 0.5);
+              0 4px 15px rgba(0, 0, 0, 0.5),
+              inset 0 1px 3px rgba(255, 255, 255, 0.5);
   cursor: ew-resize;
-  transition: all 0.3s ease;
+  pointer-events: auto;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 2;
 }
 
 .phase-slider .slider-handle:hover {
-  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 0 35px var(--plugin-glow),
+              0 4px 20px rgba(0, 0, 0, 0.7),
+              inset 0 1px 3px rgba(255, 255, 255, 0.7);
 }
 
 /* ===================================================================
@@ -271,10 +348,18 @@
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  color: var(--plugin-secondary);
+  font-size: 18px !important; /* Split between lg and xl */
+  color: #60a5fa !important; /* Brighter blue */
   text-align: center;
   min-width: 70px;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(96, 165, 250, 0.6);
+}
+
+.value-display.large {
+  font-size: 18px !important; /* Same size as regular */
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(96, 165, 250, 0.6);
 }
 
 /* ===================================================================
@@ -352,6 +437,13 @@
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.9),
               0 0 20px var(--plugin-glow);
   transform-origin: bottom center;
+  transition: none; /* Disable transition until initialized */
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Enable transition after initialization */
+.amplitude-knob.initialized .knob-indicator {
   transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -407,6 +499,15 @@
   animation: lunar-shimmer 3s ease-in-out infinite;
 }
 
+@keyframes pulse-subtle {
+  0%, 100% {
+    box-shadow: 0 0 12px var(--plugin-glow);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--plugin-glow), 0 0 30px rgba(59, 130, 246, 0.4);
+  }
+}
+
 /* Phase slider - flow indicator */
 .phase-slider .slider-handle::before {
   content: '';
@@ -424,10 +525,24 @@
 .phase-slider:hover .slider-handle::before {
   opacity: 1;
   left: -25px;
-  animation: pulse-subtle 1.5s ease-in-out infinite;
 }
 
 /* Tempo selector - beat pulse */
 .tempo-selector button.active {
-  animation: pulse-subtle 1s ease-in-out infinite;
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Value displays - glow on hover */
+.value-display {
+  transition: all 0.2s ease;
+  font-size: 18px !important; /* Ensure consistent size */
+}
+
+.value-display.large {
+  font-size: 18px !important; /* Same size as regular */
+}
+
+.value-display:hover {
+  box-shadow: 0 0 15px var(--plugin-glow);
+  border-color: var(--wave-crest);
 }

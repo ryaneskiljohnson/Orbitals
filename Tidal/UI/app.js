@@ -87,8 +87,10 @@ function setupTidalVisualization(canvas) {
     let canvasSize = getCanvasSize();
     let phase = 0;
     const particles = [];
-    let strengthValue = 50;
+    let amplitudeValue = 50;
     let phaseValue = 0;
+    let rateValue = '1/4'; // Tempo rate
+    let shapeValue = 'sine'; // Wave shape
     
     // Handle resize
     const resizeObserver = new ResizeObserver(() => {
@@ -100,8 +102,10 @@ function setupTidalVisualization(canvas) {
     resizeObserver.observe(canvas);
     
     // Expose control updaters
-    window.updateStrengthValue = (value) => { strengthValue = value; };
+    window.updateAmplitude = (value) => { amplitudeValue = value; };
     window.updatePhaseValue = (value) => { phaseValue = value; };
+    window.updateRate = (value) => { rateValue = value; };
+    window.updateShape = (value) => { shapeValue = value; };
     
     animationManager.add('tidal-wave', (deltaTime, time) => {
       canvasSize = getCanvasSize();
@@ -109,13 +113,43 @@ function setupTidalVisualization(canvas) {
       ctx.fillStyle = 'rgba(10, 10, 15, 0.12)';
       ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
       
-      // Update phase
-      phase += 0.015;
+      // Calculate rate multiplier (faster rates = faster animation)
+      let rateMultiplier = 1;
+      if (rateValue === '1/4') rateMultiplier = 0.5;  // Slowest
+      else if (rateValue === '1/8') rateMultiplier = 1;
+      else if (rateValue === '1/16') rateMultiplier = 2;
+      else if (rateValue === '1/32') rateMultiplier = 4;  // Fastest
+      
+      // Update phase based on rate
+      phase += 0.015 * rateMultiplier;
       const globalPhase = phase + (phaseValue / 360) * Math.PI * 2;
       
       // Draw wave lines (multiple layers)
-      const amplitude = 30 + (strengthValue / 100) * 40; // 30-70px based on strength
+      const amplitude = 30 + (amplitudeValue / 100) * 40; // 30-70px based on amplitude
       const centerY = canvasSize.height / 2;
+      
+      // Wave function based on shape
+      const getWaveY = (x, phaseOffset) => {
+        const normalizedX = (x / canvasSize.width) * Math.PI * 4 + globalPhase + phaseOffset;
+        let y;
+        
+        if (shapeValue === 'sine') {
+          y = Math.sin(normalizedX) * amplitude;
+        } else if (shapeValue === 'triangle') {
+          const trianglePhase = (normalizedX / (Math.PI * 2)) % 1;
+          y = (trianglePhase < 0.5 ? trianglePhase * 4 - 1 : 3 - trianglePhase * 4) * amplitude;
+        } else if (shapeValue === 'saw') {
+          const sawPhase = (normalizedX / (Math.PI * 2)) % 1;
+          y = (sawPhase * 2 - 1) * amplitude;
+        } else if (shapeValue === 'square') {
+          const squarePhase = (normalizedX / (Math.PI * 2)) % 1;
+          y = (squarePhase < 0.5 ? -1 : 1) * amplitude;
+        } else {
+          y = Math.sin(normalizedX) * amplitude; // Default to sine
+        }
+        
+        return centerY + y;
+      };
       
       for (let layer = 0; layer < 3; layer++) {
         const layerAlpha = 0.4 - layer * 0.1;
@@ -127,7 +161,7 @@ function setupTidalVisualization(canvas) {
         ctx.beginPath();
         
         for (let x = 0; x < canvasSize.width; x += 2) {
-          const y = centerY + layerOffset + Math.sin(x * 0.015 + globalPhase + layer * 0.5) * amplitude;
+          const y = getWaveY(x, layer * 0.5) + layerOffset;
           if (x === 0) ctx.moveTo(x, y);
           else ctx.lineTo(x, y);
         }
@@ -135,35 +169,13 @@ function setupTidalVisualization(canvas) {
         ctx.restore();
       }
       
-      // Draw moon (lunar influence)
-      const moonX = canvasSize.width - 80;
-      const moonY = 60 + Math.sin(time * 0.0005) * 10;
-      const moonGradient = ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, 35);
-      moonGradient.addColorStop(0, '#cbd5e1');
-      moonGradient.addColorStop(0.6, 'rgba(203, 213, 225, 0.4)');
-      moonGradient.addColorStop(1, 'rgba(203, 213, 225, 0)');
-      ctx.fillStyle = moonGradient;
-      ctx.beginPath();
-      ctx.arc(moonX, moonY, 35, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Moon core
-      ctx.save();
-      ctx.shadowColor = '#cbd5e1';
-      ctx.shadowBlur = 20;
-      ctx.fillStyle = '#cbd5e1';
-      ctx.beginPath();
-      ctx.arc(moonX, moonY, 20, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      
-      // Emit wave particles
-      const emissionChance = 0.1 + (strengthValue / 100) * 0.2;
+      // Emit wave particles - affected by amplitude and rate
+      const emissionChance = (0.1 + (amplitudeValue / 100) * 0.2) * rateMultiplier;
       if (Math.random() < emissionChance) {
         particles.push(new WaveParticle(0, centerY, {
-          vx: 1.5 + Math.random() * 1,
+          vx: (1.5 + Math.random() * 1) * rateMultiplier, // Faster particles for faster rates
           amplitude: amplitude,
-          frequency: 0.015,
+          frequency: 0.015 * rateMultiplier, // Frequency affected by rate
           phase: Math.random() * Math.PI * 2,
           size: 2 + Math.random() * 2,
           color: ColorUtils.hslToRgb(200 + Math.random() * 20, 80, 50 + Math.random() * 20),
@@ -172,12 +184,22 @@ function setupTidalVisualization(canvas) {
         }));
       }
       
-      // Update and draw particles
+      // Update and draw particles - particles follow the wave shape
       for (let i = particles.length - 1; i >= 0; i--) {
-        if (!particles[i].update(deltaTime, globalPhase) || particles[i].x > canvasSize.width + 50) {
-          particles.splice(i, 1);
+        const particle = particles[i];
+        if (particle.update) {
+          // Update particle
+          const stillAlive = particle.update(deltaTime, globalPhase);
+          if (!stillAlive || particle.x > canvasSize.width + 50) {
+            particles.splice(i, 1);
+          } else {
+            // Adjust particle baseY to follow wave shape
+            const waveY = getWaveY(particle.x, particle.phase || 0);
+            particle.baseY = waveY;
+            particle.draw(ctx);
+          }
         } else {
-          particles[i].draw(ctx);
+          particles.splice(i, 1);
         }
       }
     });
@@ -191,19 +213,140 @@ function setupTidalVisualization(canvas) {
 }
 
 function setupControls() {
-  new OrbitalsKnob(document.getElementById('phaseKnob'), {
-    min: 0, max: 360, value: 0,
-    onChange: (v) => {
-      document.getElementById('phaseValue').textContent = Math.round(v) + '°';
-      if (window.updatePhaseValue) window.updatePhaseValue(v);
-    }
+  let currentShape = 'sine';
+  let currentAmplitude = 50;
+  let currentPhase = 0;
+  
+  // Setup wave shape canvas
+  const waveShapeCanvas = document.getElementById('waveShapeCanvas');
+  if (waveShapeCanvas) {
+    let waveCtx = CanvasUtils.setupHiDPI(waveShapeCanvas);
+    
+    const drawWaveShape = () => {
+      const rect = waveShapeCanvas.getBoundingClientRect();
+      waveCtx.clearRect(0, 0, rect.width, rect.height);
+      
+      const centerY = rect.height / 2;
+      const amplitude = (currentAmplitude / 100) * (rect.height * 0.35);
+      const phase = (currentPhase / 360) * Math.PI * 2;
+      
+      // Draw grid lines
+      waveCtx.strokeStyle = 'rgba(59, 130, 246, 0.15)';
+      waveCtx.lineWidth = 1;
+      waveCtx.beginPath();
+      waveCtx.moveTo(0, centerY);
+      waveCtx.lineTo(rect.width, centerY);
+      waveCtx.stroke();
+      
+      // Draw wave
+      waveCtx.strokeStyle = '#60a5fa';
+      waveCtx.lineWidth = 3;
+      waveCtx.shadowColor = '#60a5fa';
+      waveCtx.shadowBlur = 10;
+      waveCtx.beginPath();
+      
+      for (let x = 0; x < rect.width; x++) {
+        const progress = x / rect.width;
+        let y;
+        
+        if (currentShape === 'sine') {
+          y = centerY + Math.sin(progress * Math.PI * 4 + phase) * amplitude;
+        } else if (currentShape === 'triangle') {
+          const trianglePhase = (progress * 4 + phase / (Math.PI * 2)) % 1;
+          y = centerY + (trianglePhase < 0.5 ? trianglePhase * 4 - 1 : 3 - trianglePhase * 4) * amplitude;
+        } else if (currentShape === 'saw') {
+          const sawPhase = (progress * 4 + phase / (Math.PI * 2)) % 1;
+          y = centerY + (sawPhase * 2 - 1) * amplitude;
+        } else if (currentShape === 'square') {
+          const squarePhase = (progress * 4 + phase / (Math.PI * 2)) % 1;
+          y = centerY + (squarePhase < 0.5 ? -1 : 1) * amplitude;
+        }
+        
+        if (x === 0) waveCtx.moveTo(x, y);
+        else waveCtx.lineTo(x, y);
+      }
+      waveCtx.stroke();
+      
+      // Draw fill
+      waveCtx.fillStyle = 'rgba(96, 165, 250, 0.1)';
+      waveCtx.lineTo(rect.width, centerY);
+      waveCtx.lineTo(0, centerY);
+      waveCtx.fill();
+    };
+    
+    // Animate wave shape
+    const animateWave = () => {
+      drawWaveShape();
+      requestAnimationFrame(animateWave);
+    };
+    animateWave();
+  }
+  
+  // Amplitude Knob
+  const amplitudeKnob = document.getElementById('amplitudeKnob');
+  if (amplitudeKnob) {
+    const knob = new OrbitalsKnob(amplitudeKnob, {
+      min: 0, max: 100, value: 50,
+      onChange: (v) => {
+        currentAmplitude = v;
+        document.getElementById('amplitudeValue').textContent = Math.round(v) + '%';
+        if (window.updateAmplitude) window.updateAmplitude(v);
+        sendToJUCE('amplitude', v);
+      }
+    });
+    // Mark as initialized to prevent initial snap animation
+    amplitudeKnob.classList.add('initialized');
+  }
+  
+  // Phase Slider
+  const phaseSlider = document.getElementById('phaseSlider');
+  if (phaseSlider) {
+    const slider = new OrbitalsSlider(phaseSlider, {
+      min: 0, max: 360, value: 0,
+      orientation: 'horizontal',
+      onChange: (v) => {
+        currentPhase = v;
+        document.getElementById('phaseValue').textContent = Math.round(v) + '°';
+        if (window.updatePhaseValue) window.updatePhaseValue(v);
+        sendToJUCE('phase', v);
+      }
+    });
+    // Ensure initial value is set for fill
+    slider.updatePosition();
+  }
+  
+  // Rate/Tempo Selector
+  const tempoButtons = document.querySelectorAll('.tempo-selector[data-help-title="CYCLE LENGTH"] button');
+  tempoButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      tempoButtons.forEach(b => b.classList.remove('active'));
+      button.classList.add('active');
+      const tempo = button.dataset.tempo;
+      if (window.updateRate) window.updateRate(tempo);
+      sendToJUCE('rate', tempo);
+    });
   });
   
-  new OrbitalsKnob(document.getElementById('strengthKnob'), {
-    min: 0, max: 100, value: 50,
-    onChange: (v) => {
-      document.getElementById('strengthValue').textContent = Math.round(v) + '%';
-      if (window.updateStrengthValue) window.updateStrengthValue(v);
-    }
+  // Shape Selector
+  const shapeButtons = document.querySelectorAll('.tempo-selector[data-help-title="FLOW"] button');
+  shapeButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      shapeButtons.forEach(b => b.classList.remove('active'));
+      button.classList.add('active');
+      currentShape = button.dataset.shape;
+      if (window.updateShape) window.updateShape(currentShape);
+      sendToJUCE('shape', currentShape);
+    });
   });
+}
+
+/**
+ * @brief Sends parameter changes to JUCE
+ * @param {string} param - Parameter name
+ * @param {*} value - Parameter value
+ */
+function sendToJUCE(param, value) {
+  if (window.chrome?.webview) {
+    window.chrome.webview.postMessage({ type: 'parameterChange', parameter: param, value });
+  }
 }

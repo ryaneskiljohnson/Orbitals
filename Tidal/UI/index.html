@@ -21,8 +21,8 @@
             <canvas id="tidalCanvas"></canvas>
 
             <div class="controls-wave">
-                <!-- Wave Shape Display (Top) -->
-                <div class="control-wave-wide" style="grid-row: 1;">
+                <!-- Wave Shape Display (Top Left) -->
+                <div class="control-wave-display">
                     <label class="control-label">WAVE SHAPE</label>
                     <div class="wave-shape-display">
                         <canvas id="waveShapeCanvas"></canvas>
@@ -40,38 +40,8 @@
                         </div>
                     </div>
                     <div class="value-display large" id="amplitudeValue">50%</div>
-                </div>
-
-                <!-- Left: Frequency/Rate -->
-                <div class="control-wave-section" style="grid-column: 1; grid-row: 2;">
-                    <label class="control-label">RATE</label>
-                    <div class="tempo-selector"
-                         data-help-title="CYCLE LENGTH"
-                         data-help-description="Tempo-synced rate of the tidal cycle. Faster rates create quicker rhythmic modulation.">
-                        <button data-tempo="1/4" class="active">1/4</button>
-                        <button data-tempo="1/8">1/8</button>
-                        <button data-tempo="1/16">1/16</button>
-                        <button data-tempo="1/32">1/32</button>
-                    </div>
-                    <div class="value-display" id="rateValue">1/4</div>
-                </div>
-
-                <!-- Right: Shape selector -->
-                <div class="control-wave-section" style="grid-column: 3; grid-row: 2;">
-                    <label class="control-label">SHAPE</label>
-                    <div class="tempo-selector"
-                         data-help-title="FLOW"
-                         data-help-description="Wave shape for different groove feels. SINE for smooth, TRI for balanced, SAW for ramp, SQR for stepped.">
-                        <button data-shape="sine" class="active">SINE</button>
-                        <button data-shape="triangle">TRI</button>
-                        <button data-shape="saw">SAW</button>
-                        <button data-shape="square">SQR</button>
-                    </div>
-                    <div class="value-display" id="shapeValue">SINE</div>
-                </div>
-
-                <!-- Bottom: Phase Slider -->
-                <div class="control-wave-wide" style="grid-row: 3;">
+                    
+                    <!-- Phase Offset Slider -->
                     <label class="control-label">PHASE OFFSET</label>
                     <div class="phase-slider" id="phaseSlider" data-param="phase"
                          data-help-title="PHASE"
@@ -81,6 +51,33 @@
                     </div>
                     <div class="value-display" id="phaseValue">0°</div>
                 </div>
+
+                <!-- Left: Shape selector -->
+                <div class="control-wave-section" style="grid-column: 1; grid-row: 2;">
+                    <label class="control-label">SHAPE</label>
+                    <div class="tempo-selector"
+                         data-help-title="FLOW"
+                         data-help-description="Wave shape for different groove feels. SINE for smooth, TRI for balanced, SAW for ramp, SQR for stepped.">
+                        <button data-shape="sine" class="active">SINE</button>
+                        <button data-shape="triangle">TRI</button>
+                        <button data-shape="saw">SAW</button>
+                        <button data-shape="square">SQR</button>
+                    </div>
+                </div>
+
+                <!-- Right: Frequency/Rate -->
+                <div class="control-wave-section" style="grid-column: 3; grid-row: 2;">
+                    <label class="control-label">RATE</label>
+                    <div class="tempo-selector"
+                         data-help-title="CYCLE LENGTH"
+                         data-help-description="Tempo-synced rate of the tidal cycle. Faster rates create quicker rhythmic modulation.">
+                        <button data-tempo="1/4" class="active">1/4</button>
+                        <button data-tempo="1/8">1/8</button>
+                        <button data-tempo="1/16">1/16</button>
+                        <button data-tempo="1/32">1/32</button>
+                    </div>
+                </div>
+
             </div>
         </main>
 
