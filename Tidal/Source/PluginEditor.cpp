@@ -172,7 +172,7 @@ void TidalAudioProcessorEditor::handleJavaScriptMessage (const juce::var& messag
         {
             auto* p = audioProcessor.parameters.getParameter(TidalAudioProcessor::PARAM_AMPLITUDE);
             if (p != nullptr)
-                p->setValueNotifyingHost(value / 100.0f);
+                p->setValueNotifyingHost((float)value / 100.0f);
         }
         else if (param == "phase")
         {
