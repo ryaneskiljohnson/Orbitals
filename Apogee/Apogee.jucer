@@ -6,7 +6,7 @@
       <FILE id="PluginProcessor.cpp" name="PluginProcessor.cpp" compile="1" resource="0" file="Source/PluginProcessor.cpp" />
       <FILE id="PluginEditor.h" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h" />
       <FILE id="PluginEditor.cpp" name="PluginEditor.cpp" compile="1" resource="0" file="Source/PluginEditor.cpp" />
-    </GROUP>
+    <FILE id="HubAuthComponent_h" name="HubAuthComponent.h" compile="0" resource="0" file="../_Shared/Authentication/HubAuthComponent.h" /><FILE id="HubAuthComponent_cpp" name="HubAuthComponent.cpp" compile="1" resource="0" file="../_Shared/Authentication/HubAuthComponent.cpp" /></GROUP>
     
     <GROUP id="{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}" name="UI">
       <FILE id="app_js" name="app.js" compile="0" resource="1" file="UI/app.js" />
