@@ -76,7 +76,7 @@ private:
     struct NoteInfo
     {
         juce::MidiMessage message;
-        int relativePosition;
+        int samplePosition;
         double timestamp;
     };
     std::deque<NoteInfo> noteBuffer;
