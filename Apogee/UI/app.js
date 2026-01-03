@@ -241,8 +241,28 @@ function setupControls() {
     onChange: (v) => {
       document.getElementById('ceilingValue').textContent = Math.round(v);
       if (window.updateCeilingValue) window.updateCeilingValue(v);
+      
+      // Update background image brightness based on ceiling value
+      // Map 1-127 to brightness: lower values = darker, higher values = brighter
+      const normalized = (v - 1) / 126; // 0 to 1
+      const brightness = 60 + (normalized * 40); // 60% to 100% brightness
+      
+      // Apply brightness filter to background image via CSS variable
+      const container = document.querySelector('.apogee-theme.plugin-container');
+      if (container) {
+        container.style.setProperty('--ceiling-brightness', `${brightness}`);
+      }
     }
   });
+  
+  // Set initial ceiling value for background brightness
+  const initialCeiling = 127;
+  const normalized = (initialCeiling - 1) / 126;
+  const brightness = 60 + (normalized * 40); // 60% to 100% brightness
+  const container = document.querySelector('.apogee-theme.plugin-container');
+  if (container) {
+    container.style.setProperty('--ceiling-brightness', `${brightness}`);
+  }
   
   new OrbitalsKnob(document.getElementById('momentumKnob'), {
     min: 0, max: 100, value: 50,

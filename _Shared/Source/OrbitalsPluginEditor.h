@@ -48,8 +48,19 @@ public:
         auto designSystemFile = sharedDir.getChildFile("orbitals-design-system.css");
         if (designSystemFile.existsAsFile())
         {
+            auto designSystemContent = designSystemFile.loadFileAsString();
+            
+            // Replace logo image path with relative path for temp directory
+            // Handle both single and double quotes
+            juce::String logoPattern = "../../_Shared/Assets/logos/nnaudio-logo.png";
+            juce::String logoOldPattern1 = "url('" + logoPattern + "')";
+            juce::String logoOldPattern2 = "url(\"" + logoPattern + "\")";
+            juce::String logoNewPattern = "url('nnaudio-logo.png')";
+            designSystemContent = designSystemContent.replace (logoOldPattern1, logoNewPattern);
+            designSystemContent = designSystemContent.replace (logoOldPattern2, logoNewPattern);
+            
             htmlContent = htmlContent.replace("<link rel=\"stylesheet\" href=\"../../_Shared/UI/orbitals-design-system.css\">",
-                                             "<style>" + designSystemFile.loadFileAsString() + "</style>");
+                                             "<style>" + designSystemContent + "</style>");
         }
         
         // Inline plugin-specific JS

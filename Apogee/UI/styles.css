@@ -28,12 +28,20 @@
   /* Background image */
   --plugin-background-image: url('../../_Shared/Assets/backgrounds/apogee-background.png');
   --plugin-background-opacity: 0.6;
+  
+  /* Ceiling-based tint (updated by JavaScript) */
+  --ceiling-hue: 0deg;
+  --ceiling-saturation: 100;
+  --ceiling-lightness: 100;
 }
 
 /* Keep background image visible at all times (no fade-out) */
 .apogee-theme.plugin-container::after {
   animation: none !important;
   opacity: var(--plugin-background-opacity, 0.6) !important;
+  /* Ceiling-based brightness */
+  filter: brightness(calc(var(--ceiling-brightness, 100) * 1%));
+  transition: filter 0.3s ease;
 }
 
 /* ===================================================================
@@ -94,7 +102,7 @@
 .control-center {
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 65%;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
@@ -121,17 +129,18 @@
    =================================================================== */
 
 .slider-vertical-tall {
-  width: 64px;
+  width: 24px;
   height: 380px;
   position: relative;
   border-radius: var(--radius-lg);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
-  border: 3px solid var(--plugin-primary);
+  border: 2px solid var(--plugin-primary);
   overflow: hidden;
   box-shadow: 0 0 25px rgba(0, 212, 255, 0.4),
               inset 0 0 20px rgba(0, 212, 255, 0.1);
   transition: all var(--transition-medium);
+  box-sizing: content-box;
 }
 
 .slider-vertical-tall:hover {
@@ -208,15 +217,16 @@
 
 .slider-horizontal-limiter {
   width: 400px;
-  height: 60px;
+  height: 24px;
   position: relative;
   border-radius: var(--radius-lg);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   border: 2px solid var(--plugin-primary);
-  overflow: visible;
+  overflow: hidden;
   box-shadow: 0 0 20px rgba(0, 212, 255, 0.3),
               inset 0 0 15px rgba(0, 212, 255, 0.1);
+  box-sizing: content-box;
 }
 
 .slider-horizontal-limiter::before {
@@ -237,15 +247,19 @@
 
 /* Full-height rounded rectangle handle for ceiling slider */
 .slider-horizontal-limiter .slider-handle {
-  width: 24px;
+  width: 28px;
   height: 100%;
   top: 0;
   background: linear-gradient(180deg, var(--plugin-accent), var(--plugin-primary));
   border-radius: var(--radius-md);
-  border: 3px solid white;
+  border: 2px solid white;
   cursor: ew-resize;
   transition: none !important;
   will-change: left;
+  transform: translateX(-50%);
+  z-index: 10;
+  box-sizing: border-box;
+  pointer-events: auto;
 }
 
 /* ===================================================================
@@ -257,10 +271,11 @@
   gap: var(--spacing-xs);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
-  border: 2px solid var(--plugin-primary);
+  border: 3px solid var(--plugin-primary);
   border-radius: var(--radius-md);
   padding: var(--spacing-xs);
-  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.4),
+              0 0 30px rgba(0, 212, 255, 0.2);
 }
 
 .curve-selector button {
@@ -412,12 +427,23 @@
 .slider-handle {
   position: absolute;
   background: radial-gradient(circle at 30% 30%, #ffffff, var(--plugin-secondary) 40%, var(--plugin-primary));
-  border: 3px solid white;
+  border: 2px solid white;
   border-radius: 50%;
   box-shadow: 0 0 20px var(--plugin-glow),
               inset 0 0 15px rgba(255, 255, 255, 0.2);
   cursor: grab;
   transition: all 0.3s ease;
+}
+
+/* Vertical slider handle - slightly larger than slider width */
+.slider-vertical-tall .slider-handle {
+  width: 28px;
+  height: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  box-sizing: border-box;
+  pointer-events: auto;
 }
 
 .slider-handle:hover {

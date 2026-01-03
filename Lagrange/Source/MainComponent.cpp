@@ -138,14 +138,56 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
     auto htmlContent = htmlFile.loadFileAsString();
     auto uiDir = htmlFile.getParentDirectory();
     
-    // Inline CSS
+    // Inline JavaScript files first
+    auto jsFile = uiDir.getChildFile ("app.js");
+    if (jsFile.existsAsFile())
+    {
+        auto jsContent = jsFile.loadFileAsString();
+        htmlContent = htmlContent.replace ("<script src=\"app.js\"></script>",
+                                           "<script>" + jsContent + "</script>");
+        htmlContent = htmlContent.replace ("<script src='app.js'></script>",
+                                           "<script>" + jsContent + "</script>");
+    }
+    
+    // Inline shared CSS and JS from _Shared/UI (load FIRST so plugin CSS can override)
+    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+    auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
+    
+    // Shared CSS
+    auto sharedCSS = sharedDir.getChildFile ("orbitals-design-system.css");
+    if (sharedCSS.existsAsFile())
+    {
+        auto sharedCSSContent = sharedCSS.loadFileAsString();
+        
+        // Replace logo image path with relative path for temp directory
+        // Handle both single and double quotes
+        juce::String logoPattern = "../../_Shared/Assets/logos/nnaudio-logo.png";
+        juce::String logoOldPattern1 = "url('" + logoPattern + "')";
+        juce::String logoOldPattern2 = "url(\"" + logoPattern + "\")";
+        juce::String logoNewPattern = "url('nnaudio-logo.png')";
+        sharedCSSContent = sharedCSSContent.replace (logoOldPattern1, logoNewPattern);
+        sharedCSSContent = sharedCSSContent.replace (logoOldPattern2, logoNewPattern);
+        
+        // Remove the link tag and add shared CSS first
+        htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"../../_Shared/UI/orbitals-design-system.css\">", "");
+        htmlContent = htmlContent.replace ("<link rel='stylesheet' href='../../_Shared/UI/orbitals-design-system.css'>", "");
+        
+        int headEnd = htmlContent.indexOf ("</head>");
+        if (headEnd > 0)
+        {
+            htmlContent = htmlContent.substring (0, headEnd) + 
+                         "<style>" + sharedCSSContent + "</style>" +
+                         htmlContent.substring (headEnd);
+        }
+    }
+    
+    // Inline plugin CSS LAST so it can override shared CSS
     auto cssFile = uiDir.getChildFile ("styles.css");
     if (cssFile.existsAsFile())
     {
         auto cssContent = cssFile.loadFileAsString();
         
         // Replace relative background image paths with absolute file:// URLs
-        auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
         auto backgroundsDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("backgrounds");
         
         // Find and replace background image URLs - copy to temp dir and use relative path
@@ -168,44 +210,15 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
             DBG ("Background image file not found: " + imageFile.getFullPathName());
         }
         
-        htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"styles.css\">",
-                                           "<style>" + cssContent + "</style>");
-        htmlContent = htmlContent.replace ("<link rel='stylesheet' href='styles.css'>",
-                                           "<style>" + cssContent + "</style>");
-    }
-    
-    // Inline JavaScript files
-    auto jsFile = uiDir.getChildFile ("app.js");
-    if (jsFile.existsAsFile())
-    {
-        auto jsContent = jsFile.loadFileAsString();
-        htmlContent = htmlContent.replace ("<script src=\"app.js\"></script>",
-                                           "<script>" + jsContent + "</script>");
-        htmlContent = htmlContent.replace ("<script src='app.js'></script>",
-                                           "<script>" + jsContent + "</script>");
-    }
-    
-    // Inline shared CSS and JS from _Shared/UI
-    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
-    auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
-    
-    // Shared CSS
-    auto sharedCSS = sharedDir.getChildFile ("orbitals-design-system.css");
-    if (sharedCSS.existsAsFile())
-    {
-        auto sharedCSSContent = sharedCSS.loadFileAsString();
-        
-        // Replace logo image path with relative path for temp directory
-        juce::String logoPattern = "../../_Shared/Assets/logos/nnaudio-logo.png";
-        juce::String logoOldPattern = "url('" + logoPattern + "')";
-        juce::String logoNewPattern = "url('nnaudio-logo.png')";
-        sharedCSSContent = sharedCSSContent.replace (logoOldPattern, logoNewPattern);
+        // Remove the link tag and add plugin CSS AFTER shared CSS
+        htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"styles.css\">", "");
+        htmlContent = htmlContent.replace ("<link rel='stylesheet' href='styles.css'>", "");
         
         int headEnd = htmlContent.indexOf ("</head>");
         if (headEnd > 0)
         {
             htmlContent = htmlContent.substring (0, headEnd) + 
-                         "<style>" + sharedCSSContent + "</style>" +
+                         "<style>" + cssContent + "</style>" +
                          htmlContent.substring (headEnd);
         }
     }

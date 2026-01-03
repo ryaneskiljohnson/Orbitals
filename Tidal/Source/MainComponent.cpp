@@ -187,10 +187,13 @@ void MainComponent::loadHTMLFile (const juce::File& htmlFile)
         auto sharedCSSContent = sharedCSS.loadFileAsString();
         
         // Replace logo image path with relative path for temp directory
+        // Handle both single and double quotes
         juce::String logoPattern = "../../_Shared/Assets/logos/nnaudio-logo.png";
-        juce::String logoOldPattern = "url('" + logoPattern + "')";
+        juce::String logoOldPattern1 = "url('" + logoPattern + "')";
+        juce::String logoOldPattern2 = "url(\"" + logoPattern + "\")";
         juce::String logoNewPattern = "url('nnaudio-logo.png')";
-        sharedCSSContent = sharedCSSContent.replace (logoOldPattern, logoNewPattern);
+        sharedCSSContent = sharedCSSContent.replace (logoOldPattern1, logoNewPattern);
+        sharedCSSContent = sharedCSSContent.replace (logoOldPattern2, logoNewPattern);
         
         int headEnd = htmlContent.indexOf ("</head>");
         if (headEnd > 0)

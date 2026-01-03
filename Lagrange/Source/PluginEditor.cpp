@@ -108,6 +108,16 @@ void LagrangeAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
     if (designSystemFile.existsAsFile())
     {
         auto designSystemContent = designSystemFile.loadFileAsString();
+        
+        // Replace logo image path with relative path for temp directory
+        // Handle both single and double quotes
+        juce::String logoPattern = "../../_Shared/Assets/logos/nnaudio-logo.png";
+        juce::String logoOldPattern1 = "url('" + logoPattern + "')";
+        juce::String logoOldPattern2 = "url(\"" + logoPattern + "\")";
+        juce::String logoNewPattern = "url('nnaudio-logo.png')";
+        designSystemContent = designSystemContent.replace (logoOldPattern1, logoNewPattern);
+        designSystemContent = designSystemContent.replace (logoOldPattern2, logoNewPattern);
+        
         htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"../../_Shared/UI/orbitals-design-system.css\">",
                                            "<style>" + designSystemContent + "</style>");
     }
@@ -173,6 +183,15 @@ void LagrangeAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
     auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
         .getChildFile("LagrangeUI_" + juce::String(juce::Time::currentTimeMillis()));
     tempDir.createDirectory();
+    
+    // Copy logo image to temp directory if it exists
+    auto logosDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("logos");
+    auto logoFile = logosDir.getChildFile ("nnaudio-logo.png");
+    if (logoFile.existsAsFile())
+    {
+        auto tempLogoFile = tempDir.getChildFile ("nnaudio-logo.png");
+        logoFile.copyFileTo (tempLogoFile);
+    }
     
     auto tempFile = tempDir.getChildFile("index.html");
     tempFile.replaceWithText(htmlContent);

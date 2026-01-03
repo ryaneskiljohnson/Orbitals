@@ -74,6 +74,16 @@ void EclipseAudioProcessorEditor::loadWebUI()
         .getChildFile("EclipseUI_" + juce::String(juce::Time::currentTimeMillis()));
     tempDir.createDirectory();
     
+    // Copy logo image to temp directory if it exists
+    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+    auto logosDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("logos");
+    auto logoFile = logosDir.getChildFile ("nnaudio-logo.png");
+    if (logoFile.existsAsFile())
+    {
+        auto tempLogoFile = tempDir.getChildFile ("nnaudio-logo.png");
+        logoFile.copyFileTo (tempLogoFile);
+    }
+    
     auto tempFile = tempDir.getChildFile("index.html");
     tempFile.replaceWithText(htmlContent);
     

@@ -269,13 +269,17 @@ input, textarea, [contenteditable="true"] {
   transition: var(--transition-medium);
   opacity: 0.9;
   cursor: pointer;
-  position: relative;
+  position: absolute;
+  left: calc(var(--spacing-lg) - 15px);
+  top: 50%;
+  transform: translateY(-50%);
   grid-column: 1;
+  margin: 0;
 }
 
 .orbitals-logo:hover {
   opacity: 1;
-  transform: scale(1.05);
+  transform: translateY(-50%) scale(1.05);
 }
 
 /* Fallback text if logo image not found - always hidden */
@@ -686,6 +690,8 @@ label {
    SLIDER BASE STYLES
    =================================================================== */
 
+/* Base slider styles - width/height removed: Plugins define their own dimensions
+   This was conflicting with plugin-specific slider sizes (e.g., Lagrange 56px vs shared 40px) */
 .slider-vertical,
 .slider-vertical-tall,
 .slider-horizontal {
@@ -693,40 +699,9 @@ label {
   cursor: pointer;
 }
 
-.slider-vertical {
-  width: 40px;
-  height: 200px;
-}
-
-.slider-vertical-tall {
-  width: 40px;
-  height: 300px;
-}
-
-.slider-horizontal {
-  width: 200px;
-  height: 40px;
-}
-
-/* Slider track */
-.slider-vertical::before,
-.slider-vertical-tall::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 6px;
-  height: 100%;
-  background: 
-    linear-gradient(to right, 
-      rgba(255, 255, 255, 0.05),
-      var(--glass-bg),
-      rgba(0, 0, 0, 0.3));
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-full);
-  transform: translateX(-50%);
-  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
-}
+/* Slider track - REMOVED: Plugins define their own ::before fills
+   This was conflicting with plugin-specific fill styles in Apogee and Lagrange.
+   If a plugin needs a default track, it should define it in its own styles.css */
 
 .slider-horizontal::before {
   content: '';
@@ -782,31 +757,13 @@ label {
    XY PAD BASE STYLES
    =================================================================== */
 
+/* XY pad base styles - width/height/border removed: Plugins define their own dimensions
+   This was conflicting with plugin-specific XY pad sizes and borders */
 .xy-pad,
 .xy-pad-orbit {
-  width: 150px;
-  height: 150px;
-  background: 
-    radial-gradient(circle at center,
-      rgba(255, 255, 255, 0.02),
-      var(--glass-bg)),
-    repeating-linear-gradient(0deg,
-      transparent,
-      transparent 9px,
-      rgba(255, 255, 255, 0.02) 10px),
-    repeating-linear-gradient(90deg,
-      transparent,
-      transparent 9px,
-      rgba(255, 255, 255, 0.02) 10px);
-  border: 3px solid var(--glass-border);
-  border-radius: var(--radius-md);
   position: relative;
   cursor: crosshair;
-  box-shadow: 
-    var(--shadow-md),
-    inset 0 0 20px rgba(0, 0, 0, 0.5);
   transition: all var(--transition-fast);
-  overflow: hidden;
 }
 
 .xy-pad:hover,
@@ -818,66 +775,8 @@ label {
     inset 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
-/* XY pad crosshairs with glow */
-.xy-pad::before,
-.xy-pad::after {
-  content: '';
-  position: absolute;
-  background: linear-gradient(to bottom,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-}
-
-.xy-pad::before {
-  left: 50%;
-  top: 0;
-  width: 2px;
-  height: 100%;
-  transform: translateX(-50%);
-}
-
-.xy-pad::after {
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  transform: translateY(-50%);
-  background: linear-gradient(to right,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent);
-}
-
-/* XY pad handle styling */
-.xy-handle {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background: 
-    radial-gradient(circle at 30% 30%,
-      white,
-      var(--plugin-primary, var(--orbit-cyan)));
-  border: 3px solid white;
-  border-radius: 50%;
-  box-shadow: 
-    0 0 20px var(--plugin-glow),
-    0 0 40px var(--plugin-glow),
-    0 4px 12px rgba(0, 0, 0, 0.6),
-    inset 0 1px 2px rgba(255, 255, 255, 0.8);
-  pointer-events: none;
-  transition: none !important;
-  will-change: left, bottom;
-}
-
-.xy-pad:active .xy-handle {
-  transform: scale(1.2);
-  box-shadow: 
-    0 0 30px var(--plugin-glow),
-    0 0 60px var(--plugin-glow),
-    0 4px 12px rgba(0, 0, 0, 0.6);
-}
+/* XY pad crosshairs and handle - REMOVED: Plugins define their own crosshairs and handle styles
+   This was conflicting with plugin-specific XY pad implementations (e.g., Lagrange's different crosshair style) */
 
 /* ===================================================================
    TOGGLE/BUTTON STYLES
@@ -1580,7 +1479,7 @@ button:hover::before {
 }
 
 .orbitals-logo {
-  position: relative;
+  /* Position and overflow handled in main .orbitals-logo rule above */
   overflow: visible;
 }
 
@@ -1831,9 +1730,14 @@ button,
 
 canvas,
 [class*="knob"],
-[class*="slider"],
-.orbitals-logo {
+[class*="slider"] {
   transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Logo uses transform for centering, so handle separately */
+.orbitals-logo {
   backface-visibility: hidden;
   perspective: 1000px;
 }
