@@ -300,7 +300,7 @@ bool IonAudioProcessorEditor::checkAuthorization()
     if (!product_list.isEmpty())
         expiration_date = juce::Time::fromISO8601(product_list[0]);
     
-    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("ion"));
+    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200006"));
     
     if (authorized != isAuthorized)
     {

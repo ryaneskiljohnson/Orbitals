@@ -375,7 +375,7 @@ bool ApogeeAudioProcessorEditor::checkAuthorization()
     if (!product_list.isEmpty())
         expiration_date = juce::Time::fromISO8601(product_list[0]);
     
-    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("apogee"));
+    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200002"));
     
     if (authorized != isAuthorized)
     {

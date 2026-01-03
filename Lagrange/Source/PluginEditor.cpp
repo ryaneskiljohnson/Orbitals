@@ -350,7 +350,7 @@ bool LagrangeAudioProcessorEditor::checkAuthorization()
     if (!product_list.isEmpty())
         expiration_date = juce::Time::fromISO8601(product_list[0]);
     
-    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("lagrange"));
+    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200004"));
     
     if (authorized != isAuthorized)
     {

@@ -271,7 +271,7 @@ bool PerihelionAudioProcessorEditor::checkAuthorization()
     if (!product_list.isEmpty())
         expiration_date = juce::Time::fromISO8601(product_list[0]);
     
-    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("perihelion"));
+    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200007"));
     
     if (authorized != isAuthorized)
     {
