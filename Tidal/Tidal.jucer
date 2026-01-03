@@ -15,6 +15,9 @@
     </GROUP>
     <GROUP id="{B2C3D4E5-F6A7-8901-BCDE-F23456789012}" name="SharedAssets">
       <FILE id="tidal_bg" name="tidal-background.png" compile="0" resource="1" file="../_Shared/Assets/backgrounds/tidal-background.png" />
+      <FILE id="hub_auth_bg" name="hub_auth_background.png" compile="0" resource="1" file="../_Shared/Assets/auth/hub_auth_background.png" />
+      <FILE id="hub_auth_logo" name="hub_auth_logo.png" compile="0" resource="1" file="../_Shared/Assets/auth/hub_auth_logo.png" />
+      <FILE id="product_id" name="product_id.txt" compile="0" resource="1" file="product_id.txt" />
     </GROUP>
   </MAINGROUP>
   <MODULES>

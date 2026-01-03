@@ -16,9 +16,12 @@ namespace NNAudio::Authentication
 /**
  * @brief Constructor
  * @param productId The product ID for this plugin
+ * @note Product ID can be passed directly or loaded from BinaryData::product_id_txt
  */
 HubAuthComponent::HubAuthComponent(const juce::String& productId)
-  : m_product_id(productId)
+  : m_product_id(productId.isEmpty() ? 
+                 juce::String::fromUTF8(BinaryData::product_id_txt, BinaryData::product_id_txtSize) : 
+                 productId)
 {
   setInterceptsMouseClicks(true, false);
   setOpaque(true);

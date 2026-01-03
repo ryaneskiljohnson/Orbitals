@@ -12,7 +12,7 @@
 
 //==============================================================================
 TidalAudioProcessorEditor::TidalAudioProcessorEditor (TidalAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+    : AudioProcessorEditor (&p), audioProcessor (p), m_auth_component("tidal")
 {
     // Enable native title bar on the top-level window (for standalone builds)
     if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
@@ -20,6 +20,9 @@ TidalAudioProcessorEditor::TidalAudioProcessorEditor (TidalAudioProcessor& p)
 
     setSize (1200, 750);
     setResizable (false, false);
+    
+    // Add authentication component (hidden by default, shown if not authorized)
+    addChildComponent(m_auth_component);
 
     // Create WebView with native integration enabled for message passing
     auto options = juce::WebBrowserComponent::Options{}
@@ -53,7 +56,6 @@ void TidalAudioProcessorEditor::resized()
     m_auth_component.setBounds(getLocalBounds());
     
     // Resize web view
-{
     if (webView != nullptr)
         webView->setBounds (getLocalBounds());
 }
