@@ -46,7 +46,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ApogeeAudioProcessor::create
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_LIFT,
+        juce::ParameterID (PARAM_LIFT, 1),
         "Lift",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f),
         50.0f,
@@ -56,20 +56,20 @@ juce::AudioProcessorValueTreeState::ParameterLayout ApogeeAudioProcessor::create
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterChoice> (
-        PARAM_CURVE,
+        juce::ParameterID (PARAM_CURVE, 2),
         "Curve",
         juce::StringArray { "LINEAR", "EXP", "S", "LOG" },
         1 // Default to EXP
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterInt> (
-        PARAM_CEILING,
+        juce::ParameterID (PARAM_CEILING, 3),
         "Ceiling",
         1, 127, 127
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_MOMENTUM,
+        juce::ParameterID (PARAM_MOMENTUM, 4),
         "Momentum",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f),
         50.0f,
@@ -79,7 +79,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ApogeeAudioProcessor::create
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterBool> (
-        PARAM_BYPASS,
+        juce::ParameterID (PARAM_BYPASS, 5),
         "Bypass",
         false
     ));

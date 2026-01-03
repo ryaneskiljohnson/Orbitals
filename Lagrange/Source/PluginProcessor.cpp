@@ -46,37 +46,44 @@ juce::AudioProcessorValueTreeState::ParameterLayout LagrangeAudioProcessor::crea
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_STABILITY, "Stability",
+        juce::ParameterID (PARAM_STABILITY, 1),
+        "Stability",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f), 50.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_MASS, "Mass",
+        juce::ParameterID (PARAM_MASS, 2),
+        "Mass",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f), 50.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_DRIFT_MIN, "Drift Min",
+        juce::ParameterID (PARAM_DRIFT_MIN, 3),
+        "Drift Min",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f), 20.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_DRIFT_MAX, "Drift Max",
+        juce::ParameterID (PARAM_DRIFT_MAX, 4),
+        "Drift Max",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f), 80.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_CHAOS_X, "Chaos X",
+        juce::ParameterID (PARAM_CHAOS_X, 5),
+        "Chaos X",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f), 50.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_CHAOS_Y, "Chaos Y",
+        juce::ParameterID (PARAM_CHAOS_Y, 6),
+        "Chaos Y",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f), 50.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterBool> (
-        PARAM_BYPASS, "Bypass", false
+        juce::ParameterID (PARAM_BYPASS, 7),
+        "Bypass", false
     ));
 
     return { params.begin(), params.end() };

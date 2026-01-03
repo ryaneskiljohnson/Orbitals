@@ -15,6 +15,10 @@
 EclipseAudioProcessorEditor::EclipseAudioProcessorEditor (EclipseAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
+    // Enable native title bar on the top-level window (for standalone builds)
+    if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
+        top_level->setUsingNativeTitleBar(true);
+
     setSize (1200, 750);
     setResizable (false, false);
 
@@ -52,7 +56,17 @@ void EclipseAudioProcessorEditor::loadWebUI()
     auto htmlContent = OrbitalsEditorHelpers::loadPluginHTML("Eclipse");
     if (htmlContent.isNotEmpty())
     {
-        webView->goToURL("data:text/html;charset=utf-8," + juce::URL::addEscapeChars(htmlContent, true));
+            // Load HTML using temporary file approach (avoids data URL encoding issues)
+    auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
+        .getChildFile("EclipseUI_" + juce::String(juce::Time::currentTimeMillis()));
+    tempDir.createDirectory();
+    
+    auto tempFile = tempDir.getChildFile("index.html");
+    tempFile.replaceWithText(htmlContent);
+    
+    auto filePath = tempFile.getFullPathName().replace(" ", "%20");
+    juce::String fileURL = "file://" + filePath;
+    webView->goToURL(fileURL);
     }
 }
 

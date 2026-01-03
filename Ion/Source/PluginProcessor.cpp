@@ -46,33 +46,39 @@ juce::AudioProcessorValueTreeState::ParameterLayout IonAudioProcessor::createPar
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
     params.push_back (std::make_unique<juce::AudioParameterInt> (
-        PARAM_ROOT, "Root", 0, 11, 0
+        juce::ParameterID (PARAM_ROOT, 1),
+        "Root", 0, 11, 0
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterChoice> (
-        PARAM_SCALE, "Scale",
+        juce::ParameterID (PARAM_SCALE, 2),
+        "Scale",
         juce::StringArray { "Major", "Minor", "Dorian", "Phrygian", "Lydian", "Mixolydian", "Aeolian", "Locrian", "Chromatic" },
         0
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_FIELD_STRENGTH, "Field Strength",
+        juce::ParameterID (PARAM_FIELD_STRENGTH, 3),
+        "Field Strength",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f), 50.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_ATTRACTION_STRENGTH, "Attraction Strength",
+        juce::ParameterID (PARAM_ATTRACTION_STRENGTH, 4),
+        "Attraction Strength",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f), 50.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterChoice> (
-        PARAM_ATTRACTION_TYPE, "Attraction Type",
+        juce::ParameterID (PARAM_ATTRACTION_TYPE, 5),
+        "Attraction Type",
         juce::StringArray { "SNAP", "PULL", "GUIDE" },
         0
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterBool> (
-        PARAM_BYPASS, "Bypass", false
+        juce::ParameterID (PARAM_BYPASS, 6),
+        "Bypass", false
     ));
 
     return { params.begin(), params.end() };

@@ -44,26 +44,31 @@ juce::AudioProcessorValueTreeState::ParameterLayout PerihelionAudioProcessor::cr
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_GRAVITY, "Gravity",
+        juce::ParameterID (PARAM_GRAVITY, 1),
+        "Gravity",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f), 50.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_ORBIT, "Orbit",
+        juce::ParameterID (PARAM_ORBIT, 2),
+        "Orbit",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f), 50.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterInt> (
-        PARAM_SOLAR_POINT, "Solar Point", 1, 127, 64
+        juce::ParameterID (PARAM_SOLAR_POINT, 3),
+        "Solar Point", 1, 127, 64
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_BIAS, "Bias",
+        juce::ParameterID (PARAM_BIAS, 4),
+        "Bias",
         juce::NormalisableRange<float> (-100.0f, 100.0f, 0.1f), 0.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterBool> (
-        PARAM_BYPASS, "Bypass", false
+        juce::ParameterID (PARAM_BYPASS, 5),
+        "Bypass", false
     ));
 
     return { params.begin(), params.end() };

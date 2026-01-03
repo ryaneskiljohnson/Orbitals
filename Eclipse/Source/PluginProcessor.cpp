@@ -46,35 +46,42 @@ juce::AudioProcessorValueTreeState::ParameterLayout EclipseAudioProcessor::creat
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
     params.push_back (std::make_unique<juce::AudioParameterInt> (
-        PARAM_THRESHOLD, "Threshold", 0, 127, 64
+        juce::ParameterID (PARAM_THRESHOLD, 1),
+        "Threshold", 0, 127, 64
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_SHADOW_MIN, "Shadow Min",
+        juce::ParameterID (PARAM_SHADOW_MIN, 2),
+        "Shadow Min",
         juce::NormalisableRange<float> (0.0f, 127.0f, 1.0f), 30.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_SHADOW_MAX, "Shadow Max",
+        juce::ParameterID (PARAM_SHADOW_MAX, 3),
+        "Shadow Max",
         juce::NormalisableRange<float> (0.0f, 127.0f, 1.0f), 90.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_UMBRA, "Umbra",
+        juce::ParameterID (PARAM_UMBRA, 4),
+        "Umbra",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f), 50.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_PENUMBRA, "Penumbra",
+        juce::ParameterID (PARAM_PENUMBRA, 5),
+        "Penumbra",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f), 50.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterBool> (
-        PARAM_ECLIPSE_MODE, "Eclipse Mode", false
+        juce::ParameterID (PARAM_ECLIPSE_MODE, 6),
+        "Eclipse Mode", false
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterBool> (
-        PARAM_BYPASS, "Bypass", false
+        juce::ParameterID (PARAM_BYPASS, 7),
+        "Bypass", false
     ));
 
     return { params.begin(), params.end() };

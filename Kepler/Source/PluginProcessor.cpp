@@ -48,48 +48,48 @@ juce::AudioProcessorValueTreeState::ParameterLayout KeplerAudioProcessor::create
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
     params.push_back (std::make_unique<juce::AudioParameterInt> (
-        PARAM_ORBIT_COUNT,
+        juce::ParameterID (PARAM_ORBIT_COUNT, 1),
         "Orbit Count",
         1, 8, 3
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_ECCENTRICITY,
+        juce::ParameterID (PARAM_ECCENTRICITY, 2),
         "Eccentricity",
         juce::NormalisableRange<float> (0.0f, 0.95f, 0.01f),
         0.5f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_ROTATION_SPEED,
+        juce::ParameterID (PARAM_ROTATION_SPEED, 3),
         "Rotation Speed",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f),
         50.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_STABILITY_X,
+        juce::ParameterID (PARAM_STABILITY_X, 4),
         "Stability X",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f),
         50.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_STABILITY_Y,
+        juce::ParameterID (PARAM_STABILITY_Y, 5),
         "Stability Y",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f),
         50.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterChoice> (
-        PARAM_PERIOD,
+        juce::ParameterID (PARAM_PERIOD, 6),
         "Period",
         juce::StringArray { "1/8", "1/4", "1/2", "1 bar", "2 bars" },
         2
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterChoice> (
-        PARAM_DIRECTION,
+        juce::ParameterID (PARAM_DIRECTION, 7),
         "Direction",
         juce::StringArray { "CW", "CCW", "ALT" },
         0

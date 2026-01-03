@@ -44,25 +44,30 @@ juce::AudioProcessorValueTreeState::ParameterLayout RetrogradeAudioProcessor::cr
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
     params.push_back (std::make_unique<juce::AudioParameterChoice> (
-        PARAM_MODE, "Mode",
+        juce::ParameterID (PARAM_MODE, 1),
+        "Mode",
         juce::StringArray { "VELOCITY", "TIMING", "PHRASE" }, 0
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterInt> (
-        PARAM_SCOPE, "Scope", 1, 4, 2
+        juce::ParameterID (PARAM_SCOPE, 2),
+        "Scope", 1, 4, 2
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_SYMMETRY, "Symmetry",
+        juce::ParameterID (PARAM_SYMMETRY, 3),
+        "Symmetry",
         juce::NormalisableRange<float> (0.0f, 360.0f, 1.0f), 180.0f
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterInt> (
-        PARAM_ECHO, "Echo", 0, 8, 0
+        juce::ParameterID (PARAM_ECHO, 4),
+        "Echo", 0, 8, 0
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterBool> (
-        PARAM_BYPASS, "Bypass", false
+        juce::ParameterID (PARAM_BYPASS, 5),
+        "Bypass", false
     ));
 
     return { params.begin(), params.end() };
