@@ -128,9 +128,9 @@ void RetrogradeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         auto message = metadata.getMessage();
         if (message.isNoteOn() || message.isNoteOff())
         {
-            NoteEvent event;
+            NoteInfo event;
             event.message = message;
-            event.samplePosition = metadata.samplePosition;
+            event.relativePosition = metadata.samplePosition;
             event.timestamp = metadata.samplePosition;
             noteBuffer.push_back(event);
         }
@@ -143,7 +143,7 @@ void RetrogradeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     
     if (noteBuffer.size() >= targetSize)
     {
-        std::vector<NoteEvent> toReverse(noteBuffer.begin(), noteBuffer.begin() + targetSize);
+        std::vector<NoteInfo> toReverse(noteBuffer.begin(), noteBuffer.begin() + targetSize);
         noteBuffer.erase(noteBuffer.begin(), noteBuffer.begin() + targetSize);
         
         if (mode == 0) // VELOCITY
@@ -165,11 +165,11 @@ void RetrogradeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
                     auto newMessage = juce::MidiMessage::noteOn(event.message.getChannel(),
                                                                 event.message.getNoteNumber(),
                                                                 (juce::uint8)velocities[velIndex++]);
-                    processedMidi.addEvent(newMessage, event.samplePosition);
+                    processedMidi.addEvent(newMessage, event.relativePosition);
                 }
                 else
                 {
-                    processedMidi.addEvent(event.message, event.samplePosition);
+                    processedMidi.addEvent(event.message, event.relativePosition);
                 }
             }
         }
@@ -179,7 +179,7 @@ void RetrogradeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
             std::reverse(toReverse.begin(), toReverse.end());
             for (auto& event : toReverse)
             {
-                processedMidi.addEvent(event.message, event.samplePosition);
+                processedMidi.addEvent(event.message, event.relativePosition);
             }
         }
         else if (mode == 2) // PHRASE
@@ -188,7 +188,7 @@ void RetrogradeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
             std::reverse(toReverse.begin(), toReverse.end());
             for (auto& event : toReverse)
             {
-                processedMidi.addEvent(event.message, event.samplePosition);
+                processedMidi.addEvent(event.message, event.relativePosition);
             }
         }
     }
