@@ -11,13 +11,12 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "../../_Shared/Authentication/HubAuthComponent.h"
 
 //==============================================================================
 /**
     Tidal Plugin Editor - WebView-based UI
 */
-class TidalAudioProcessorEditor  : public juce::AudioProcessorEditor
+class TidalAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Timer
 {
 public:
     TidalAudioProcessorEditor (TidalAudioProcessor&);
@@ -26,6 +25,7 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+    void timerCallback() override;
 
 private:
     TidalAudioProcessor& audioProcessor;
@@ -33,13 +33,17 @@ private:
     // WebView for CSS-based UI
     std::unique_ptr<juce::WebBrowserComponent> webView;
     
-    // Authentication component
-    NNAudio::Authentication::HubAuthComponent m_auth_component;
+    // Authentication state
+    bool isAuthorized = false;
     
     // Helper methods
     void loadWebUI();
+    void loadAuthScreen();
     void loadHTMLFile (const juce::File& htmlFile);
     void handleJavaScriptMessage (const juce::var& message);
+    bool checkAuthorization();
+    static juce::File getAuthFile();
+    static juce::String loadAndDecryptLicenseFile();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TidalAudioProcessorEditor)
 };

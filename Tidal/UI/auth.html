@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tidal - Authentication Required</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 1200px;
+            height: 750px;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0f;
+            color: #e8e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .auth-container {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .auth-logo {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 40px;
+            background-image: url('data:image/png;base64,PLACEHOLDER_LOGO');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        .auth-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00d4ff;
+        }
+        
+        .auth-message {
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+            color: #e8e8f0;
+        }
+        
+        .auth-status {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-logo"></div>
+        <h1 class="auth-title">TIDAL</h1>
+        <p class="auth-message">
+            Your plugin's authentication needs to be refreshed.<br>
+            Please launch the NNAudio Access app to continue.
+        </p>
+        <p class="auth-status">Checking license...</p>
+    </div>
+    
+    <script>
+        // Periodically check if auth status changes
+        setInterval(function() {
+            // Send message to C++ to check auth status
+            if (window.webkit && window.webkit.messageHandlers) {
+                window.webkit.messageHandlers.juce.postMessage({
+                    type: 'checkAuth'
+                });
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
