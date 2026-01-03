@@ -130,7 +130,7 @@ void RetrogradeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         {
             NoteInfo event;
             event.message = message;
-            event.relativePosition = metadata.samplePosition;
+            event.samplePosition = metadata.samplePosition;
             event.timestamp = metadata.samplePosition;
             noteBuffer.push_back(event);
         }
