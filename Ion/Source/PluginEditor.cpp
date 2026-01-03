@@ -13,7 +13,7 @@
 
 //==============================================================================
 IonAudioProcessorEditor::IonAudioProcessorEditor (IonAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p), m_auth_component("ion")
+    : AudioProcessorEditor (&p), audioProcessor (p)
 {
     // Enable native title bar on the top-level window (for standalone builds)
     if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
@@ -21,7 +21,8 @@ IonAudioProcessorEditor::IonAudioProcessorEditor (IonAudioProcessor& p)
 
     setSize (1200, 750);
     setResizable (false, false);
-
+    
+    // Create WebView with native integration enabled for message passing
     auto options = juce::WebBrowserComponent::Options{}
         .withNativeIntegrationEnabled (true)
         .withEventListener ("message", [this](const juce::var& message) {
@@ -33,12 +34,19 @@ IonAudioProcessorEditor::IonAudioProcessorEditor (IonAudioProcessor& p)
     addAndMakeVisible (webView.get());
     webView->setBounds (getLocalBounds());
     
-    // Add authentication component AFTER webview (so it renders on top)
-    // Hidden by default, shown if not authorized
-    addChildComponent(m_auth_component);
-    m_auth_component.setAlwaysOnTop(true);  // Ensure it's always on top
-
-    loadWebUI();
+    // Check authorization first, then load appropriate UI
+    isAuthorized = checkAuthorization();
+    
+    if (isAuthorized)
+    {
+        loadWebUI();
+        startTimer(1000 * 60 * 15); // Re-check every 15 minutes
+    }
+    else
+    {
+        loadAuthScreen();
+        startTimer(5000); // Re-check every 5 seconds
+    }
 }
 
 IonAudioProcessorEditor::~IonAudioProcessorEditor()

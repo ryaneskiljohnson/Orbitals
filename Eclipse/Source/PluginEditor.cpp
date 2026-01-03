@@ -60,9 +60,6 @@ void EclipseAudioProcessorEditor::paint (juce::Graphics& g)
 
 void EclipseAudioProcessorEditor::resized()
 {
-    // Resize auth component to match editor bounds
-    m_auth_component.setBounds(getLocalBounds());
-    
     if (webView != nullptr)
         webView->setBounds (getLocalBounds());
 }
