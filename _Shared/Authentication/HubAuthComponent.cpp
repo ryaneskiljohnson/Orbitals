@@ -49,7 +49,7 @@ void HubAuthComponent::paint(juce::Graphics& g)
   g.drawImage(logo, logo_bounds);
 
   g.setColour(juce::Colours::white);
-  g.setFont(juce::Font().withHeight(text_height));
+  g.setFont(juce::FontOptions{}.withHeight(text_height));
   g.drawMultiLineText(
     "Your plugin's authentication needs to be refreshed.\nPlease launch the NNAudio Access app to continue.",
     bounds.getX(),
