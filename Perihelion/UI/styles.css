@@ -44,6 +44,13 @@
   opacity: 0.15 !important;
 }
 
+/* Remove dark background from body/html so background image shows through */
+.perihelion-theme,
+body.perihelion-theme,
+html.perihelion-theme {
+  background: transparent !important;
+}
+
 /* Keep background image visible at all times (no fade-out) */
 .perihelion-theme .plugin-container::after {
   animation: none !important;

@@ -390,8 +390,8 @@ function setupSolarVisualization(canvas) {
       });
       
       // Clear canvas with trail effect
-      ctx.fillStyle = 'rgba(10, 10, 15, 0.15)'; // Slightly more opaque for better trail visibility
-      ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
+      // Use transparent clear instead of dark fill to let background show through
+      ctx.clearRect(0, 0, canvasSize.width, canvasSize.height);
       
       // Draw orbital reference rings (subtle guides)
       drawOrbitalRings(ctx, centerX, centerY, time, gravityValue);
