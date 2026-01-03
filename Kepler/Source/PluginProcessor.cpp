@@ -96,7 +96,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout KeplerAudioProcessor::create
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterBool> (
-        PARAM_BYPASS,
+        juce::ParameterID (PARAM_BYPASS, 8),
         "Bypass",
         false
     ));
