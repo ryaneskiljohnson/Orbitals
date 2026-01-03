@@ -21,10 +21,6 @@ EclipseAudioProcessorEditor::EclipseAudioProcessorEditor (EclipseAudioProcessor&
 
     setSize (1200, 750);
     setResizable (false, false);
-    
-    // Add authentication component (hidden by default, shown if not authorized)
-    addChildComponent(m_auth_component);
-    m_auth_component.setAlwaysOnTop(true);  // Ensure it\'s always on top
 
     auto options = juce::WebBrowserComponent::Options{}
         .withNativeIntegrationEnabled (true)
