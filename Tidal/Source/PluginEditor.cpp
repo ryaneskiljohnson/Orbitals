@@ -14,6 +14,10 @@
 TidalAudioProcessorEditor::TidalAudioProcessorEditor (TidalAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
+    // Enable native title bar on the top-level window (for standalone builds)
+    if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
+        top_level->setUsingNativeTitleBar(true);
+
     setSize (1200, 750);
     setResizable (false, false);
 
@@ -148,8 +152,22 @@ void TidalAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
         }
     }
 
-    // Load HTML
-    webView->goToURL("data:text/html;charset=utf-8," + juce::URL::addEscapeChars(htmlContent, true));
+    // Load HTML using temporary file approach (avoids data URL encoding issues)
+    // Create temporary directory for UI files
+    auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
+        .getChildFile("TidalUI_" + juce::String(juce::Time::currentTimeMillis()));
+    tempDir.createDirectory();
+    
+    // Write HTML to temp file
+    auto tempFile = tempDir.getChildFile("index.html");
+    tempFile.replaceWithText(htmlContent);
+    
+    // Copy any referenced assets if needed (background images already inlined as base64)
+    
+    // Load via file:// URL
+    auto filePath = tempFile.getFullPathName().replace(" ", "%20");
+    juce::String fileURL = "file://" + filePath;
+    webView->goToURL(fileURL);
 }
 
 void TidalAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)

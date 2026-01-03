@@ -45,7 +45,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout TidalAudioProcessor::createP
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_AMPLITUDE,
+        juce::ParameterID (PARAM_AMPLITUDE, 1),
         "Amplitude",
         juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f),
         50.0f,
@@ -55,7 +55,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout TidalAudioProcessor::createP
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        PARAM_PHASE,
+        juce::ParameterID (PARAM_PHASE, 2),
         "Phase",
         juce::NormalisableRange<float> (0.0f, 360.0f, 1.0f),
         0.0f,
@@ -65,21 +65,21 @@ juce::AudioProcessorValueTreeState::ParameterLayout TidalAudioProcessor::createP
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterChoice> (
-        PARAM_RATE,
+        juce::ParameterID (PARAM_RATE, 3),
         "Rate",
         juce::StringArray { "1/4", "1/8", "1/16", "1/32" },
         0
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterChoice> (
-        PARAM_SHAPE,
+        juce::ParameterID (PARAM_SHAPE, 4),
         "Shape",
         juce::StringArray { "SINE", "TRI", "SAW", "SQR" },
         0
     ));
 
     params.push_back (std::make_unique<juce::AudioParameterBool> (
-        PARAM_BYPASS,
+        juce::ParameterID (PARAM_BYPASS, 5),
         "Bypass",
         false
     ));

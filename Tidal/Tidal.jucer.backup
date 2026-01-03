@@ -1,0 +1,1224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="LUm7xB" name="Cymasphere" projectType="audioplug" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              version="2.0.6" companyName="NNAudio" companyCopyright="2025"
+              companyWebsite="cymasphere.com" pluginManufacturerCode="NNAU"
+              pluginCode="CYMA" cppLanguageStandard="20" pluginAUMainType="'aumi'"
+              defines="DISABLE_AUTH=0&#10;DISABLE_UPDATE=0&#10;BASE_WEB_URL=&quot;https://cymasphere.com&quot;&#10;PRODUCT_ID=&quot;195710&quot;"
+              maxBinaryFileSize="20971520" pluginCharacteristicsValue="pluginEditorRequiresKeys,pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
+              pluginVST3Category="Fx,Instrument,Synth">
+  <MAINGROUP id="eBXcD7" name="Cymasphere">
+    <GROUP id="{C9D305BA-EEC5-C248-7063-E0AFF9A67CE0}" name="Source">
+      <GROUP id="{6B0CA1D2-7EDB-DF02-5F02-E81AB7F0775C}" name="Updater">
+        <FILE id="dqP7GK" name="CymasphereUpdater.cpp" compile="1" resource="0"
+              file="Source/Updater/CymasphereUpdater.cpp"/>
+        <FILE id="KiYfTy" name="CymasphereUpdater.h" compile="0" resource="0"
+              file="Source/Updater/CymasphereUpdater.h"/>
+      </GROUP>
+      <FILE id="SyntVc" name="SynthVoice.cpp" compile="1" resource="0" file="Source/SynthVoice.cpp"/>
+      <FILE id="SyntVh" name="SynthVoice.h" compile="0" resource="0" file="Source/SynthVoice.h"/>
+      <FILE id="SyntPc" name="SynthPresets.cpp" compile="1" resource="0"
+            file="Source/SynthPresets.cpp"/>
+      <FILE id="SyntPh" name="SynthPresets.h" compile="0" resource="0" file="Source/SynthPresets.h"/>
+      <GROUP id="{13DE954F-CAA5-D51B-ADCA-5408E554230D}" name="Authentication">
+        <FILE id="gpaDuh" name="hub_auth_background_blur.png" compile="0" resource="1"
+              file="Source/Authentication/hub_auth_background_blur.png"/>
+        <FILE id="vUNQHB" name="hub_auth_background.png" compile="0" resource="1"
+              file="Source/Authentication/hub_auth_background.png"/>
+        <FILE id="igQAep" name="hub_auth_logo.png" compile="0" resource="1"
+              file="Source/Authentication/hub_auth_logo.png"/>
+        <FILE id="AuthMgrC" name="AuthenticationManager.cpp" compile="1" resource="0"
+              file="Source/Authentication/AuthenticationManager.cpp"/>
+        <FILE id="AuthMgrH" name="AuthenticationManager.h" compile="0" resource="0"
+              file="Source/Authentication/AuthenticationManager.h"/>
+        <FILE id="sVGCS9" name="HubAuthComponent.cpp" compile="1" resource="0"
+              file="Source/Authentication/HubAuthComponent.cpp"/>
+        <FILE id="SKxbbF" name="HubAuthComponent.h" compile="0" resource="0"
+              file="Source/Authentication/HubAuthComponent.h"/>
+        <FILE id="SignUpCompCpp" name="SignUpComponent.cpp" compile="1" resource="0"
+              file="Source/Authentication/SignUpComponent.cpp"/>
+        <FILE id="SignUpCompH" name="SignUpComponent.h" compile="0" resource="0"
+              file="Source/Authentication/SignUpComponent.h"/>
+      </GROUP>
+      <GROUP id="{E6CF5E88-76C8-3593-4889-F8F42E59EB4E}" name="Domain">
+        <GROUP id="{06C5D633-0DF7-8F95-8DF5-E375FE4CB7E3}" name="CellStream">
+          <GROUP id="{2EA991EC-1D52-A1E1-6E17-1A806DFB0A34}" name="Event">
+            <FILE id="q8Vyps" name="Event.cpp" compile="1" resource="0" file="Source/Domain/CellStream/Event/Event.cpp"/>
+            <FILE id="zFhSDf" name="Event.h" compile="0" resource="0" file="Source/Domain/CellStream/Event/Event.h"/>
+          </GROUP>
+          <FILE id="p3BXbw" name="Cell.cpp" compile="1" resource="0" file="Source/Domain/CellStream/Cell.cpp"/>
+          <FILE id="M7Eq0D" name="Cell.h" compile="0" resource="0" file="Source/Domain/CellStream/Cell.h"/>
+          <FILE id="WU7nMM" name="Consumer.h" compile="0" resource="0" file="Source/Domain/CellStream/Consumer.h"/>
+          <FILE id="uxahXb" name="EventQueue.cpp" compile="1" resource="0" file="Source/Domain/CellStream/EventQueue.cpp"/>
+          <FILE id="DA6yIc" name="EventQueue.h" compile="0" resource="0" file="Source/Domain/CellStream/EventQueue.h"/>
+          <FILE id="gP8j2s" name="Stream.cpp" compile="1" resource="0" file="Source/Domain/CellStream/Stream.cpp"/>
+          <FILE id="BumglH" name="Stream.h" compile="0" resource="0" file="Source/Domain/CellStream/Stream.h"/>
+        </GROUP>
+        <GROUP id="{3F052A18-B952-0D19-A0BB-2B38DCE3346F}" name="Database">
+          <GROUP id="{01C6143F-97BE-AC0F-0844-D1EFFC3589AC}" name="Structure">
+            <FILE id="WtuBVb" name="Collection.h" compile="0" resource="0" file="Source/Domain/Database/Structure/Collection.h"/>
+            <FILE id="wKKRZN" name="Entry.cpp" compile="1" resource="0" file="Source/Domain/Database/Structure/Entry.cpp"/>
+            <FILE id="eIRCVI" name="Entry.h" compile="0" resource="0" file="Source/Domain/Database/Structure/Entry.h"/>
+            <FILE id="jKbdSI" name="Id.cpp" compile="1" resource="0" file="Source/Domain/Database/Structure/Id.cpp"/>
+            <FILE id="emgVyr" name="Id.h" compile="0" resource="0" file="Source/Domain/Database/Structure/Id.h"/>
+            <FILE id="QhvzNU" name="SettingEntry.cpp" compile="1" resource="0"
+                  file="Source/Domain/Database/Structure/SettingEntry.cpp"/>
+            <FILE id="zamckK" name="SettingEntry.h" compile="0" resource="0" file="Source/Domain/Database/Structure/SettingEntry.h"/>
+          </GROUP>
+          <GROUP id="{EBADF21C-1EB2-E1F4-91EB-949A66C80F85}" name="Values">
+            <FILE id="r8JZOc" name="Region.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/Region.cpp"/>
+            <FILE id="utQIVj" name="Region.h" compile="0" resource="0" file="Source/Domain/Database/Values/Region.h"/>
+            <FILE id="heWTe5" name="Strum.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/Strum.cpp"/>
+            <FILE id="kauq9M" name="Strum.h" compile="0" resource="0" file="Source/Domain/Database/Values/Strum.h"/>
+            <FILE id="njTsWm" name="Sustain.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/Sustain.cpp"/>
+            <FILE id="lcibUs" name="Sustain.h" compile="0" resource="0" file="Source/Domain/Database/Values/Sustain.h"/>
+            <FILE id="gGpwP5" name="Progression.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/Progression.cpp"/>
+            <FILE id="Jr0Ao1" name="Progression.h" compile="0" resource="0" file="Source/Domain/Database/Values/Progression.h"/>
+            <FILE id="ghiRRu" name="VoiceLeadSetting.cpp" compile="1" resource="0"
+                  file="Source/Domain/Database/Values/VoiceLeadSetting.cpp"/>
+            <FILE id="iGUOID" name="VoiceLeadSetting.h" compile="0" resource="0"
+                  file="Source/Domain/Database/Values/VoiceLeadSetting.h"/>
+            <FILE id="omnXNC" name="EnharmonicSpelling.cpp" compile="1" resource="0"
+                  file="Source/Domain/Database/Values/EnharmonicSpelling.cpp"/>
+            <FILE id="qxnnHR" name="EnharmonicSpelling.h" compile="0" resource="0"
+                  file="Source/Domain/Database/Values/EnharmonicSpelling.h"/>
+            <FILE id="zyKiKW" name="MidiMapping.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/MidiMapping.cpp"/>
+            <FILE id="eLYMQc" name="MidiMapping.h" compile="0" resource="0" file="Source/Domain/Database/Values/MidiMapping.h"/>
+            <FILE id="onCRmL" name="Dynamics.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/Dynamics.cpp"/>
+            <FILE id="Tr62eT" name="Dynamics.h" compile="0" resource="0" file="Source/Domain/Database/Values/Dynamics.h"/>
+            <FILE id="zLxGCU" name="Sequencer.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/Sequencer.cpp"/>
+            <FILE id="MaiPjZ" name="Sequencer.h" compile="0" resource="0" file="Source/Domain/Database/Values/Sequencer.h"/>
+            <FILE id="IzLK8l" name="Bass.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/Bass.cpp"/>
+            <FILE id="s2nei8" name="Bass.h" compile="0" resource="0" file="Source/Domain/Database/Values/Bass.h"/>
+            <FILE id="ShXPRb" name="Chord.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/Chord.cpp"/>
+            <FILE id="QQbJJD" name="Chord.h" compile="0" resource="0" file="Source/Domain/Database/Values/Chord.h"/>
+            <FILE id="Fq1Hys" name="ExpressionData.cpp" compile="1" resource="0"
+                  file="Source/Domain/Database/Values/ExpressionData.cpp"/>
+            <FILE id="Cx12y3" name="ExpressionData.h" compile="0" resource="0"
+                  file="Source/Domain/Database/Values/ExpressionData.h"/>
+            <FILE id="nMk9Y4" name="FollowValue.h" compile="0" resource="0" file="Source/Domain/Database/Values/FollowValue.h"/>
+            <FILE id="CnqFbm" name="ScaleIndex.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/ScaleIndex.cpp"/>
+            <FILE id="KDNM2H" name="ScaleIndex.h" compile="0" resource="0" file="Source/Domain/Database/Values/ScaleIndex.h"/>
+            <FILE id="aVD8td" name="SmartChord.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/SmartChord.cpp"/>
+            <FILE id="I5IrEU" name="SmartChord.h" compile="0" resource="0" file="Source/Domain/Database/Values/SmartChord.h"/>
+            <FILE id="GgL1DD" name="VoiceLeadRange.cpp" compile="1" resource="0"
+                  file="Source/Domain/Database/Values/VoiceLeadRange.cpp"/>
+            <FILE id="wg7zw0" name="VoiceLeadRange.h" compile="0" resource="0"
+                  file="Source/Domain/Database/Values/VoiceLeadRange.h"/>
+            <FILE id="fmhaNV" name="Spacing.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/Spacing.cpp"/>
+            <FILE id="ZgeZXf" name="Spacing.h" compile="0" resource="0" file="Source/Domain/Database/Values/Spacing.h"/>
+            <FILE id="G7Guj0" name="SustainCommonTones.cpp" compile="1" resource="0"
+                  file="Source/Domain/Database/Values/SustainCommonTones.cpp"/>
+            <FILE id="qoa0Yu" name="SustainCommonTones.h" compile="0" resource="0"
+                  file="Source/Domain/Database/Values/SustainCommonTones.h"/>
+            <FILE id="Mr5lUe" name="Voice.h" compile="0" resource="0" file="Source/Domain/Database/Values/Voice.h"/>
+            <FILE id="c8122r" name="Voice.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/Voice.cpp"/>
+            <FILE id="hIiCSU" name="VoiceChannelMatrix.cpp" compile="1" resource="0"
+                  file="Source/Domain/Database/Values/VoiceChannelMatrix.cpp"/>
+            <FILE id="txmVH1" name="VoiceChannelMatrix.h" compile="0" resource="0"
+                  file="Source/Domain/Database/Values/VoiceChannelMatrix.h"/>
+            <FILE id="xRm34H" name="VoiceCount.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/VoiceCount.cpp"/>
+            <FILE id="JWqswN" name="VoiceCount.h" compile="0" resource="0" file="Source/Domain/Database/Values/VoiceCount.h"/>
+            <FILE id="GrooveCpp" name="Groove.cpp" compile="1" resource="0" file="Source/Domain/Database/Values/Groove.cpp"/>
+            <FILE id="GrooveH" name="Groove.h" compile="0" resource="0" file="Source/Domain/Database/Values/Groove.h"/>
+          </GROUP>
+          <FILE id="sqq2eb" name="Db.cpp" compile="1" resource="0" file="Source/Domain/Database/Db.cpp"/>
+          <FILE id="KGAZKC" name="Db.h" compile="0" resource="0" file="Source/Domain/Database/Db.h"/>
+          <FILE id="xaTaY6" name="Bank.cpp" compile="1" resource="0" file="Source/Domain/Database/Bank.cpp"/>
+          <FILE id="fviFXA" name="Bank.h" compile="0" resource="0" file="Source/Domain/Database/Bank.h"/>
+          <FILE id="J0400I" name="BankTemplate.cpp" compile="1" resource="0"
+                file="Source/Domain/Database/BankTemplate.cpp"/>
+          <FILE id="S24srO" name="BankTemplate.h" compile="0" resource="0" file="Source/Domain/Database/BankTemplate.h"/>
+          <FILE id="W7Jfkw" name="Cymatic.cpp" compile="1" resource="0" file="Source/Domain/Database/Cymatic.cpp"/>
+          <FILE id="NO4Fr2" name="Cymatic.h" compile="0" resource="0" file="Source/Domain/Database/Cymatic.h"/>
+          <FILE id="J2zUDn" name="Palette.cpp" compile="1" resource="0" file="Source/Domain/Database/Palette.cpp"/>
+          <FILE id="E6dPDi" name="Palette.h" compile="0" resource="0" file="Source/Domain/Database/Palette.h"/>
+          <FILE id="kQueyI" name="Repository.cpp" compile="1" resource="0" file="Source/Domain/Database/Repository.cpp"/>
+          <FILE id="l2T5tH" name="Repository.h" compile="0" resource="0" file="Source/Domain/Database/Repository.h"/>
+          <FILE id="dIBqz4" name="SPSettings.cpp" compile="1" resource="0" file="Source/Domain/Database/SPSettings.cpp"/>
+          <FILE id="zMLuxp" name="SPSettings.h" compile="0" resource="0" file="Source/Domain/Database/SPSettings.h"/>
+          <FILE id="zl4h5J" name="Settings.cpp" compile="1" resource="0" file="Source/Domain/Database/Settings.cpp"/>
+          <FILE id="CvCIaw" name="Settings.h" compile="0" resource="0" file="Source/Domain/Database/Settings.h"/>
+          <FILE id="gsvVQM" name="Song.cpp" compile="1" resource="0" file="Source/Domain/Database/Song.cpp"/>
+          <FILE id="pN7WoJ" name="Song.h" compile="0" resource="0" file="Source/Domain/Database/Song.h"/>
+          <FILE id="dth4jS" name="Track.cpp" compile="1" resource="0" file="Source/Domain/Database/Track.cpp"/>
+          <FILE id="OBfzTr" name="Track.h" compile="0" resource="0" file="Source/Domain/Database/Track.h"/>
+          <FILE id="GrvTmpC" name="GrooveTemplate.cpp" compile="1" resource="0"
+                file="Source/Domain/Database/GrooveTemplate.cpp"/>
+          <FILE id="SeqTmpC" name="SequencerTemplate.cpp" compile="1" resource="0"
+                file="Source/Domain/Database/SequencerTemplate.cpp"/>
+          <FILE id="GrvTmpH" name="GrooveTemplate.h" compile="0" resource="0"
+                file="Source/Domain/Database/GrooveTemplate.h"/>
+          <FILE id="SeqTmpH" name="SequencerTemplate.h" compile="0" resource="0"
+                file="Source/Domain/Database/SequencerTemplate.h"/>
+          <FILE id="iT2y6J" name="Note.cpp" compile="1" resource="0" file="Source/Domain/Database/Note.cpp"/>
+          <FILE id="GrIyan" name="Note.h" compile="0" resource="0" file="Source/Domain/Database/Note.h"/>
+          <FILE id="tZVRir" name="Expression.cpp" compile="1" resource="0" file="Source/Domain/Database/Expression.cpp"/>
+          <FILE id="csrhCk" name="Expression.h" compile="0" resource="0" file="Source/Domain/Database/Expression.h"/>
+        </GROUP>
+        <GROUP id="{361A5B75-F149-9823-D5B9-9287B2592CC2}" name="DataStructs">
+          <FILE id="CnhHv5" name="AvoidInterval.cpp" compile="1" resource="0"
+                file="Source/Domain/DataStructs/AvoidInterval.cpp"/>
+          <FILE id="ftTRN5" name="AvoidInterval.h" compile="0" resource="0" file="Source/Domain/DataStructs/AvoidInterval.h"/>
+          <FILE id="YEbSbk" name="AvoidType.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/AvoidType.cpp"/>
+          <FILE id="lVlCr4" name="AvoidType.h" compile="0" resource="0" file="Source/Domain/DataStructs/AvoidType.h"/>
+          <FILE id="CDiXrR" name="ChordPrefix.h" compile="0" resource="0" file="Source/Domain/DataStructs/ChordPrefix.h"/>
+          <FILE id="Dl8ULk" name="Degree.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/Degree.cpp"/>
+          <FILE id="gnvvK4" name="Degree.h" compile="0" resource="0" file="Source/Domain/DataStructs/Degree.h"/>
+          <FILE id="NKEp4l" name="Interval.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/Interval.cpp"/>
+          <FILE id="a4dmqy" name="Interval.h" compile="0" resource="0" file="Source/Domain/DataStructs/Interval.h"/>
+          <FILE id="Qnm0qR" name="Inversion.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/Inversion.cpp"/>
+          <FILE id="dWhldx" name="Inversion.h" compile="0" resource="0" file="Source/Domain/DataStructs/Inversion.h"/>
+          <FILE id="q0YAIk" name="Layer.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/Layer.cpp"/>
+          <FILE id="dM7PEg" name="Layer.h" compile="0" resource="0" file="Source/Domain/DataStructs/Layer.h"/>
+          <FILE id="bWWGNO" name="Letter.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/Letter.cpp"/>
+          <FILE id="b3a2WT" name="Letter.h" compile="0" resource="0" file="Source/Domain/DataStructs/Letter.h"/>
+          <FILE id="buRj7Q" name="Midi.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/Midi.cpp"/>
+          <FILE id="LJ1Omn" name="Midi.h" compile="0" resource="0" file="Source/Domain/DataStructs/Midi.h"/>
+          <FILE id="w6nKqs" name="Octave.h" compile="0" resource="0" file="Source/Domain/DataStructs/Octave.h"/>
+          <FILE id="X7JqGT" name="Pitch.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/Pitch.cpp"/>
+          <FILE id="VJixJZ" name="Pitch.h" compile="0" resource="0" file="Source/Domain/DataStructs/Pitch.h"/>
+          <FILE id="OgYdCE" name="Quality.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/Quality.cpp"/>
+          <FILE id="XM5Dkt" name="Quality.h" compile="0" resource="0" file="Source/Domain/DataStructs/Quality.h"/>
+          <FILE id="fK4Xv5" name="Scale.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/Scale.cpp"/>
+          <FILE id="j0p1g1" name="Scale.h" compile="0" resource="0" file="Source/Domain/DataStructs/Scale.h"/>
+          <FILE id="fGPqub" name="ShiftedLetter.cpp" compile="1" resource="0"
+                file="Source/Domain/DataStructs/ShiftedLetter.cpp"/>
+          <FILE id="UQMcBb" name="ShiftedLetter.h" compile="0" resource="0" file="Source/Domain/DataStructs/ShiftedLetter.h"/>
+          <FILE id="RU8Eou" name="Solfege.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/Solfege.cpp"/>
+          <FILE id="XMCp67" name="Solfege.h" compile="0" resource="0" file="Source/Domain/DataStructs/Solfege.h"/>
+          <FILE id="uXyuVF" name="SortOrder.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/SortOrder.cpp"/>
+          <FILE id="vw8pok" name="SortOrder.h" compile="0" resource="0" file="Source/Domain/DataStructs/SortOrder.h"/>
+          <FILE id="zx6XKi" name="Subdivisions.cpp" compile="1" resource="0"
+                file="Source/Domain/DataStructs/Subdivisions.cpp"/>
+          <FILE id="ffsWF5" name="Subdivisions.h" compile="0" resource="0" file="Source/Domain/DataStructs/Subdivisions.h"/>
+          <FILE id="NVKIB3" name="Theme.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/Theme.cpp"/>
+          <FILE id="KnC3kF" name="Theme.h" compile="0" resource="0" file="Source/Domain/DataStructs/Theme.h"/>
+          <FILE id="TzZANR" name="VoiceLeadMode.cpp" compile="1" resource="0"
+                file="Source/Domain/DataStructs/VoiceLeadMode.cpp"/>
+          <FILE id="cXO6RK" name="VoiceLeadMode.h" compile="0" resource="0" file="Source/Domain/DataStructs/VoiceLeadMode.h"/>
+          <FILE id="NGFyOH" name="Voicing.cpp" compile="1" resource="0" file="Source/Domain/DataStructs/Voicing.cpp"/>
+          <FILE id="BKUQa3" name="Voicing.h" compile="0" resource="0" file="Source/Domain/DataStructs/Voicing.h"/>
+        </GROUP>
+        <GROUP id="{C1178A3E-EADC-2EFA-48CA-D5ECBEEF4101}" name="Promise">
+          <FILE id="JgWTil" name="Dispatcher.h" compile="0" resource="0" file="Source/Domain/Promise/Dispatcher.h"/>
+          <FILE id="ntV1I1" name="Promise.h" compile="0" resource="0" file="Source/Domain/Promise/Promise.h"/>
+        </GROUP>
+        <GROUP id="{D8D421B2-EDBF-8231-41B4-583B40FAC512}" name="React">
+          <FILE id="NnKIjx" name="Reactive.cpp" compile="1" resource="0" file="Source/Domain/React/Reactive.cpp"/>
+          <FILE id="he6Cjg" name="Reactive.h" compile="0" resource="0" file="Source/Domain/React/Reactive.h"/>
+          <FILE id="TmOETn" name="ReactiveArray.cpp" compile="1" resource="0"
+                file="Source/Domain/React/ReactiveArray.cpp"/>
+          <FILE id="kftigf" name="ReactiveArray.h" compile="0" resource="0" file="Source/Domain/React/ReactiveArray.h"/>
+          <FILE id="qp9pD8" name="ReactiveClass.cpp" compile="1" resource="0"
+                file="Source/Domain/React/ReactiveClass.cpp"/>
+          <FILE id="AtJ4GH" name="ReactiveClass.h" compile="0" resource="0" file="Source/Domain/React/ReactiveClass.h"/>
+          <FILE id="lEjaHC" name="ReactiveMap.h" compile="0" resource="0" file="Source/Domain/React/ReactiveMap.h"/>
+          <FILE id="Y4Qnh9" name="Subscriptions.h" compile="0" resource="0" file="Source/Domain/React/Subscriptions.h"/>
+        </GROUP>
+        <GROUP id="{AF1B5892-9D42-67D4-5B72-D9B7664FC387}" name="Serialization">
+          <FILE id="Z2u3Bp" name="Version.h" compile="0" resource="0" file="Source/Domain/Serialization/Version.h"/>
+          <FILE id="Kqw8Sz" name="Index.h" compile="0" resource="0" file="Source/Domain/Serialization/Index.h"/>
+          <FILE id="snJqQm" name="ISerializable.h" compile="0" resource="0" file="Source/Domain/Serialization/ISerializable.h"/>
+          <GROUP id="{B9733EBF-1C63-A020-3189-B23793B87888}" name="Streams">
+            <FILE id="hThCk5" name="StreamReader.h" compile="0" resource="0" file="Source/Domain/Serialization/Streams/StreamReader.h"/>
+            <FILE id="G5AAu9" name="StreamReader.cpp" compile="1" resource="0"
+                  file="Source/Domain/Serialization/Streams/StreamReader.cpp"/>
+            <FILE id="oQPcAZ" name="StreamWriter.cpp" compile="1" resource="0"
+                  file="Source/Domain/Serialization/Streams/StreamWriter.cpp"/>
+            <FILE id="sMKtze" name="StreamWriter.h" compile="0" resource="0" file="Source/Domain/Serialization/Streams/StreamWriter.h"/>
+          </GROUP>
+          <GROUP id="{A5EB0A92-634F-4AEA-219E-FDF2C56973D8}" name="Base64">
+            <GROUP id="{FFC8EA83-5283-4D0E-725D-9F1996F40DE3}" name="Base64">
+              <FILE id="RtK581" name="b64.h" compile="0" resource="0" file="Source/Domain/Serialization/Base64/b64.h"/>
+              <FILE id="P7f0tQ" name="Base64InputStream.cpp" compile="1" resource="0"
+                    file="Source/Domain/Serialization/Base64/Base64InputStream.cpp"/>
+              <FILE id="BWyVtC" name="Base64InputStream.h" compile="0" resource="0"
+                    file="Source/Domain/Serialization/Base64/Base64InputStream.h"/>
+            </GROUP>
+          </GROUP>
+          <GROUP id="{C1CA5927-40D9-FD96-D56F-FA38F8D6C76C}" name="LZ4">
+            <FILE id="Ut73lA" name="LZ4Writer.h" compile="0" resource="0" file="Source/Domain/Serialization/LZ4/LZ4Writer.h"/>
+            <FILE id="QmB85v" name="lz4.c" compile="1" resource="0" file="Source/Domain/Serialization/LZ4/lz4.c"/>
+            <FILE id="lkJ4n2" name="lz4.h" compile="0" resource="0" file="Source/Domain/Serialization/LZ4/lz4.h"/>
+            <FILE id="Y7rZ9H" name="LZ4Reader.h" compile="0" resource="0" file="Source/Domain/Serialization/LZ4/LZ4Reader.h"/>
+            <FILE id="oo6tAj" name="LZ4Pickler.cpp" compile="1" resource="0" file="Source/Domain/Serialization/LZ4/LZ4Pickler.cpp"/>
+            <FILE id="yOq7ZL" name="LZ4Pickler.h" compile="0" resource="0" file="Source/Domain/Serialization/LZ4/LZ4Pickler.h"/>
+          </GROUP>
+          <FILE id="kHBXAU" name="Serializer.cpp" compile="1" resource="0" file="Source/Domain/Serialization/Serializer.cpp"/>
+          <FILE id="ILpVaB" name="Serializer.h" compile="0" resource="0" file="Source/Domain/Serialization/Serializer.h"/>
+        </GROUP>
+        <GROUP id="{61427F60-1440-425E-3B1A-5470BB2B3C97}" name="Tests">
+          <FILE id="aIL0Hw" name="CollectionTests.h" compile="0" resource="0"
+                file="Source/Domain/Tests/CollectionTests.h"/>
+          <FILE id="R1ukRx" name="DispatcherTests.h" compile="0" resource="0"
+                file="Source/Domain/Tests/DispatcherTests.h"/>
+          <FILE id="nxR5l2" name="FollowValueTests.h" compile="0" resource="0"
+                file="Source/Domain/Tests/FollowValueTests.h"/>
+          <FILE id="XoUIhN" name="Index.h" compile="0" resource="0" file="Source/Domain/Tests/Index.h"/>
+          <FILE id="CLxAXB" name="OptionTests.h" compile="0" resource="0" file="Source/Domain/Tests/OptionTests.h"/>
+          <FILE id="MoLapr" name="PromiseTests.h" compile="0" resource="0" file="Source/Domain/Tests/PromiseTests.h"/>
+          <FILE id="XeFC42" name="QualityTests.h" compile="0" resource="0" file="Source/Domain/Tests/QualityTests.h"/>
+          <FILE id="PWlH7I" name="ReactiveTests.h" compile="0" resource="0" file="Source/Domain/Tests/ReactiveTests.h"/>
+          <FILE id="DnBuJA" name="SerializerTests.h" compile="0" resource="0"
+                file="Source/Domain/Tests/SerializerTests.h"/>
+          <FILE id="oxlcIz" name="VectorExtensionsTests.h" compile="0" resource="0"
+                file="Source/Domain/Tests/VectorExtensionsTests.h"/>
+          <FILE id="bxQqMO" name="VoicingGeneratorTests.h" compile="0" resource="0"
+                file="Source/Domain/Tests/VoicingGeneratorTests.h"/>
+          <FILE id="SuHote" name="VoicingTests.h" compile="0" resource="0" file="Source/Domain/Tests/VoicingTests.h"/>
+        </GROUP>
+        <GROUP id="{2323BC8F-8E59-8C1C-4AA8-F63A9C74C0AA}" name="Utils">
+          <FILE id="Pb84U4" name="Colour.cpp" compile="1" resource="0" file="Source/Domain/Utils/Colour.cpp"/>
+          <FILE id="LoFE83" name="Colour.h" compile="0" resource="0" file="Source/Domain/Utils/Colour.h"/>
+          <FILE id="wprY1d" name="Combinations.cpp" compile="1" resource="0"
+                file="Source/Domain/Utils/Combinations.cpp"/>
+          <FILE id="AppuB7" name="Combinations.h" compile="0" resource="0" file="Source/Domain/Utils/Combinations.h"/>
+          <FILE id="YHHytJ" name="Delay.cpp" compile="1" resource="0" file="Source/Domain/Utils/Delay.cpp"/>
+          <FILE id="mG2zE2" name="Delay.h" compile="0" resource="0" file="Source/Domain/Utils/Delay.h"/>
+          <FILE id="rdTmpQ" name="EMath.cpp" compile="1" resource="0" file="Source/Domain/Utils/EMath.cpp"/>
+          <FILE id="xgF9sv" name="EMath.h" compile="0" resource="0" file="Source/Domain/Utils/EMath.h"/>
+          <FILE id="hPJygf" name="EnableSharedCreation.h" compile="0" resource="0"
+                file="Source/Domain/Utils/EnableSharedCreation.h"/>
+          <FILE id="akhmzJ" name="EqualityChecks.h" compile="0" resource="0"
+                file="Source/Domain/Utils/EqualityChecks.h"/>
+          <FILE id="KXGg9f" name="ExceptionHelper.cpp" compile="1" resource="0"
+                file="Source/Domain/Utils/ExceptionHelper.cpp"/>
+          <FILE id="GF5ArS" name="ExceptionHelper.h" compile="0" resource="0"
+                file="Source/Domain/Utils/ExceptionHelper.h"/>
+          <FILE id="yCMiUn" name="Maybe.h" compile="0" resource="0" file="Source/Domain/Utils/Maybe.h"/>
+          <FILE id="Q5EHpl" name="NoteDisplay.cpp" compile="1" resource="0" file="Source/Domain/Utils/NoteDisplay.cpp"/>
+          <FILE id="SXqdET" name="NoteDisplay.h" compile="0" resource="0" file="Source/Domain/Utils/NoteDisplay.h"/>
+          <FILE id="iiNoej" name="Option.h" compile="0" resource="0" file="Source/Domain/Utils/Option.h"/>
+          <FILE id="Zzo0dG" name="VectorExtensions.h" compile="0" resource="0"
+                file="Source/Domain/Utils/VectorExtensions.h"/>
+        </GROUP>
+        <GROUP id="{3E78F910-2590-56B1-FE66-DA6316A07F93}" name="VoicingGenerator">
+          <FILE id="HLs1Gq" name="MidiOutputManager.cpp" compile="1" resource="0"
+                file="Source/Domain/VoicingGenerator/MidiOutputManager.cpp"/>
+          <FILE id="q4PZRd" name="MidiOutputManager.h" compile="0" resource="0"
+                file="Source/Domain/VoicingGenerator/MidiOutputManager.h"/>
+          <FILE id="VirtMC" name="VirtualMidiDevice.cpp" compile="1" resource="0"
+                file="Source/Domain/VoicingGenerator/VirtualMidiDevice.cpp"/>
+          <FILE id="VirtMH" name="VirtualMidiDevice.h" compile="0" resource="0"
+                file="Source/Domain/VoicingGenerator/VirtualMidiDevice.h"/>
+          <FILE id="HopOzJ" name="Result.h" compile="0" resource="0" file="Source/Domain/VoicingGenerator/Result.h"/>
+          <FILE id="eUFIHT" name="Spelling.cpp" compile="1" resource="0" file="Source/Domain/VoicingGenerator/Spelling.cpp"/>
+          <FILE id="W4ZtJi" name="Spelling.h" compile="0" resource="0" file="Source/Domain/VoicingGenerator/Spelling.h"/>
+          <FILE id="NAWXCM" name="VoiceLeadAlgorithm.cpp" compile="1" resource="0"
+                file="Source/Domain/VoicingGenerator/VoiceLeadAlgorithm.cpp"/>
+          <FILE id="JDj8aG" name="VoiceLeadAlgorithm.h" compile="0" resource="0"
+                file="Source/Domain/VoicingGenerator/VoiceLeadAlgorithm.h"/>
+          <FILE id="tFokuq" name="VoicingGenerator.cpp" compile="1" resource="0"
+                file="Source/Domain/VoicingGenerator/VoicingGenerator.cpp"/>
+          <FILE id="A27NV6" name="VoicingGenerator.h" compile="0" resource="0"
+                file="Source/Domain/VoicingGenerator/VoicingGenerator.h"/>
+          <FILE id="U9Ahml" name="VoicingQuality.cpp" compile="1" resource="0"
+                file="Source/Domain/VoicingGenerator/VoicingQuality.cpp"/>
+          <FILE id="k7DRY9" name="VoicingQuality.h" compile="0" resource="0"
+                file="Source/Domain/VoicingGenerator/VoicingQuality.h"/>
+        </GROUP>
+        <FILE id="v7bFgU" name="TimelineState.cpp" compile="1" resource="0"
+              file="Source/Domain/TimelineState.cpp"/>
+        <FILE id="GwhFd1" name="TimelineState.h" compile="0" resource="0" file="Source/Domain/TimelineState.h"/>
+      </GROUP>
+      <GROUP id="{42F2C972-305D-2B6D-76CF-4164E772E7B0}" name="SDK">
+        <FILE id="ON1kCC" name="CachedGradient.cpp" compile="1" resource="0"
+              file="Source/SDK/CachedGradient.cpp"/>
+        <FILE id="LPiALy" name="CachedGradient.h" compile="0" resource="0"
+              file="Source/SDK/CachedGradient.h"/>
+        <FILE id="giOdA7" name="WindowManager.cpp" compile="1" resource="0"
+              file="Source/SDK/WindowManager.cpp"/>
+        <FILE id="olGleP" name="WindowManager.h" compile="0" resource="0" file="Source/SDK/WindowManager.h"/>
+        <FILE id="DPMiDB" name="MidiOutputProcessor.cpp" compile="1" resource="0"
+              file="Source/SDK/MidiOutputProcessor.cpp"/>
+        <FILE id="h7qUoC" name="MidiOutputProcessor.h" compile="0" resource="0"
+              file="Source/SDK/MidiOutputProcessor.h"/>
+        <FILE id="qTVbyb" name="HistoryManager.cpp" compile="1" resource="0"
+              file="Source/SDK/HistoryManager.cpp"/>
+        <FILE id="hnTfBP" name="HistoryManager.h" compile="0" resource="0"
+              file="Source/SDK/HistoryManager.h"/>
+        <GROUP id="{B7749834-0024-B9E1-F833-45EDE2BB2ABF}" name="Tests">
+          <FILE id="UtCWRO" name="CButtonTests.h" compile="0" resource="0" file="Source/SDK/Tests/CButtonTests.h"/>
+          <FILE id="caNnZL" name="Index.h" compile="0" resource="0" file="Source/SDK/Tests/Index.h"/>
+        </GROUP>
+        <FILE id="eTi6G9" name="AnimatedState.cpp" compile="1" resource="0"
+              file="Source/SDK/AnimatedState.cpp"/>
+        <FILE id="GCdCYP" name="AnimatedState.h" compile="0" resource="0" file="Source/SDK/AnimatedState.h"/>
+        <FILE id="DlRq9R" name="Assets.cpp" compile="1" resource="0" file="Source/SDK/Assets.cpp"/>
+        <FILE id="ZLGh5a" name="Assets.h" compile="0" resource="0" file="Source/SDK/Assets.h"/>
+        <FILE id="CustomCursorsCPP" name="CustomCursors.cpp" compile="1" resource="0"
+              file="Source/SDK/CustomCursors.cpp"/>
+        <FILE id="CustomCursorsH" name="CustomCursors.h" compile="0" resource="0"
+              file="Source/SDK/CustomCursors.h"/>
+        <FILE id="CachedFontCPP" name="CachedFont.cpp" compile="1" resource="0"
+              file="Source/SDK/CachedFont.cpp"/>
+        <FILE id="CachedFontH" name="CachedFont.h" compile="0" resource="0"
+              file="Source/SDK/CachedFont.h"/>
+        <FILE id="kvOHZ7" name="CButtonState.cpp" compile="1" resource="0"
+              file="Source/SDK/CButtonState.cpp"/>
+        <FILE id="HR8swl" name="CButtonState.h" compile="0" resource="0" file="Source/SDK/CButtonState.h"/>
+        <FILE id="mLoizA" name="CSliderState.cpp" compile="1" resource="0"
+              file="Source/SDK/CSliderState.cpp"/>
+        <FILE id="v3amfI" name="CSliderState.h" compile="0" resource="0" file="Source/SDK/CSliderState.h"/>
+        <FILE id="xYfLGa" name="DarkMenuButtonState.cpp" compile="1" resource="0"
+              file="Source/SDK/DarkMenuButtonState.cpp"/>
+        <FILE id="cVt8a0" name="DarkMenuButtonState.h" compile="0" resource="0"
+              file="Source/SDK/DarkMenuButtonState.h"/>
+        <FILE id="VLuh1a" name="DropdownState.cpp" compile="1" resource="0"
+              file="Source/SDK/DropdownState.cpp"/>
+        <FILE id="Gxf6kv" name="DropdownState.h" compile="0" resource="0" file="Source/SDK/DropdownState.h"/>
+        <FILE id="VwPaTu" name="GlobalMenuState.cpp" compile="1" resource="0"
+              file="Source/SDK/GlobalMenuState.cpp"/>
+        <FILE id="svFWeY" name="GlobalMenuState.h" compile="0" resource="0"
+              file="Source/SDK/GlobalMenuState.h"/>
+        <FILE id="JnHhjx" name="PlaybackControl.cpp" compile="1" resource="0"
+              file="Source/SDK/PlaybackControl.cpp"/>
+        <FILE id="ptb6a3" name="PlaybackControl.h" compile="0" resource="0"
+              file="Source/SDK/PlaybackControl.h"/>
+        <FILE id="RNSufM" name="PlayheadState.cpp" compile="1" resource="0"
+              file="Source/SDK/PlayheadState.cpp"/>
+        <FILE id="EEn1Z9" name="PlayheadState.h" compile="0" resource="0" file="Source/SDK/PlayheadState.h"/>
+        <FILE id="mI1uQI" name="PopupMenuState.cpp" compile="1" resource="0"
+              file="Source/SDK/PopupMenuState.cpp"/>
+        <FILE id="gb5IAI" name="PopupMenuState.h" compile="0" resource="0"
+              file="Source/SDK/PopupMenuState.h"/>
+        <FILE id="g4Ap7s" name="ProgressionState.cpp" compile="1" resource="0"
+              file="Source/SDK/ProgressionState.cpp"/>
+        <FILE id="yhE9pr" name="ProgressionState.h" compile="0" resource="0"
+              file="Source/SDK/ProgressionState.h"/>
+        <FILE id="jtUOtj" name="ScrollbarState.cpp" compile="1" resource="0"
+              file="Source/SDK/ScrollbarState.cpp"/>
+        <FILE id="AbVY8l" name="ScrollbarState.h" compile="0" resource="0"
+              file="Source/SDK/ScrollbarState.h"/>
+        <FILE id="UIAdv4" name="Stateful.h" compile="0" resource="0" file="Source/SDK/Stateful.h"/>
+        <FILE id="zTOMNU" name="SVG.cpp" compile="1" resource="0" file="Source/SDK/SVG.cpp"/>
+        <FILE id="pTCyQ3" name="SVG.h" compile="0" resource="0" file="Source/SDK/SVG.h"/>
+        <FILE id="En3TdH" name="TabManager.cpp" compile="1" resource="0" file="Source/SDK/TabManager.cpp"/>
+        <FILE id="dxpnKa" name="TabManager.h" compile="0" resource="0" file="Source/SDK/TabManager.h"/>
+        <FILE id="PE5JTK" name="ThemeManager.cpp" compile="1" resource="0"
+              file="Source/SDK/ThemeManager.cpp"/>
+        <FILE id="fTY2sZ" name="ThemeManager.h" compile="0" resource="0" file="Source/SDK/ThemeManager.h"/>
+        <FILE id="a1a83S" name="TimeProvider.cpp" compile="1" resource="0"
+              file="Source/SDK/TimeProvider.cpp"/>
+        <FILE id="bBpNoh" name="TimeProvider.h" compile="0" resource="0" file="Source/SDK/TimeProvider.h"/>
+        <FILE id="MetronomeH" name="Metronome.h" compile="0" resource="0" file="Source/SDK/Metronome.h"/>
+        <FILE id="MetronomeCPP" name="Metronome.cpp" compile="1" resource="0"
+              file="Source/SDK/Metronome.cpp"/>
+        <FILE id="PurchasingMgrCPP" name="PurchasingManager.cpp" compile="1"
+              resource="0" file="Source/SDK/PurchasingManager.cpp"/>
+        <FILE id="PurchasingMgrH" name="PurchasingManager.h" compile="0" resource="0"
+              file="Source/SDK/PurchasingManager.h"/>
+        <FILE id="StoreKitMgrCPP" name="StoreKitManager.cpp" compile="1" resource="0"
+              file="Source/SDK/StoreKitManager.cpp"/>
+        <FILE id="StoreKitMgrH" name="StoreKitManager.h" compile="0" resource="0"
+              file="Source/SDK/StoreKitManager.h"/>
+        <FILE id="StoreKitBridgeH" name="StoreKitBridge.h" compile="0" resource="0"
+              file="Source/SDK/StoreKitBridge.h"/>
+        <FILE id="StoreKitBridgeMM" name="StoreKitBridge.mm" compile="1" resource="0"
+              file="Source/SDK/StoreKitBridge.mm"/>
+        <FILE id="iOSKeyboardHelperH" name="iOSKeyboardHelper.h" compile="0"
+              resource="0" file="Source/SDK/iOSKeyboardHelper.h"/>
+        <FILE id="iOSKeyboardHelperMM" name="iOSKeyboardHelper.mm" compile="1"
+              resource="0" file="Source/SDK/iOSKeyboardHelper.mm"/>
+        <FILE id="iOSKeyboardHelperCPP" name="iOSKeyboardHelper.cpp" compile="1"
+              resource="0" file="Source/SDK/iOSKeyboardHelper.cpp"/>
+      </GROUP>
+      <GROUP id="{EABD162A-C609-A4B8-78A6-A5C07574D7C2}" name="UI">
+        <GROUP id="{A433A596-916B-FA02-83E1-9F72888C9A97}" name="Voicing">
+          <FILE id="IJZVqF" name="BassBox.cpp" compile="1" resource="0" file="Source/UI/Voicing/BassBox.cpp"/>
+          <FILE id="IllJQl" name="BassBox.h" compile="0" resource="0" file="Source/UI/Voicing/BassBox.h"/>
+          <FILE id="SQ1VMY" name="ChordPrefixBox.cpp" compile="1" resource="0"
+                file="Source/UI/Voicing/ChordPrefixBox.cpp"/>
+          <FILE id="GMn9LL" name="ChordPrefixBox.h" compile="0" resource="0"
+                file="Source/UI/Voicing/ChordPrefixBox.h"/>
+          <FILE id="ckrfxz" name="ChordScaleBox.cpp" compile="1" resource="0"
+                file="Source/UI/Voicing/ChordScaleBox.cpp"/>
+          <FILE id="BQ1498" name="ChordScaleBox.h" compile="0" resource="0" file="Source/UI/Voicing/ChordScaleBox.h"/>
+          <FILE id="LpD3aU" name="DynamicsBox.cpp" compile="1" resource="0" file="Source/UI/Voicing/DynamicsBox.cpp"/>
+          <FILE id="EeiSng" name="DynamicsBox.h" compile="0" resource="0" file="Source/UI/Voicing/DynamicsBox.h"/>
+          <FILE id="xUlRUq" name="InversionBox.cpp" compile="1" resource="0"
+                file="Source/UI/Voicing/InversionBox.cpp"/>
+          <FILE id="j35TKc" name="InversionBox.h" compile="0" resource="0" file="Source/UI/Voicing/InversionBox.h"/>
+          <FILE id="sqdEQy" name="KeyBox.cpp" compile="1" resource="0" file="Source/UI/Voicing/KeyBox.cpp"/>
+          <FILE id="GeC5aV" name="KeyBox.h" compile="0" resource="0" file="Source/UI/Voicing/KeyBox.h"/>
+          <FILE id="S4wzel" name="OctaveBox.cpp" compile="1" resource="0" file="Source/UI/Voicing/OctaveBox.cpp"/>
+          <FILE id="ZoPqw0" name="OctaveBox.h" compile="0" resource="0" file="Source/UI/Voicing/OctaveBox.h"/>
+          <FILE id="U57AHb" name="SmartChordBox.cpp" compile="1" resource="0"
+                file="Source/UI/Voicing/SmartChordBox.cpp"/>
+          <FILE id="wco0x6" name="SmartChordBox.h" compile="0" resource="0" file="Source/UI/Voicing/SmartChordBox.h"/>
+          <FILE id="iLMWfe" name="SpacingBox.cpp" compile="1" resource="0" file="Source/UI/Voicing/SpacingBox.cpp"/>
+          <FILE id="WOwI7V" name="SpacingBox.h" compile="0" resource="0" file="Source/UI/Voicing/SpacingBox.h"/>
+          <FILE id="vXJJXr" name="SpellingBox.cpp" compile="1" resource="0" file="Source/UI/Voicing/SpellingBox.cpp"/>
+          <FILE id="UlMZfF" name="SpellingBox.h" compile="0" resource="0" file="Source/UI/Voicing/SpellingBox.h"/>
+          <FILE id="mmq54v" name="StrumBox.cpp" compile="1" resource="0" file="Source/UI/Voicing/StrumBox.cpp"/>
+          <FILE id="auKJPS" name="StrumBox.h" compile="0" resource="0" file="Source/UI/Voicing/StrumBox.h"/>
+          <FILE id="hgF1hq" name="SustainBox.cpp" compile="1" resource="0" file="Source/UI/Voicing/SustainBox.cpp"/>
+          <FILE id="we2lmN" name="SustainBox.h" compile="0" resource="0" file="Source/UI/Voicing/SustainBox.h"/>
+          <FILE id="TSO4gw" name="SustainCTBox.cpp" compile="1" resource="0"
+                file="Source/UI/Voicing/SustainCTBox.cpp"/>
+          <FILE id="GdMGp0" name="SustainCTBox.h" compile="0" resource="0" file="Source/UI/Voicing/SustainCTBox.h"/>
+          <FILE id="QmYkAV" name="VoiceCountBox.cpp" compile="1" resource="0"
+                file="Source/UI/Voicing/VoiceCountBox.cpp"/>
+          <FILE id="g1Suow" name="VoiceCountBox.h" compile="0" resource="0" file="Source/UI/Voicing/VoiceCountBox.h"/>
+          <FILE id="U7UuDO" name="VoiceLeadBox.cpp" compile="1" resource="0"
+                file="Source/UI/Voicing/VoiceLeadBox.cpp"/>
+          <FILE id="ZZFFd7" name="VoiceLeadBox.h" compile="0" resource="0" file="Source/UI/Voicing/VoiceLeadBox.h"/>
+          <FILE id="FKoW76" name="VoicingBoxLabel.cpp" compile="1" resource="0"
+                file="Source/UI/Voicing/VoicingBoxLabel.cpp"/>
+          <FILE id="NrluCg" name="VoicingBoxLabel.h" compile="0" resource="0"
+                file="Source/UI/Voicing/VoicingBoxLabel.h"/>
+        </GROUP>
+        <GROUP id="{A8C73DE5-EEAB-0D69-BAD8-0F13A0FD2A84}" name="Windows">
+          <GROUP id="{E9BDAE10-0AD5-8961-DC67-2AEA70182A28}" name="CLayerManager">
+            <FILE id="Qogwcl" name="CLayerManager.cpp" compile="1" resource="0"
+                  file="Source/UI/Windows/CLayerManager/CLayerManager.cpp"/>
+            <FILE id="XSEZjM" name="CLayerManager.h" compile="0" resource="0" file="Source/UI/Windows/CLayerManager/CLayerManager.h"/>
+            <FILE id="LYQV1G" name="CLayerManagerCells.cpp" compile="1" resource="0"
+                  file="Source/UI/Windows/CLayerManager/CLayerManagerCells.cpp"/>
+            <FILE id="lPv3KO" name="CLayerManagerCells.h" compile="0" resource="0"
+                  file="Source/UI/Windows/CLayerManager/CLayerManagerCells.h"/>
+          </GROUP>
+          <FILE id="IbLXzR" name="ChordScaleWindow.cpp" compile="1" resource="0"
+                file="Source/UI/Windows/ChordScaleWindow.cpp"/>
+          <FILE id="qC9ir0" name="ChordScaleWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/ChordScaleWindow.h"/>
+          <FILE id="mvTObf" name="LayerManagerConfig.h" compile="0" resource="0"
+                file="Source/UI/Windows/LayerManagerConfig.h"/>
+          <FILE id="u5qLMX" name="LayerManagerWindow.cpp" compile="1" resource="0"
+                file="Source/UI/Windows/LayerManagerWindow.cpp"/>
+          <FILE id="Bd3jHr" name="LayerManagerWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/LayerManagerWindow.h"/>
+          <FILE id="LayerHierarchyPopupH" name="LayerHierarchyPopup.h" compile="0"
+                resource="0" file="Source/UI/Windows/LayerHierarchyPopup.h"/>
+          <FILE id="LayerHierarchyPopupCPP" name="LayerHierarchyPopup.cpp" compile="1"
+                resource="0" file="Source/UI/Windows/LayerHierarchyPopup.cpp"/>
+          <FILE id="nFdzER" name="TableComponents.cpp" compile="1" resource="0"
+                file="Source/UI/Windows/TableComponents.cpp"/>
+          <FILE id="xXcXnK" name="TableComponents.h" compile="0" resource="0"
+                file="Source/UI/Windows/TableComponents.h"/>
+          <FILE id="CellEditWindowCpp" name="CellEditWindow.cpp" compile="1"
+                resource="0" file="Source/UI/Windows/CellEditWindow.cpp"/>
+          <FILE id="CellEditWindowH" name="CellEditWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/CellEditWindow.h"/>
+          <FILE id="VCMWh1" name="VoiceChannelMatrixWindow.cpp" compile="1" resource="0"
+                file="Source/UI/Windows/VoiceChannelMatrixWindow.cpp"/>
+          <FILE id="VCMWh2" name="VoiceChannelMatrixWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/VoiceChannelMatrixWindow.h"/>
+          <FILE id="tpYR5u" name="ColorThemesWindow.cpp" compile="1" resource="0"
+                file="Source/UI/Windows/ColorThemesWindow.cpp"/>
+          <FILE id="B3XTFV" name="ColorThemesWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/ColorThemesWindow.h"/>
+          <FILE id="HotkeysWinCpp" name="HotkeysWindow.cpp" compile="1" resource="0"
+                file="Source/UI/Windows/HotkeysWindow.cpp"/>
+          <FILE id="HotkeysWinH" name="HotkeysWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/HotkeysWindow.h"/>
+          <FILE id="MidiMonitorWinCpp" name="MidiMonitorWindow.cpp" compile="1"
+                resource="0" file="Source/UI/Windows/MidiMonitorWindow.cpp"/>
+          <FILE id="MidiMonitorWinH" name="MidiMonitorWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/MidiMonitorWindow.h"/>
+          <FILE id="ControllerAssignmentsWinCpp" name="ControllerAssignmentsWindow.cpp"
+                compile="1" resource="0" file="Source/UI/Windows/ControllerAssignmentsWindow.cpp"/>
+          <FILE id="ControllerAssignmentsWinH" name="ControllerAssignmentsWindow.h"
+                compile="0" resource="0" file="Source/UI/Windows/ControllerAssignmentsWindow.h"/>
+          <FILE id="MidiDeviceListenerCpp" name="MidiDeviceListener.cpp" compile="1"
+                resource="0" file="Source/UI/Windows/MidiDeviceListener.cpp"/>
+          <FILE id="MidiDeviceListenerH" name="MidiDeviceListener.h" compile="0"
+                resource="0" file="Source/UI/Windows/MidiDeviceListener.h"/>
+          <FILE id="j9pU6h" name="SequencerWindow.cpp" compile="1" resource="0"
+                file="Source/UI/Windows/SequencerWindow.cpp"/>
+          <FILE id="EzUvL3" name="SequencerWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/SequencerWindow.h"/>
+          <FILE id="DynPopWinCpp" name="DynamicsPopupWindow.cpp" compile="1"
+                resource="0" file="Source/UI/Windows/DynamicsPopupWindow.cpp"/>
+          <FILE id="DynPopWinH" name="DynamicsPopupWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/DynamicsPopupWindow.h"/>
+          <FILE id="GenWinCpp" name="GenerateWindow.cpp" compile="1" resource="0"
+                file="Source/UI/Windows/GenerateWindow.cpp"/>
+          <FILE id="GenWinH" name="GenerateWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/GenerateWindow.h"/>
+          <FILE id="GenGrooveWinCpp" name="GenerateGrooveWindow.cpp" compile="1"
+                resource="0" file="Source/UI/Windows/GenerateGrooveWindow.cpp"/>
+          <FILE id="GenGrooveWinH" name="GenerateGrooveWindow.h" compile="0"
+                resource="0" file="Source/UI/Windows/GenerateGrooveWindow.h"/>
+          <GROUP id="{A1B2C3D4-E5F6-7890-ABCD-EF1234567891}" name="GrooveGenerators">
+            <FILE id="GrooveGenCtxH" name="GrooveGeneratorContext.h" compile="0"
+                  resource="0" file="Source/UI/Windows/GrooveGenerators/GrooveGeneratorContext.h"/>
+            <FILE id="GrooveGenHelpersH" name="GrooveGeneratorHelpers.h" compile="0"
+                  resource="0" file="Source/UI/Windows/GrooveGenerators/GrooveGeneratorHelpers.h"/>
+            <FILE id="GrooveGenHelpersCpp" name="GrooveGeneratorHelpers.cpp" compile="1"
+                  resource="0" file="Source/UI/Windows/GrooveGenerators/GrooveGeneratorHelpers.cpp"/>
+            <FILE id="AllGeneratorsH" name="AllGenerators.h" compile="0" resource="0"
+                  file="Source/UI/Windows/GrooveGenerators/AllGenerators.h"/>
+            <FILE id="AllGeneratorsCpp" name="AllGenerators.cpp" compile="1" resource="0"
+                  file="Source/UI/Windows/GrooveGenerators/AllGenerators.cpp"/>
+            <FILE id="StyleDefsH" name="StyleDefinitions.h" compile="0" resource="0"
+                  file="Source/UI/Windows/GrooveGenerators/StyleDefinitions.h"/>
+            <FILE id="StyleDefsCpp" name="StyleDefinitions.cpp" compile="1" resource="0"
+                  file="Source/UI/Windows/GrooveGenerators/StyleDefinitions.cpp"/>
+            <FILE id="StyleDetailWinH" name="StyleDetailWindow.h" compile="0" resource="0"
+                  file="Source/UI/Windows/GrooveGenerators/StyleDetailWindow.h"/>
+            <FILE id="StyleDetailWinCpp" name="StyleDetailWindow.cpp" compile="1"
+                  resource="0" file="Source/UI/Windows/GrooveGenerators/StyleDetailWindow.cpp"/>
+          </GROUP>
+          <FILE id="GenProgWinCpp" name="GenerateProgressionWindow.cpp" compile="1"
+                resource="0" file="Source/UI/Windows/GenerateProgressionWindow.cpp"/>
+          <FILE id="GenProgWinH" name="GenerateProgressionWindow.h" compile="0"
+                resource="0" file="Source/UI/Windows/GenerateProgressionWindow.h"/>
+          <FILE id="GrvPresWinCpp" name="GroovePresetsWindow.cpp" compile="1"
+                resource="0" file="Source/UI/Windows/GroovePresetsWindow.cpp"/>
+          <FILE id="GrvPresWinH" name="GroovePresetsWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/GroovePresetsWindow.h"/>
+          <FILE id="ExpressionWinCpp" name="ExpressionWindow.cpp" compile="1"
+                resource="0" file="Source/UI/Windows/ExpressionWindow.cpp"/>
+          <FILE id="ExpressionWinH" name="ExpressionWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/ExpressionWindow.h"/>
+          <FILE id="NotationWinCpp" name="NotationWindow.cpp" compile="1" resource="0"
+                file="Source/UI/Windows/NotationWindow.cpp"/>
+          <FILE id="NotationWinH" name="NotationWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/NotationWindow.h"/>
+          <FILE id="LilyPondConverterCpp" name="LilyPondConverter.cpp" compile="1"
+                resource="0" file="Source/UI/Windows/LilyPondConverter.cpp"/>
+          <FILE id="LilyPondConverterH" name="LilyPondConverter.h" compile="0"
+                resource="0" file="Source/UI/Windows/LilyPondConverter.h"/>
+          <FILE id="LilyPondRendererCpp" name="LilyPondRenderer.cpp" compile="1"
+                resource="0" file="Source/UI/Windows/LilyPondRenderer.cpp"/>
+          <FILE id="LilyPondRendererH" name="LilyPondRenderer.h" compile="0"
+                resource="0" file="Source/UI/Windows/LilyPondRenderer.h"/>
+        </GROUP>
+        <GROUP id="{34EDE343-E37D-A099-DB04-105F6F390C26}" name="Track">
+          <FILE id="O9DZCe" name="PatternNoteUI.cpp" compile="1" resource="0"
+                file="Source/UI/Track/PatternNoteUI.cpp"/>
+          <FILE id="KT0GgO" name="PatternNoteUI.h" compile="0" resource="0" file="Source/UI/Track/PatternNoteUI.h"/>
+          <FILE id="ciwvzs" name="PatternTrackUI.cpp" compile="1" resource="0"
+                file="Source/UI/Track/PatternTrackUI.cpp"/>
+          <FILE id="fAaPJt" name="PatternTrackUI.h" compile="0" resource="0"
+                file="Source/UI/Track/PatternTrackUI.h"/>
+          <FILE id="pointingHandImg" name="pointinghand_100160.png" compile="0"
+                resource="1" file="Source/UI/Track/pointinghand_100160.png"/>
+          <FILE id="PRGHlpCpp" name="PianoRollGridHelper.cpp" compile="1" resource="0"
+                file="Source/UI/Track/PianoRollGridHelper.cpp"/>
+          <FILE id="PRGHlpH" name="PianoRollGridHelper.h" compile="0" resource="0"
+                file="Source/UI/Track/PianoRollGridHelper.h"/>
+          <FILE id="MidiPasteOptWinCpp" name="MidiPasteOptionsWindow.cpp" compile="1"
+                resource="0" file="Source/UI/Track/MidiPasteOptionsWindow.cpp"/>
+          <FILE id="MidiPasteOptWinH" name="MidiPasteOptionsWindow.h" compile="0"
+                resource="0" file="Source/UI/Track/MidiPasteOptionsWindow.h"/>
+          <FILE id="SeqNoteUICpp" name="SequencerNoteUI.cpp" compile="1" resource="0"
+                file="Source/UI/Track/SequencerNoteUI.cpp"/>
+          <FILE id="SeqNoteUIH" name="SequencerNoteUI.h" compile="0" resource="0"
+                file="Source/UI/Track/SequencerNoteUI.h"/>
+          <FILE id="hVOCuj" name="SequencerTrackUI.cpp" compile="1" resource="0"
+                file="Source/UI/Track/SequencerTrackUI.cpp"/>
+          <FILE id="fTHg5r" name="SequencerTrackUI.h" compile="0" resource="0"
+                file="Source/UI/Track/SequencerTrackUI.h"/>
+          <FILE id="C8TW2X" name="VoicingTrackUI.cpp" compile="1" resource="0"
+                file="Source/UI/Track/VoicingTrackUI.cpp"/>
+          <FILE id="NRbHJ6" name="VoicingTrackUI.h" compile="0" resource="0"
+                file="Source/UI/Track/VoicingTrackUI.h"/>
+          <FILE id="GrvTrkCPP" name="GrooveTrackUI.cpp" compile="1" resource="0"
+                file="Source/UI/Track/GrooveTrackUI.cpp"/>
+          <FILE id="GrvTrkH" name="GrooveTrackUI.h" compile="0" resource="0"
+                file="Source/UI/Track/GrooveTrackUI.h"/>
+        </GROUP>
+        <GROUP id="{6167A1DB-B460-58FD-493A-7B3C9A68A302}" name="Song">
+          <FILE id="eJqqpT" name="SongRegionUI.cpp" compile="1" resource="0"
+                file="Source/UI/Song/SongRegionUI.cpp"/>
+          <FILE id="fjuIBB" name="SongRegionUI.h" compile="0" resource="0" file="Source/UI/Song/SongRegionUI.h"/>
+          <FILE id="GW0QPQ" name="SongTrackUI.cpp" compile="1" resource="0" file="Source/UI/Song/SongTrackUI.cpp"/>
+          <FILE id="OKRgeP" name="SongTrackUI.h" compile="0" resource="0" file="Source/UI/Song/SongTrackUI.h"/>
+        </GROUP>
+        <GROUP id="{DA851557-4D34-A990-50AA-E6FEC85B5DD8}" name="Views">
+          <FILE id="FQQuH8" name="PaletteView.cpp" compile="1" resource="0" file="Source/UI/Views/PaletteView.cpp"/>
+          <FILE id="g9t8Jf" name="PaletteView.h" compile="0" resource="0" file="Source/UI/Views/PaletteView.h"/>
+          <FILE id="hThQbf" name="SongView.cpp" compile="1" resource="0" file="Source/UI/Views/SongView.cpp"/>
+          <FILE id="oGtLrU" name="SongView.h" compile="0" resource="0" file="Source/UI/Views/SongView.h"/>
+          <FILE id="sawkBs" name="TrackView.cpp" compile="1" resource="0" file="Source/UI/Views/TrackView.cpp"/>
+          <FILE id="hNP9s9" name="TrackView.h" compile="0" resource="0" file="Source/UI/Views/TrackView.h"/>
+          <FILE id="Wrnb7x" name="VoicingView.cpp" compile="1" resource="0" file="Source/UI/Views/VoicingView.cpp"/>
+          <FILE id="VCg0JA" name="VoicingView.h" compile="0" resource="0" file="Source/UI/Views/VoicingView.h"/>
+        </GROUP>
+        <GROUP id="{9F1F0DDC-EC9E-DBF3-534A-94E355D72B21}" name="Palette">
+          <FILE id="HVp5aF" name="BankUI.cpp" compile="1" resource="0" file="Source/UI/Palette/BankUI.cpp"/>
+          <FILE id="n4Xkcn" name="BankUI.h" compile="0" resource="0" file="Source/UI/Palette/BankUI.h"/>
+          <FILE id="UPmVNv" name="CymaticUI.cpp" compile="1" resource="0" file="Source/UI/Palette/CymaticUI.cpp"/>
+          <FILE id="OTDUE2" name="CymaticUI.h" compile="0" resource="0" file="Source/UI/Palette/CymaticUI.h"/>
+          <FILE id="CyUIStC" name="CymaticUIState.cpp" compile="1" resource="0"
+                file="Source/UI/Palette/CymaticUIState.cpp"/>
+          <FILE id="CyUIStH" name="CymaticUIState.h" compile="0" resource="0"
+                file="Source/UI/Palette/CymaticUIState.h"/>
+          <FILE id="jAEYod" name="Dashboard.cpp" compile="1" resource="0" file="Source/UI/Palette/Dashboard.cpp"/>
+          <FILE id="h2AJkw" name="Dashboard.h" compile="0" resource="0" file="Source/UI/Palette/Dashboard.h"/>
+          <FILE id="nStCQu" name="DashboardItem.cpp" compile="1" resource="0"
+                file="Source/UI/Palette/DashboardItem.cpp"/>
+          <FILE id="YCvtnU" name="DashboardItem.h" compile="0" resource="0" file="Source/UI/Palette/DashboardItem.h"/>
+          <FILE id="OITlbu" name="DegreesUI.cpp" compile="1" resource="0" file="Source/UI/Palette/DegreesUI.cpp"/>
+          <FILE id="luoE5r" name="DegreesUI.h" compile="0" resource="0" file="Source/UI/Palette/DegreesUI.h"/>
+          <FILE id="njH6XC" name="LayerSelector.cpp" compile="1" resource="0"
+                file="Source/UI/Palette/LayerSelector.cpp"/>
+          <FILE id="zINeTc" name="LayerSelector.h" compile="0" resource="0" file="Source/UI/Palette/LayerSelector.h"/>
+          <FILE id="kFesJx" name="PaletteUI.cpp" compile="1" resource="0" file="Source/UI/Palette/PaletteUI.cpp"/>
+          <FILE id="bqLgNw" name="PaletteUI.h" compile="0" resource="0" file="Source/UI/Palette/PaletteUI.h"/>
+          <FILE id="a0RjA2" name="PaletteWindow.cpp" compile="1" resource="0"
+                file="Source/UI/Palette/PaletteWindow.cpp"/>
+          <FILE id="Un7aXy" name="PaletteWindow.h" compile="0" resource="0" file="Source/UI/Palette/PaletteWindow.h"/>
+          <FILE id="yUOFXO" name="SpawnBankWindow.cpp" compile="1" resource="0"
+                file="Source/UI/Palette/SpawnBankWindow.cpp"/>
+          <FILE id="AMcSjl" name="SpawnBankWindow.h" compile="0" resource="0"
+                file="Source/UI/Palette/SpawnBankWindow.h"/>
+        </GROUP>
+        <GROUP id="{40733EB5-B4AB-001F-A680-47DCA9A37FA3}" name="Generic">
+          <FILE id="nVe6t8" name="ColoredKeyboardComponent.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/ColoredKeyboardComponent.cpp"/>
+          <FILE id="nkw67x" name="ColoredKeyboardComponent.h" compile="0" resource="0"
+                file="Source/UI/Generic/ColoredKeyboardComponent.h"/>
+          <FILE id="rZ1rVQ" name="HelpManager.cpp" compile="1" resource="0" file="Source/UI/Generic/HelpManager.cpp"/>
+          <FILE id="SynthPopH" name="SynthPopup.h" compile="0" resource="0" file="Source/UI/Generic/SynthPopup.h"/>
+          <FILE id="SynthPopC" name="SynthPopup.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/SynthPopup.cpp"/>
+          <FILE id="SynthManH" name="SynthManager.h" compile="0" resource="0"
+                file="Source/UI/Generic/SynthManager.h"/>
+          <FILE id="SynthManC" name="SynthManager.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/SynthManager.cpp"/>
+          <FILE id="NOOfx3" name="MultiColumnListView.h" compile="0" resource="0"
+                file="Source/UI/Generic/MultiColumnListView.h"/>
+          <FILE id="b2U2KL" name="CScrollView.cpp" compile="1" resource="0" file="Source/UI/Generic/CScrollView.cpp"/>
+          <FILE id="Ly9vD4" name="CScrollView.h" compile="0" resource="0" file="Source/UI/Generic/CScrollView.h"/>
+          <FILE id="HT1234" name="HelpText.cpp" compile="1" resource="0" file="Source/UI/Generic/HelpText.cpp"/>
+          <FILE id="HT5678" name="HelpText.h" compile="0" resource="0" file="Source/UI/Generic/HelpText.h"/>
+          <FILE id="ClipboardHelperH" name="ClipboardHelper.h" compile="0" resource="0"
+                file="Source/UI/Generic/ClipboardHelper.h"/>
+          <FILE id="ClipboardHelperMM" name="ClipboardHelper.mm" compile="1"
+                resource="0" file="Source/UI/Generic/ClipboardHelper.mm"/>
+          <FILE id="ClipboardHelperCPP" name="ClipboardHelper.cpp" compile="1"
+                resource="0" file="Source/UI/Generic/ClipboardHelper.cpp"/>
+          <GROUP id="{FCD67863-287D-AAB0-040A-E5A74A8887C4}" name="Ctable">
+            <FILE id="fu2BPS" name="CTable.cpp" compile="1" resource="0" file="Source/UI/Generic/CTable/CTable.cpp"/>
+            <FILE id="f95uXo" name="CTable.h" compile="0" resource="0" file="Source/UI/Generic/CTable/CTable.h"/>
+            <FILE id="iRHcXj" name="CTableCell.cpp" compile="1" resource="0" file="Source/UI/Generic/CTable/CTableCell.cpp"/>
+            <FILE id="Jt5Q7m" name="CTableCell.h" compile="0" resource="0" file="Source/UI/Generic/CTable/CTableCell.h"/>
+            <FILE id="IRYmyV" name="CTableGroup.cpp" compile="1" resource="0" file="Source/UI/Generic/CTable/CTableGroup.cpp"/>
+            <FILE id="lvJn6q" name="CTableGroup.h" compile="0" resource="0" file="Source/UI/Generic/CTable/CTableGroup.h"/>
+            <FILE id="FeVmis" name="CTableElement.cpp" compile="1" resource="0"
+                  file="Source/UI/Generic/CTable/CTableElement.cpp"/>
+            <FILE id="uLof3t" name="CTableElement.h" compile="0" resource="0" file="Source/UI/Generic/CTable/CTableElement.h"/>
+            <FILE id="m1MkdU" name="CTableRow.cpp" compile="1" resource="0" file="Source/UI/Generic/CTable/CTableRow.cpp"/>
+            <FILE id="E0nkhW" name="CTableRow.h" compile="0" resource="0" file="Source/UI/Generic/CTable/CTableRow.h"/>
+            <FILE id="ToastNotificationH" name="ToastNotification.h" compile="0"
+                  resource="0" file="Source/UI/Generic/ToastNotification.h"/>
+            <FILE id="ToastNotificationCpp" name="ToastNotification.cpp" compile="1"
+                  resource="0" file="Source/UI/Generic/ToastNotification.cpp"/>
+            <FILE id="CustomAnimationsH" name="CustomAnimations.h" compile="0"
+                  resource="0" file="Source/UI/Generic/CustomAnimations.h"/>
+            <FILE id="CustomAnimationsCpp" name="CustomAnimations.cpp" compile="1"
+                  resource="0" file="Source/UI/Generic/CustomAnimations.cpp"/>
+          </GROUP>
+          <FILE id="hENGXs" name="CToggle.cpp" compile="1" resource="0" file="Source/UI/Generic/CToggle.cpp"/>
+          <FILE id="VAActM" name="CToggle.h" compile="0" resource="0" file="Source/UI/Generic/CToggle.h"/>
+          <FILE id="iubicb" name="LabelSlider.cpp" compile="1" resource="0" file="Source/UI/Generic/LabelSlider.cpp"/>
+          <FILE id="WwKYoh" name="LabelSlider.h" compile="0" resource="0" file="Source/UI/Generic/LabelSlider.h"/>
+          <FILE id="NA3043" name="Divider.cpp" compile="1" resource="0" file="Source/UI/Generic/Divider.cpp"/>
+          <FILE id="aH5mP7" name="Divider.h" compile="0" resource="0" file="Source/UI/Generic/Divider.h"/>
+          <FILE id="WmJmzM" name="Breadcrumbs.cpp" compile="1" resource="0" file="Source/UI/Generic/Breadcrumbs.cpp"/>
+          <FILE id="iBO2je" name="Breadcrumbs.h" compile="0" resource="0" file="Source/UI/Generic/Breadcrumbs.h"/>
+          <FILE id="LMB001" name="LayerManagerButton.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/LayerManagerButton.cpp"/>
+          <FILE id="LMB002" name="LayerManagerButton.h" compile="0" resource="0"
+                file="Source/UI/Generic/LayerManagerButton.h"/>
+          <FILE id="PVB001" name="PlayVoicingButton.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/PlayVoicingButton.cpp"/>
+          <FILE id="PVB002" name="PlayVoicingButton.h" compile="0" resource="0"
+                file="Source/UI/Generic/PlayVoicingButton.h"/>
+          <FILE id="wGWu4b" name="ClickableLabel.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/ClickableLabel.cpp"/>
+          <FILE id="b6RbVF" name="ClickableLabel.h" compile="0" resource="0"
+                file="Source/UI/Generic/ClickableLabel.h"/>
+          <FILE id="EDQEKp" name="ButtonDropdown.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/ButtonDropdown.cpp"/>
+          <FILE id="k5mF7y" name="ButtonDropdown.h" compile="0" resource="0"
+                file="Source/UI/Generic/ButtonDropdown.h"/>
+          <FILE id="e5GW18" name="RotarySlider.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/RotarySlider.cpp"/>
+          <FILE id="mIy7l5" name="RotarySlider.h" compile="0" resource="0" file="Source/UI/Generic/RotarySlider.h"/>
+          <FILE id="sWFd1I" name="ToggleWithText.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/ToggleWithText.cpp"/>
+          <FILE id="LBl4Xc" name="ToggleWithText.h" compile="0" resource="0"
+                file="Source/UI/Generic/ToggleWithText.h"/>
+          <FILE id="GnAAIj" name="CButton.cpp" compile="1" resource="0" file="Source/UI/Generic/CButton.cpp"/>
+          <FILE id="iuLert" name="CButton.h" compile="0" resource="0" file="Source/UI/Generic/CButton.h"/>
+          <FILE id="GrvBtC" name="GrooveBeat.cpp" compile="1" resource="0" file="Source/UI/Generic/GrooveBeat.cpp"/>
+          <FILE id="GrvBtH" name="GrooveBeat.h" compile="0" resource="0" file="Source/UI/Generic/GrooveBeat.h"/>
+          <FILE id="w3yFQG" name="CKnob.cpp" compile="1" resource="0" file="Source/UI/Generic/CKnob.cpp"/>
+          <FILE id="Fi09Az" name="CKnob.h" compile="0" resource="0" file="Source/UI/Generic/CKnob.h"/>
+          <FILE id="gr3Hzt" name="ConfirmWindow.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/ConfirmWindow.cpp"/>
+          <FILE id="OYdYAQ" name="ConfirmWindow.h" compile="0" resource="0" file="Source/UI/Generic/ConfirmWindow.h"/>
+          <FILE id="AboutWinCPP" name="AboutWindow.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/AboutWindow.cpp"/>
+          <FILE id="AboutWinH" name="AboutWindow.h" compile="0" resource="0"
+                file="Source/UI/Generic/AboutWindow.h"/>
+          <FILE id="ResetProfileWinCPP" name="ResetProfileWindow.cpp" compile="1"
+                resource="0" file="Source/UI/Generic/ResetProfileWindow.cpp"/>
+          <FILE id="ResetProfileWinH" name="ResetProfileWindow.h" compile="0"
+                resource="0" file="Source/UI/Generic/ResetProfileWindow.h"/>
+          <FILE id="ManageAccountWinCPP" name="ManageAccountWindow.cpp" compile="1"
+                resource="0" file="Source/UI/Generic/ManageAccountWindow.cpp"/>
+          <FILE id="ManageAccountWinH" name="ManageAccountWindow.h" compile="0"
+                resource="0" file="Source/UI/Generic/ManageAccountWindow.h"/>
+          <FILE id="AudioSettingsWinCPP" name="AudioSettingsWindow.cpp" compile="1"
+                resource="0" file="Source/UI/Generic/AudioSettingsWindow.cpp"/>
+          <FILE id="AudioSettingsWinH" name="AudioSettingsWindow.h" compile="0"
+                resource="0" file="Source/UI/Generic/AudioSettingsWindow.h"/>
+          <FILE id="BNy0W2" name="CSlider.cpp" compile="1" resource="0" file="Source/UI/Generic/CSlider.cpp"/>
+          <FILE id="x5HH0L" name="CSlider.h" compile="0" resource="0" file="Source/UI/Generic/CSlider.h"/>
+          <FILE id="LKojDu" name="DarkMenuButton.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/DarkMenuButton.cpp" skipPCH="0"/>
+          <FILE id="ks6uG1" name="DarkMenuButton.h" compile="0" resource="0"
+                file="Source/UI/Generic/DarkMenuButton.h"/>
+          <FILE id="ynFkvk" name="Dropdown.cpp" compile="1" resource="0" file="Source/UI/Generic/Dropdown.cpp"/>
+          <FILE id="Qr8goL" name="Dropdown.h" compile="0" resource="0" file="Source/UI/Generic/Dropdown.h"/>
+          <FILE id="ZqwTG0" name="ListView.cpp" compile="1" resource="0" file="Source/UI/Generic/ListView.cpp"/>
+          <FILE id="Kn6nRB" name="ListView.h" compile="0" resource="0" file="Source/UI/Generic/ListView.h"/>
+          <FILE id="wheR1G" name="PopupMenu.cpp" compile="1" resource="0" file="Source/UI/Generic/PopupMenu.cpp"/>
+          <FILE id="M7uNsL" name="PopupMenu.h" compile="0" resource="0" file="Source/UI/Generic/PopupMenu.h"/>
+          <FILE id="XGkTbM" name="PopupWindow.cpp" compile="1" resource="0" file="Source/UI/Generic/PopupWindow.cpp"/>
+          <FILE id="ERc4xt" name="PopupWindow.h" compile="0" resource="0" file="Source/UI/Generic/PopupWindow.h"/>
+          <FILE id="bE87LW" name="RenameWindow.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/RenameWindow.cpp"/>
+          <FILE id="rUpbeb" name="RenameWindow.h" compile="0" resource="0" file="Source/UI/Generic/RenameWindow.h"/>
+          <FILE id="DbRecoveryWinCpp" name="DatabaseRecoveryWindow.cpp" compile="1"
+                resource="0" file="Source/UI/Generic/DatabaseRecoveryWindow.cpp"/>
+          <FILE id="DbRecoveryWinH" name="DatabaseRecoveryWindow.h" compile="0"
+                resource="0" file="Source/UI/Generic/DatabaseRecoveryWindow.h"/>
+          <FILE id="GestureAwareComponentCPP" name="GestureAwareComponent.cpp"
+                compile="1" resource="0" file="Source/UI/Generic/GestureAwareComponent.cpp"/>
+          <FILE id="GestureAwareComponentH" name="GestureAwareComponent.h" compile="0"
+                resource="0" file="Source/UI/Generic/GestureAwareComponent.h"/>
+          <FILE id="iZjygG" name="Scrollbar.cpp" compile="1" resource="0" file="Source/UI/Generic/Scrollbar.cpp"/>
+          <FILE id="jDKcEF" name="Scrollbar.h" compile="0" resource="0" file="Source/UI/Generic/Scrollbar.h"/>
+          <FILE id="F5rb07" name="SlicedImage.cpp" compile="1" resource="0" file="Source/UI/Generic/SlicedImage.cpp"/>
+          <FILE id="NQS3Z5" name="SlicedImage.h" compile="0" resource="0" file="Source/UI/Generic/SlicedImage.h"/>
+          <FILE id="hFaSrF" name="TextListItem.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/TextListItem.cpp"/>
+          <FILE id="yl9JlI" name="TextListItem.h" compile="0" resource="0" file="Source/UI/Generic/TextListItem.h"/>
+          <FILE id="RngSld" name="CRangeSlider.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/CRangeSlider.cpp"/>
+          <FILE id="RngSl2" name="CRangeSlider.h" compile="0" resource="0" file="Source/UI/Generic/CRangeSlider.h"/>
+          <FILE id="BtnStD" name="ButtonStyleDropdown.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/ButtonStyleDropdown.cpp"/>
+          <FILE id="BtnStH" name="ButtonStyleDropdown.h" compile="0" resource="0"
+                file="Source/UI/Generic/ButtonStyleDropdown.h"/>
+          <FILE id="HelpPopupId" name="HelpPopup.h" compile="0" resource="0"
+                file="Source/UI/Generic/HelpPopup.h"/>
+          <FILE id="HelpManagerId" name="HelpManager.h" compile="0" resource="0"
+                file="Source/UI/Generic/HelpManager.h"/>
+          <FILE id="HelpMouseListenerId" name="HelpMouseListener.h" compile="0"
+                resource="0" file="Source/UI/Generic/HelpMouseListener.h"/>
+          <FILE id="LinkToggleH" name="LinkToggle.h" compile="0" resource="0"
+                file="Source/UI/Generic/LinkToggle.h"/>
+          <FILE id="LinkToggleCPP" name="LinkToggle.cpp" compile="1" resource="0"
+                file="Source/UI/Generic/LinkToggle.cpp"/>
+          <FILE id="RegionSelectorH" name="RegionSelector.h" compile="0" resource="0"
+                file="Source/UI/Generic/RegionSelector.h"/>
+          <FILE id="RegionSelectorCPP" name="RegionSelector.cpp" compile="1"
+                resource="0" file="Source/UI/Generic/RegionSelector.cpp"/>
+        </GROUP>
+        <GROUP id="{A8C73DE5-EEAB-0D69-BAD8-0F13A0FD2A84}" name="Common">
+          <FILE id="RegionComponentCpp" name="RegionComponent.cpp" compile="1"
+                resource="0" file="Source/UI/Common/RegionComponent.cpp"/>
+          <FILE id="RegionComponentH" name="RegionComponent.h" compile="0" resource="0"
+                file="Source/UI/Common/RegionComponent.h"/>
+          <FILE id="RegionsManagerCpp" name="RegionsManager.cpp" compile="1"
+                resource="0" file="Source/UI/Common/RegionsManager.cpp"/>
+          <FILE id="RegionsManagerH" name="RegionsManager.h" compile="0" resource="0"
+                file="Source/UI/Common/RegionsManager.h"/>
+        </GROUP>
+        <GROUP id="{4FE47257-A715-DB41-FE06-63CD152B80A0}" name="Songbar">
+          <FILE id="UZKgGK" name="Counter.cpp" compile="1" resource="0" file="Source/UI/Songbar/Counter.cpp"/>
+          <FILE id="udkHo8" name="Counter.h" compile="0" resource="0" file="Source/UI/Songbar/Counter.h"/>
+          <FILE id="h5w088" name="Playhead.cpp" compile="1" resource="0" file="Source/UI/Songbar/Playhead.cpp"/>
+          <FILE id="sudCQU" name="Playhead.h" compile="0" resource="0" file="Source/UI/Songbar/Playhead.h"/>
+          <FILE id="z0XjMN" name="ProgressionBlockUI.cpp" compile="1" resource="0"
+                file="Source/UI/Songbar/ProgressionBlockUI.cpp"/>
+          <FILE id="YigHLT" name="ProgressionBlockUI.h" compile="0" resource="0"
+                file="Source/UI/Songbar/ProgressionBlockUI.h"/>
+          <FILE id="ProgUIStC" name="ProgressionUIState.cpp" compile="1" resource="0"
+                file="Source/UI/Songbar/ProgressionUIState.cpp"/>
+          <FILE id="ProgUIStH" name="ProgressionUIState.h" compile="0" resource="0"
+                file="Source/UI/Songbar/ProgressionUIState.h"/>
+          <FILE id="sBEfvm" name="ProgressionUI.cpp" compile="1" resource="0"
+                file="Source/UI/Songbar/ProgressionUI.cpp"/>
+          <FILE id="zSTgUq" name="ProgressionUI.h" compile="0" resource="0" file="Source/UI/Songbar/ProgressionUI.h"/>
+          <FILE id="Z9Akc3" name="SongBar.cpp" compile="1" resource="0" file="Source/UI/Songbar/SongBar.cpp"/>
+          <FILE id="KbrsIi" name="SongBar.h" compile="0" resource="0" file="Source/UI/Songbar/SongBar.h"/>
+          <FILE id="oibNey" name="Timeline.cpp" compile="1" resource="0" file="Source/UI/Songbar/Timeline.cpp"/>
+          <FILE id="rLEt6k" name="Timeline.h" compile="0" resource="0" file="Source/UI/Songbar/Timeline.h"/>
+          <FILE id="AMkzkJ" name="TimelineScrollbar.cpp" compile="1" resource="0"
+                file="Source/UI/Songbar/TimelineScrollbar.cpp"/>
+          <FILE id="oxEgh0" name="TimelineScrollbar.h" compile="0" resource="0"
+                file="Source/UI/Songbar/TimelineScrollbar.h"/>
+        </GROUP>
+        <FILE id="gQE9Qo" name="VoicingDisplay.cpp" compile="1" resource="0"
+              file="Source/UI/VoicingDisplay.cpp"/>
+        <FILE id="NBjiAZ" name="VoicingDisplay.h" compile="0" resource="0"
+              file="Source/UI/VoicingDisplay.h"/>
+        <FILE id="ZJfB3D" name="GlobalMenu.cpp" compile="1" resource="0" file="Source/UI/GlobalMenu.cpp"/>
+        <FILE id="ZJOf8q" name="GlobalMenu.h" compile="0" resource="0" file="Source/UI/GlobalMenu.h"/>
+        <FILE id="oyOXdk" name="CLookAndFeel.cpp" compile="1" resource="0"
+              file="Source/UI/CLookAndFeel.cpp"/>
+        <FILE id="zkLODG" name="CLookAndFeel.h" compile="0" resource="0" file="Source/UI/CLookAndFeel.h"/>
+        <FILE id="y3ZkZ4" name="MainWindow.cpp" compile="1" resource="0" file="Source/UI/MainWindow.cpp"/>
+        <FILE id="n1JbnP" name="MainWindow.h" compile="0" resource="0" file="Source/UI/MainWindow.h"/>
+        <FILE id="Y5y5sv" name="Topbar.cpp" compile="1" resource="0" file="Source/UI/Topbar.cpp"/>
+        <FILE id="PnBBbd" name="Topbar.h" compile="0" resource="0" file="Source/UI/Topbar.h"/>
+        <GROUP id="{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}" name="Purchasing">
+          <FILE id="PurchaseDialogCPP" name="PurchaseDialog.cpp" compile="1"
+                resource="0" file="Source/UI/Purchasing/PurchaseDialog.cpp"/>
+          <FILE id="PurchaseDialogH" name="PurchaseDialog.h" compile="0" resource="0"
+                file="Source/UI/Purchasing/PurchaseDialog.h"/>
+        </GROUP>
+        <GROUP id="{B2C3D4E5-F6A7-8901-BCDE-F23456789012}" name="iOS">
+          <FILE id="iOSGestureHelperH" name="iOSGestureHelper.h" compile="0"
+                resource="0" file="Source/UI/iOS/iOSGestureHelper.h"/>
+        </GROUP>
+      </GROUP>
+      <FILE id="iz21Rd" name="CrashLogger.cpp" compile="0" resource="0" file="Source/CrashLogger.cpp"/>
+      <FILE id="mXg4DM" name="CrashLogger.h" compile="0" resource="0" file="Source/CrashLogger.h"/>
+      <FILE id="jgfnpG" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="c3OOQV" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="wfEMgS" name="CPlayhead.cpp" compile="1" resource="0" file="Source/CPlayhead.cpp"/>
+      <FILE id="KFKQXa" name="CPlayhead.h" compile="0" resource="0" file="Source/CPlayhead.h"/>
+      <FILE id="gQKaZg" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="HfhOtk" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="oGc6Dw" name="UnitTests.h" compile="0" resource="0" file="Source/UnitTests.h"/>
+      <FILE id="WVzNAM" name="Globals.h" compile="0" resource="0" file="Source/Globals.h"/>
+      <FILE id="EqsqC4" name="TrackVoicingProcessor.cpp" compile="1" resource="0"
+            file="Source/TrackVoicingProcessor.cpp"/>
+      <FILE id="Wf7TE5" name="TrackVoicingProcessor.h" compile="0" resource="0"
+            file="Source/TrackVoicingProcessor.h"/>
+      <FILE id="noSZsR" name="TrackNotesMidiProcessor.cpp" compile="1" resource="0"
+            file="Source/TrackNotesMidiProcessor.cpp"/>
+      <FILE id="TK3kTc" name="TrackNotesMidiProcessor.h" compile="0" resource="0"
+            file="Source/TrackNotesMidiProcessor.h"/>
+    </GROUP>
+    <GROUP id="{85CD6E54-EBF4-627A-5FA7-39D84E460EE9}" name="UI">
+      <GROUP id="{5BCFB915-DC50-4C4A-63CB-74B3C5711958}" name="experimental">
+        <GROUP id="{E60BE197-C021-32D8-D236-D79E2A596265}" name="Icons">
+          <GROUP id="{632D8CBD-C6C0-5C3A-352C-551EDBD31CF7}" name="sequencer">
+            <FILE id="dqTZWQ" name="icn_sequencer.svg" compile="0" resource="1"
+                  file="UI/experimental/Icons/sequencer/icn_sequencer.svg"/>
+          </GROUP>
+          <GROUP id="{A721DD79-9B86-0542-5A3D-8349631F96B9}" name="songbar">
+            <FILE id="CLSESB" name="icn_devices.svg" compile="0" resource="1" file="UI/experimental/Icons/songbar/icn_devices.svg"/>
+            <FILE id="vFVzhf" name="icn_drag.svg" compile="0" resource="1" file="UI/experimental/Icons/songbar/icn_drag.svg"/>
+            <FILE id="XP7CHT" name="icn_forward.svg" compile="0" resource="1" file="UI/experimental/Icons/songbar/icn_forward.svg"/>
+            <FILE id="HkmsAV" name="icn_ghost.svg" compile="0" resource="1" file="UI/experimental/Icons/songbar/icn_ghost.svg"/>
+            <FILE id="xFnfWK" name="icn_loop.svg" compile="0" resource="1" file="UI/experimental/Icons/songbar/icn_loop.svg"/>
+            <FILE id="uqtZJQ" name="icn_metronome.svg" compile="0" resource="1"
+                  file="UI/experimental/Icons/songbar/icn_metronome.svg"/>
+            <FILE id="iEH26g" name="icn_pause.svg" compile="0" resource="1" file="UI/experimental/Icons/songbar/icn_pause.svg"/>
+            <FILE id="uygRZb" name="icn_play.svg" compile="0" resource="1" file="UI/experimental/Icons/songbar/icn_play.svg"/>
+            <FILE id="IUttLw" name="icn_record.svg" compile="0" resource="1" file="UI/experimental/Icons/songbar/icn_record.svg"/>
+            <FILE id="wchx5d" name="icn_resize.svg" compile="0" resource="1" file="UI/experimental/Icons/songbar/icn_resize.svg"/>
+            <FILE id="eUCMM7" name="icn_rewind.svg" compile="0" resource="1" file="UI/experimental/Icons/songbar/icn_rewind.svg"/>
+            <FILE id="yIq6rS" name="icn_rewind_to_beginning.svg" compile="0" resource="1"
+                  file="UI/experimental/Icons/songbar/icn_rewind_to_beginning.svg"/>
+            <FILE id="fmVsUM" name="icn_stop.svg" compile="0" resource="1" file="UI/experimental/Icons/songbar/icn_stop.svg"/>
+            <FILE id="Ggs9R5" name="icn_zoom_in.svg" compile="0" resource="1" file="UI/experimental/Icons/songbar/icn_zoom_in.svg"/>
+            <FILE id="EhINM0" name="icn_zoom_out.svg" compile="0" resource="1"
+                  file="UI/experimental/Icons/songbar/icn_zoom_out.svg"/>
+          </GROUP>
+          <GROUP id="{0B2CCACE-582D-34B5-DC3D-D7C965C0966B}" name="topbar">
+            <FILE id="Z3tvkq" name="icn_avatar.svg" compile="0" resource="1" file="UI/experimental/Icons/topbar/icn_avatar.svg"/>
+            <FILE id="NixjUg" name="icn_help.svg" compile="0" resource="1" file="UI/experimental/Icons/topbar/icn_help.svg"/>
+            <FILE id="nzvSzb" name="icn_notification.svg" compile="0" resource="1"
+                  file="UI/experimental/Icons/topbar/icn_notification.svg"/>
+            <FILE id="T0rKJP" name="icn_redo.svg" compile="0" resource="1" file="UI/experimental/Icons/topbar/icn_redo.svg"/>
+            <FILE id="neRqkp" name="icn_speaker.svg" compile="0" resource="1" file="UI/experimental/Icons/topbar/icn_speaker.svg"/>
+            <FILE id="PoOFzQ" name="icn_undo.svg" compile="0" resource="1" file="UI/experimental/Icons/topbar/icn_undo.svg"/>
+          </GROUP>
+          <FILE id="BUokyj" name="icn_add.svg" compile="0" resource="1" file="UI/experimental/Icons/icn_add.svg"/>
+          <FILE id="ntYNc1" name="icn_ai.svg" compile="0" resource="1" file="UI/experimental/Icons/icn_ai.svg"/>
+          <FILE id="jY8PyH" name="icn_delete.svg" compile="0" resource="1" file="UI/experimental/Icons/icn_delete.svg"/>
+          <FILE id="VKQ9NT" name="icn_dropdown.svg" compile="0" resource="1"
+                file="UI/experimental/Icons/icn_dropdown.svg"/>
+          <FILE id="ekK04U" name="icn_expand.svg" compile="0" resource="1" file="UI/experimental/Icons/icn_expand.svg"/>
+          <FILE id="DZAjKe" name="icn_lock.svg" compile="0" resource="1" file="UI/experimental/Icons/icn_lock.svg"/>
+          <FILE id="Y3mrsS" name="icn_menu.svg" compile="0" resource="1" file="UI/experimental/Icons/icn_menu.svg"/>
+          <FILE id="l7DxRM" name="icn_select.svg" compile="0" resource="1" file="UI/experimental/Icons/icn_select.svg"/>
+          <FILE id="on7aTW" name="icn_show.svg" compile="0" resource="1" file="UI/experimental/Icons/icn_show.svg"/>
+          <FILE id="uGmlDA" name="icn_unlock.svg" compile="0" resource="1" file="UI/experimental/Icons/icn_unlock.svg"/>
+        </GROUP>
+        <GROUP id="{6D1AAD1F-38AC-2FEA-14E5-CB781AB16527}" name="original blue buttons">
+          <FILE id="LF7RnF" name="pad_dim_pressed1.png" compile="0" resource="1"
+                file="UI/experimental/original blue buttons/pad_dim_pressed1.png"/>
+          <FILE id="fXxD1Y" name="pad_dim2.png" compile="0" resource="1" file="UI/experimental/original blue buttons/pad_dim2.png"/>
+          <FILE id="ol2oHB" name="pad_on_1.png" compile="0" resource="1" file="UI/experimental/original blue buttons/pad_on_1.png"/>
+          <FILE id="wFaVAA" name="pad_on_pressed2.png" compile="0" resource="1"
+                file="UI/experimental/original blue buttons/pad_on_pressed2.png"/>
+        </GROUP>
+        <FILE id="zQpiUG" name="slid_vert_track_grey.png" compile="0" resource="1"
+              file="UI/experimental/slid_vert_track_grey.png"/>
+        <FILE id="XpbNV6" name="bank.png" compile="0" resource="1" file="UI/experimental/bank.png"/>
+        <FILE id="kX7EOO" name="ghost.png" compile="0" resource="1" file="UI/experimental/ghost.png"/>
+        <FILE id="q8OCn9" name="melody_5_cascade_squares.png" compile="0" resource="1"
+              file="UI/experimental/melody_5_cascade_squares.png"/>
+        <FILE id="DBzeGa" name="palette.png" compile="0" resource="1" file="UI/experimental/palette.png"/>
+        <FILE id="RddUKS" name="pattern_icon 2.png" compile="0" resource="1"
+              file="UI/experimental/pattern_icon 2.png"/>
+        <FILE id="WVTHsG" name="sequencer.webp" compile="0" resource="1" file="UI/experimental/sequencer.webp"/>
+        <FILE id="xbzdht" name="sequencer_icon 2.png" compile="0" resource="1"
+              file="UI/experimental/sequencer_icon 2.png"/>
+        <FILE id="dLwXMQ" name="slid_horiz_filled_gray.png" compile="0" resource="1"
+              file="UI/experimental/slid_horiz_filled_gray.png"/>
+        <FILE id="KwU6l1" name="slid_vert_filled_gray.png" compile="0" resource="1"
+              file="UI/experimental/slid_vert_filled_gray.png"/>
+        <FILE id="Bx6m22" name="song.png" compile="0" resource="1" file="UI/experimental/song.png"/>
+        <FILE id="E4SxAH" name="voicing.png" compile="0" resource="1" file="UI/experimental/voicing.png"/>
+        <FILE id="Txk9sK" name="voicing_2.png" compile="0" resource="1" file="UI/experimental/voicing_2.png"/>
+        <FILE id="azgTdz" name="voicing_icon 2.png" compile="0" resource="1"
+              file="UI/experimental/voicing_icon 2.png"/>
+        <FILE id="Ozru0t" name="link.png" compile="0" resource="1" file="UI/experimental/link.png"/>
+        <FILE id="dg1mZ0" name="unlink.png" compile="0" resource="1" file="UI/experimental/unlink.png"/>
+        <FILE id="yvnBwo" name="toggle_right.png" compile="0" resource="1"
+              file="UI/experimental/toggle_right.png"/>
+        <FILE id="vi4Wzp" name="pad_dim.png" compile="0" resource="1" file="UI/experimental/pad_dim.png"/>
+        <FILE id="WrwhtS" name="pad_dim_pressed.png" compile="0" resource="1"
+              file="UI/experimental/pad_dim_pressed.png"/>
+        <FILE id="cvuYav" name="button_square_big_glow.png" compile="0" resource="1"
+              file="UI/experimental/button_square_big_glow.png"/>
+        <FILE id="pQFrg2" name="button_square_big_off.png" compile="0" resource="1"
+              file="UI/experimental/button_square_big_off.png"/>
+        <FILE id="a0WZqx" name="button_square_big_on.png" compile="0" resource="1"
+              file="UI/experimental/button_square_big_on.png"/>
+        <FILE id="FsrGqT" name="led_off.png" compile="0" resource="1" file="UI/experimental/led_off.png"/>
+        <FILE id="AOKGWE" name="led_on.png" compile="0" resource="1" file="UI/experimental/led_on.png"/>
+        <FILE id="FWLC4z" name="pad_on.png" compile="0" resource="1" file="UI/experimental/pad_on.png"/>
+        <FILE id="bpaikI" name="pad_on_pressed.png" compile="0" resource="1"
+              file="UI/experimental/pad_on_pressed.png"/>
+        <FILE id="TSecDF" name="dashboard_active.png" compile="0" resource="1"
+              file="UI/experimental/dashboard_active.png"/>
+        <FILE id="swTDX3" name="dashboard_idle.png" compile="0" resource="1"
+              file="UI/experimental/dashboard_idle.png"/>
+        <FILE id="cCnsWV" name="fab_active.png" compile="0" resource="1" file="UI/experimental/fab_active.png"/>
+        <FILE id="wsLCJR" name="fab_hover.png" compile="0" resource="1" file="UI/experimental/fab_hover.png"/>
+        <FILE id="uTLqc4" name="fab_normal.png" compile="0" resource="1" file="UI/experimental/fab_normal.png"/>
+        <FILE id="QnJ77w" name="enable_button_off.png" compile="0" resource="1"
+              file="UI/experimental/enable_button_off.png"/>
+        <FILE id="OER7PR" name="enable_button_on.png" compile="0" resource="1"
+              file="UI/experimental/enable_button_on.png"/>
+        <FILE id="TGfwP9" name="toggle_off.png" compile="0" resource="1" file="UI/experimental/toggle_off.png"/>
+        <FILE id="cqgAkX" name="toggle_on.png" compile="0" resource="1" file="UI/experimental/toggle_on.png"/>
+        <FILE id="NShtgX" name="slid_horiz_filled.png" compile="0" resource="1"
+              file="UI/experimental/slid_horiz_filled.png"/>
+        <FILE id="k1axk2" name="knob_medium_solid_black.png" compile="0" resource="1"
+              file="UI/experimental/knob_medium_solid_black.png"/>
+        <FILE id="jZ6nhX" name="slid_horiz_track.png" compile="0" resource="1"
+              file="UI/experimental/slid_horiz_track.png"/>
+        <FILE id="ru2jBr" name="slid_rotary_bg.png" compile="0" resource="1"
+              file="UI/experimental/slid_rotary_bg.png"/>
+        <FILE id="U81ay6" name="slid_rotary_max.png" compile="0" resource="1"
+              file="UI/experimental/slid_rotary_max.png"/>
+        <FILE id="PEQHJ3" name="slid_rotary_min.png" compile="0" resource="1"
+              file="UI/experimental/slid_rotary_min.png"/>
+        <FILE id="QvuN2p" name="slid_vert_filled.png" compile="0" resource="1"
+              file="UI/experimental/slid_vert_filled.png"/>
+        <FILE id="cWGQGi" name="slid_vert_track.png" compile="0" resource="1"
+              file="UI/experimental/slid_vert_track.png"/>
+      </GROUP>
+      <GROUP id="{FF839CA5-2EDF-F2D3-E746-BD54636BBDA6}" name="fonts">
+        <FILE id="u9GNVb" name="Comfortaa-Regular.ttf" compile="0" resource="1"
+              file="UI/fonts/Comfortaa-Regular.ttf"/>
+        <FILE id="uYEAOj" name="Roboto-Black.ttf" compile="0" resource="1"
+              file="UI/fonts/Roboto-Black.ttf"/>
+        <FILE id="YfuXDJ" name="RobotoCondensed-Regular.ttf" compile="0" resource="1"
+              file="UI/fonts/RobotoCondensed-Regular.ttf"/>
+      </GROUP>
+      <FILE id="YX4Bqq" name="screw_01.png" compile="0" resource="1" file="UI/BlackwayFxKit/screw_01.png"/>
+      <FILE id="AFdHcQ" name="screw_02.png" compile="0" resource="1" file="UI/BlackwayFxKit/screw_02.png"/>
+      <FILE id="a8LBZf" name="screw_03.png" compile="0" resource="1" file="UI/BlackwayFxKit/screw_03.png"/>
+      <FILE id="u8Lcfw" name="screw_04.png" compile="0" resource="1" file="UI/BlackwayFxKit/screw_04.png"/>
+      <FILE id="ZBQNgj" name="cm-logo.png" compile="0" resource="1" file="cm-logo.png"/>
+      <FILE id="IconFile" name="cm-logo-icon.png" compile="0" resource="1"
+            file="cm-logo-icon.png"/>
+      <FILE id="IconFileBlack" name="cm-logo-icon-black.png" compile="0"
+            resource="1" file="cm-logo-icon-black.png"/>
+      <FILE id="ot2loT" name="mainBG.png" compile="0" resource="1" file="UI/mainBG.png"/>
+      <FILE id="BasaqS" name="pattern_icon.png" compile="0" resource="1"
+            file="UI/experimental/pattern_icon.png"/>
+      <FILE id="CSlKW3" name="sequencer_icon.png" compile="0" resource="1"
+            file="UI/experimental/sequencer_icon.png"/>
+      <FILE id="bERyFk" name="voicing_icon.png" compile="0" resource="1"
+            file="UI/experimental/voicing_icon.png"/>
+      <FILE id="grooveIcon" name="groove_icon.png" compile="0" resource="1"
+            file="UI/experimental/groove_icon.png"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_analytics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors_headless" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_midi_ci" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
+  <EXPORTFORMATS>
+    <VS2022 targetFolder="Builds/VisualStudio2022" bigIcon="IconFile" smallIcon="IconFile">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" enableIncrementalLinking="1" winArchitecture="x64"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+        <CONFIGURATION isDebug="1" name="Test" defines="RUN_CYMA_TESTS=1"/>
+        <CONFIGURATION isDebug="0" name="Test Release" defines="RUN_CYMA_TESTS=1"/>
+        <CONFIGURATION isDebug="1" name="Debug Repaint" defines="JUCE_ENABLE_REPAINT_DEBUGGING=1"/>
+        <CONFIGURATION isDebug="0" name="Release with debug symbols" alwaysGenerateDebugSymbols="1"
+                       debugInformationFormat="ProgramDatabase" characterSet="Unicode"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_analytics" path="../../juce"/>
+        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../juce"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
+        <MODULEPATH id="juce_audio_utils" path="../../juce"/>
+        <MODULEPATH id="juce_core" path="../../juce"/>
+        <MODULEPATH id="juce_cryptography" path="../../juce"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce"/>
+        <MODULEPATH id="juce_dsp" path="../../juce"/>
+        <MODULEPATH id="juce_events" path="../../juce"/>
+        <MODULEPATH id="juce_graphics" path="../../juce"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
+        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
+        <MODULEPATH id="juce_midi_ci" path="../../juce"/>
+        <MODULEPATH id="juce_opengl" path="../../juce"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2022>
+    <ANDROIDSTUDIO targetFolder="Builds/Android" bigIcon="IconFile" smallIcon="IconFile">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Cymasphere"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Cymasphere"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_analytics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_midi_ci" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../JUCE/modules"/>
+      </MODULEPATHS>
+    </ANDROIDSTUDIO>
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" bigIcon="IconFile" smallIcon="IconFile">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Cymasphere"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Cymasphere"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_analytics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_midi_ci" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../JUCE/modules"/>
+      </MODULEPATHS>
+    </LINUX_MAKE>
+    <XCODE_IPHONE targetFolder="Builds/iOS" bigIcon="IconFileBlack" smallIcon="IconFileBlack"
+                  extraFrameworks="StoreKit.framework" targetedDeviceFamily="2"
+                  teamID="QSFW8GQ9MG" backgroundModes="audio">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Cymasphere"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Cymasphere"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_analytics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_midi_ci" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_IPHONE>
+    <XCODE_MAC targetFolder="Builds/MacOSX" bigIcon="IconFile" smallIcon="IconFile"
+               extraFrameworks="StoreKit.framework">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Cymasphere"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Cymasphere"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_analytics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_midi_ci" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../MyJUCE/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+</JUCERPROJECT>
