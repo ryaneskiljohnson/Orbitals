@@ -133,6 +133,12 @@ void PerihelionAudioProcessorEditor::handleJavaScriptMessage (const juce::var& m
             if (p != nullptr)
                 p->setValueNotifyingHost(((float)value + 100.0f) / 200.0f);
         }
+        else if (param == "bypass")
+        {
+            auto* p = audioProcessor.parameters.getParameter(PerihelionAudioProcessor::PARAM_BYPASS);
+            if (p != nullptr)
+                p->setValueNotifyingHost((float)value);
+        }
     }
 }
 

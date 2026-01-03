@@ -10,27 +10,14 @@
    =================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
-  initializePerihelion();
-});
-
-function initializePerihelion() {
-  console.log('Perihelion initializing...');
+  setupControls();
   
   // Setup canvas
   const canvas = document.getElementById('solarCanvas');
   if (canvas) {
     setupSolarVisualization(canvas);
   }
-  
-  // Setup controls
-  setupGravityKnob();
-  setupSolarPointSlider();
-  setupOrbitSlider();
-  setupBiasSlider();
-  setupBypassToggle();
-  
-  console.log('Perihelion initialized!');
-}
+});
 
 /* ===================================================================
    SOLAR VISUALIZATION
@@ -146,6 +133,8 @@ class OrbitalParticle {
   /**
    * @brief Draw particle and orbital trail
    * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * Visual representation: Particles are brighter at perihelion (closest to sun)
+   * This represents higher velocity when closer to the solar point (target velocity)
    */
   draw(ctx) {
     // Draw trail (orbital path)
@@ -173,18 +162,23 @@ class OrbitalParticle {
     ctx.save();
     ctx.globalAlpha = this.alpha;
     
-    // Brightness based on distance (brighter at perihelion)
-    const brightness = 0.5 + (this.perihelion / this.distance) * 0.5;
+    // Brightness based on distance from center (perihelion = closest = brightest)
+    // This represents velocity: closer to solar point = higher velocity = brighter
+    // Matches MIDI processing where velocities are pulled toward solar point
+    const distanceRatio = this.perihelion / Math.max(this.distance, this.perihelion);
+    const brightnessMultiplier = 0.5 + distanceRatio * 0.5; // Brighter when closer
+    
+    // Use particle's base color but adjust brightness based on position
     const particleColor = this.color;
     
     if (this.glow) {
       ctx.shadowColor = particleColor;
-      ctx.shadowBlur = this.size * 3;
+      ctx.shadowBlur = this.size * 3 * brightnessMultiplier; // Stronger glow when closer
     }
     
     ctx.fillStyle = particleColor;
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, this.size * brightnessMultiplier, 0, Math.PI * 2);
     ctx.fill();
     
     ctx.restore();
@@ -200,9 +194,7 @@ function setupSolarVisualization(canvas) {
     const container = canvas.parentElement;
     
     // Get canvas CSS dimensions (for drawing coordinates)
-    // After setupHiDPI, ctx.scale(DPR, DPR) is applied, so we draw in CSS pixels
     const getCanvasSize = () => {
-      // Get the actual canvas bounding rect - this gives us the exact drawing area
       const rect = canvas.getBoundingClientRect();
       return {
         width: rect.width,
@@ -210,8 +202,7 @@ function setupSolarVisualization(canvas) {
       };
     };
     
-    // Get the center position
-    // Use mathematical center with a small offset to account for UI asymmetry
+    // Get the center position - use gravity knob center
     const getCenter = () => {
       const size = getCanvasSize();
       const canvasRect = canvas.getBoundingClientRect();
@@ -284,11 +275,10 @@ function setupSolarVisualization(canvas) {
       const baseSize = (solarPointValue / 127) * 250 + 50;
       
       // Gravity affects orbital distance: 0% = very far out, 100% = tight orbits
-      // Map gravity 0-100 to orbital multiplier 3.0-0.3 (10x range)
-      // At 0% gravity: 3.0x = very far out
-      // At 100% gravity: 0.3x = tight orbits
-      const gravityMultiplier = 3.0 - (gravityValue / 100) * 2.7;
-      const semiMajorAxis = baseSize * gravityMultiplier;
+      // Map gravity 0-100 to orbital multiplier 3.0-0.8 (adjusted so particles stay visible)
+      // Minimum multiplier 0.8 ensures particles don't hide behind the knob (knob is ~85px radius)
+      const gravityMultiplier = 3.0 - (gravityValue / 100) * 2.2;
+      const semiMajorAxis = Math.max(baseSize * gravityMultiplier, 100); // Min 100px radius
       
       // Eccentricity: 0 (circle) to 0.8 (highly elliptical) based on orbit control
       const eccentricity = (orbitValue / 100) * 0.8;
@@ -302,6 +292,11 @@ function setupSolarVisualization(canvas) {
       // Orbital speed varies with gravity (tighter orbits = faster)
       const orbitalSpeed = 0.01 + (gravityValue / 100) * 0.03;
       
+      // Particle color based on solar point (higher = brighter/hotter)
+      const solarPointPercent = (solarPointValue - 1) / 126;
+      const hue = 20 + solarPointPercent * 50;
+      const brightness = 50 + solarPointPercent * 30;
+      
       // Create particle
       const particle = new OrbitalParticle(centerX, centerY, {
         centerX: centerX,
@@ -311,9 +306,9 @@ function setupSolarVisualization(canvas) {
         orbitalAngle: orbitalAngle,
         trueAnomaly: trueAnomaly,
         orbitalSpeed: orbitalSpeed,
-        size: 2 + Math.random() * 2,
-        color: ColorUtils.hslToRgb(20 + Math.random() * 50, 100, 50 + Math.random() * 30),
-        trailLength: 80,
+        size: 3 + Math.random() * 2.5,
+        color: ColorUtils.hslToRgb(hue, 100, brightness),
+        trailLength: 60 + Math.floor(orbitValue / 100 * 40), // Longer trails with higher orbit
         showTrail: true,
         glow: true
       });
@@ -321,54 +316,88 @@ function setupSolarVisualization(canvas) {
       return particle;
     }
     
-    // Expose control value setters
+    /**
+     * @brief Update gravity value - affects pull strength
+     * MIDI: pull = gravity * (1 - eccentricity)
+     * Visual: Higher gravity = tighter orbits, faster speed, more particles
+     */
     window.updateGravityValue = function(value) {
       gravityValue = Math.max(0, Math.min(100, value));
-      // Update existing particles' orbital parameters
+      
+      // Update particle count based on gravity
+      targetParticleCount = Math.floor(5 + (gravityValue / 100) * 8);
+      
+      // Update existing particles
       orbitalParticles.forEach(particle => {
         const baseSize = (solarPointValue / 127) * 250 + 50;
-        // Map gravity 0-100 to orbital multiplier 3.0-0.3
-        const gravityMultiplier = 3.0 - (gravityValue / 100) * 2.7;
-        particle.semiMajorAxis = baseSize * gravityMultiplier;
+        const gravityMultiplier = 3.0 - (gravityValue / 100) * 2.2;
+        particle.semiMajorAxis = Math.max(baseSize * gravityMultiplier, 100); // Min 100px
         particle.perihelion = particle.semiMajorAxis * (1 - particle.eccentricity);
         particle.aphelion = particle.semiMajorAxis * (1 + particle.eccentricity);
-        // Orbital speed: faster with more gravity (tighter orbits)
         particle.orbitalSpeed = 0.01 + (gravityValue / 100) * 0.03;
       });
+      
+      // Add particles if needed
+      while (orbitalParticles.length < targetParticleCount) {
+        orbitalParticles.push(createOrbitalParticle());
+      }
     };
     
+    /**
+     * @brief Update orbit value - affects eccentricity
+     * MIDI: eccentricity = orbit, also affects pull: pull = gravity * (1 - eccentricity)
+     * Visual: Higher orbit = more elliptical orbits, longer trails
+     */
     window.updateOrbitValue = function(value) {
       orbitValue = Math.max(0, Math.min(100, value));
-      // Update eccentricity
+      // Update eccentricity and trails
       orbitalParticles.forEach(particle => {
         particle.eccentricity = (orbitValue / 100) * 0.8;
         particle.perihelion = particle.semiMajorAxis * (1 - particle.eccentricity);
         particle.aphelion = particle.semiMajorAxis * (1 + particle.eccentricity);
+        // Longer trails for more elliptical orbits
+        particle.trailLength = 60 + Math.floor(orbitValue / 100 * 40);
       });
     };
     
+    /**
+     * @brief Update solar point value - affects target velocity
+     * MIDI: distance = (velocity - solarPoint) / 127.0f
+     * Visual: Higher solar point = larger base orbits, brighter colors
+     */
     window.updateSolarPointValue = function(value) {
       solarPointValue = Math.max(1, Math.min(127, value));
-      // Update orbital size
+      // Update orbital size and particle colors
       orbitalParticles.forEach(particle => {
         const baseSize = (solarPointValue / 127) * 250 + 50;
-        const gravityMultiplier = 3.0 - (gravityValue / 100) * 2.7;
-        particle.semiMajorAxis = baseSize * gravityMultiplier;
+        const gravityMultiplier = 3.0 - (gravityValue / 100) * 2.2;
+        particle.semiMajorAxis = Math.max(baseSize * gravityMultiplier, 100); // Min 100px
         particle.perihelion = particle.semiMajorAxis * (1 - particle.eccentricity);
         particle.aphelion = particle.semiMajorAxis * (1 + particle.eccentricity);
+        
+        // Update color based on solar point (higher = brighter/hotter)
+        const solarPointPercent = (solarPointValue - 1) / 126;
+        const hue = 20 + solarPointPercent * 50;
+        const brightness = 50 + solarPointPercent * 30;
+        particle.color = ColorUtils.hslToRgb(hue, 100, brightness);
       });
     };
     
+    /**
+     * @brief Update bias value - affects inner/outer orbit preference
+     * MIDI: biasedDistance = distance + (bias * 0.3f)
+     * Visual: Rotates orbital plane
+     */
     window.updateBiasValue = function(value) {
       biasValue = Math.max(-100, Math.min(100, value));
-      // Update orbital plane rotation
+      // Update orbital plane rotation (matches MIDI bias effect)
       orbitalParticles.forEach(particle => {
         particle.orbitalAngle = (biasValue / 100) * Math.PI;
       });
     };
     
-    // Initialize with some orbital particles
-    const targetParticleCount = 8; // Number of simultaneous orbits
+    // Initialize with orbital particles - count varies with gravity
+    let targetParticleCount = Math.floor(5 + (gravityValue / 100) * 8); // 5-13 particles
     for (let i = 0; i < targetParticleCount; i++) {
       orbitalParticles.push(createOrbitalParticle());
     }
@@ -389,42 +418,136 @@ function setupSolarVisualization(canvas) {
         particle.centerY = centerY;
       });
       
-      // Clear canvas with trail effect
-      // Use transparent clear instead of dark fill to let background show through
+      // Clear canvas - keep fully transparent background
       ctx.clearRect(0, 0, canvasSize.width, canvasSize.height);
       
-      // Draw orbital reference rings (subtle guides)
-      drawOrbitalRings(ctx, centerX, centerY, time, gravityValue);
+      // Draw velocity zones (concentric rings showing velocity ranges)
+      const solarPointPercent = (solarPointValue - 1) / 126;
+      const zoneCount = 3;
+      for (let i = 0; i < zoneCount; i++) {
+        const zoneRadius = 120 + i * 70;
+        const zoneAlpha = 0.04 * (1 - i / zoneCount) * (0.5 + solarPointPercent * 0.5);
+        const zoneHue = 30 + solarPointPercent * 30;
+        
+        ctx.save();
+        ctx.strokeStyle = `hsla(${zoneHue}, 100%, 50%, ${zoneAlpha})`;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 10]);
+        ctx.lineDashOffset = time * 8 * (i % 2 === 0 ? 1 : -1);
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, zoneRadius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+      
+      // Draw gravitational field lines
+      const fieldLineCount = Math.floor(6 + (gravityValue / 100) * 10);
+      const fieldAlpha = 0.04 + (gravityValue / 100) * 0.06;
+      for (let i = 0; i < fieldLineCount; i++) {
+        const angle = (Math.PI * 2 * i) / fieldLineCount + time * 0.1;
+        const length = 120 + (gravityValue / 100) * 180;
+        
+        const gradient = ctx.createLinearGradient(
+          centerX, centerY,
+          centerX + Math.cos(angle) * length, centerY + Math.sin(angle) * length
+        );
+        gradient.addColorStop(0, `rgba(255, 200, 100, ${fieldAlpha})`);
+        gradient.addColorStop(0.7, `rgba(255, 165, 0, ${fieldAlpha * 0.3})`);
+        gradient.addColorStop(1, 'rgba(255, 165, 0, 0)');
+        
+        ctx.save();
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(centerX + Math.cos(angle) * length, centerY + Math.sin(angle) * length);
+        ctx.stroke();
+        ctx.restore();
+      }
+      
+      // Draw orbital reference rings
+      drawOrbitalRings(ctx, centerX, centerY, time, gravityValue, orbitValue);
+      
+      // Draw bias axis indicator
+      if (Math.abs(biasValue) > 5) {
+        const biasAngle = (biasValue / 100) * Math.PI;
+        const biasLength = 250;
+        const biasAlpha = Math.min(Math.abs(biasValue) / 100 * 0.4, 0.4);
+        
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(biasAngle);
+        
+        const biasGradient = ctx.createLinearGradient(-biasLength, 0, biasLength, 0);
+        biasGradient.addColorStop(0, `rgba(100, 150, 255, ${biasAlpha})`);
+        biasGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
+        biasGradient.addColorStop(1, `rgba(255, 100, 50, ${biasAlpha})`);
+        
+        ctx.strokeStyle = biasGradient;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([8, 8]);
+        ctx.lineDashOffset = time * 5;
+        ctx.beginPath();
+        ctx.moveTo(-biasLength, 0);
+        ctx.lineTo(biasLength, 0);
+        ctx.stroke();
+        
+        ctx.fillStyle = `rgba(100, 150, 255, ${biasAlpha * 1.5})`;
+        ctx.beginPath();
+        ctx.arc(-biasLength, 0, 4, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = `rgba(255, 100, 50, ${biasAlpha * 1.5})`;
+        ctx.beginPath();
+        ctx.arc(biasLength, 0, 4, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
+      }
       
       // Draw sun corona (outer glow)
-      const coronaSize = 80 + Math.sin(time * 2) * 10;
+      const gravityEffect = 0.7 + (gravityValue / 100) * 0.6;
+      const coronaSize = (80 + Math.sin(time * 2) * 10) * gravityEffect;
+      const coronaIntensity = 0.12 + (gravityValue / 100) * 0.15;
       const coronaGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, coronaSize);
-      coronaGradient.addColorStop(0, 'rgba(255, 255, 200, 0.15)');
-      coronaGradient.addColorStop(0.4, 'rgba(255, 165, 0, 0.1)');
+      coronaGradient.addColorStop(0, `rgba(255, 255, 200, ${coronaIntensity})`);
+      coronaGradient.addColorStop(0.3, `rgba(255, 220, 100, ${coronaIntensity * 0.7})`);
+      coronaGradient.addColorStop(0.6, `rgba(255, 165, 0, ${coronaIntensity * 0.4})`);
       coronaGradient.addColorStop(1, 'rgba(255, 106, 0, 0)');
       ctx.fillStyle = coronaGradient;
       ctx.beginPath();
       ctx.arc(centerX, centerY, coronaSize, 0, Math.PI * 2);
       ctx.fill();
       
-      // Draw central sun with pulsing effect
-      const sunRadius = 45 + Math.sin(time * 3) * 3;
+      // Draw central sun
+      const solarPointEffect = 0.85 + ((solarPointValue - 1) / 126) * 0.4;
+      const sunRadius = (45 + Math.sin(time * 3) * 3) * solarPointEffect;
+      const sunBrightness = 0.75 + (gravityValue / 100) * 0.25;
+      
       const sunGradient = ctx.createRadialGradient(
         centerX, centerY, 0,
         centerX, centerY, sunRadius
       );
-      sunGradient.addColorStop(0, '#ffffff');
-      sunGradient.addColorStop(0.2, '#ffff88');
-      sunGradient.addColorStop(0.5, '#ffcc00');
-      sunGradient.addColorStop(0.8, '#ffaa00');
+      sunGradient.addColorStop(0, `rgba(255, 255, 255, ${sunBrightness})`);
+      sunGradient.addColorStop(0.2, `rgba(255, 255, 136, ${sunBrightness * 0.95})`);
+      sunGradient.addColorStop(0.4, `rgba(255, 220, 0, ${sunBrightness * 0.85})`);
+      sunGradient.addColorStop(0.7, `rgba(255, 170, 0, ${sunBrightness * 0.7})`);
       sunGradient.addColorStop(1, 'rgba(255, 106, 0, 0)');
       
       ctx.save();
       ctx.shadowColor = '#ffa500';
-      ctx.shadowBlur = 50;
+      ctx.shadowBlur = 40 + gravityValue / 100 * 30;
       ctx.fillStyle = sunGradient;
       ctx.beginPath();
       ctx.arc(centerX, centerY, sunRadius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // White hot core
+      const coreSize = sunRadius * 0.2 * (0.8 + (gravityValue / 100) * 0.4);
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = `rgba(255, 255, 255, ${0.9 + Math.sin(time * 4) * 0.1})`;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, coreSize, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
       
@@ -463,35 +586,6 @@ function setupSolarVisualization(canvas) {
 }
 
 /**
- * @brief Draw solar flare effect
- */
-function drawSolarFlare(ctx, cx, cy, radius) {
-  const angle = Math.random() * Math.PI * 2;
-  const length = radius + Math.random() * 40;
-  const x = cx + Math.cos(angle) * radius;
-  const y = cy + Math.sin(angle) * radius;
-  const endX = cx + Math.cos(angle) * length;
-  const endY = cy + Math.sin(angle) * length;
-  
-  const gradient = ctx.createLinearGradient(x, y, endX, endY);
-  gradient.addColorStop(0, 'rgba(255, 255, 100, 0.8)');
-  gradient.addColorStop(0.5, 'rgba(255, 165, 0, 0.4)');
-  gradient.addColorStop(1, 'transparent');
-  
-  ctx.save();
-  ctx.strokeStyle = gradient;
-  ctx.lineWidth = 2 + Math.random() * 3;
-  ctx.lineCap = 'round';
-  ctx.shadowColor = '#ffa500';
-  ctx.shadowBlur = 20;
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.lineTo(endX, endY);
-  ctx.stroke();
-  ctx.restore();
-}
-
-/**
  * @brief Draw decorative orbital reference rings
  * @param {CanvasRenderingContext2D} ctx - Canvas context
  * @param {number} centerX - Center X
@@ -499,25 +593,44 @@ function drawSolarFlare(ctx, cx, cy, radius) {
  * @param {number} time - Time value
  * @param {number} gravityValue - Gravity value (0-100) for ring spacing
  */
-function drawOrbitalRings(ctx, centerX, centerY, time, gravityValue = 50) {
-  // Draw subtle reference rings based on gravity (tighter orbits = more rings)
+/**
+ * @brief Draw orbital reference rings with elliptical distortion
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {number} centerX - Center X
+ * @param {number} centerY - Center Y
+ * @param {number} time - Time value
+ * @param {number} gravityValue - Gravity value (0-100)
+ * @param {number} orbitValue - Orbit/eccentricity value (0-100)
+ * Visual: More rings with higher gravity, elliptical shape with higher orbit
+ */
+function drawOrbitalRings(ctx, centerX, centerY, time, gravityValue = 50, orbitValue = 50) {
+  // More rings with higher gravity (stronger gravitational field)
   const tightness = 1 - (gravityValue / 100) * 0.7;
-  const ringCount = Math.floor(3 + (gravityValue / 100) * 4); // 3-7 rings
+  const ringCount = Math.floor(4 + (gravityValue / 100) * 6); // 4-10 rings
   const baseRadius = 60;
   
+  // Elliptical distortion based on orbit value
+  const ellipseRatio = 1 - (orbitValue / 100) * 0.35; // More elliptical with higher orbit
+  
   for (let i = 0; i < ringCount; i++) {
-    const radius = baseRadius + i * 40 * tightness;
+    const radius = baseRadius + i * 35 * tightness;
     const pulsePhase = time + i * 0.3;
-    const alpha = 0.05 + Math.sin(pulsePhase) * 0.02;
+    const pulseAmount = 0.06 + Math.sin(pulsePhase) * 0.03;
+    const alpha = pulseAmount * (0.8 + gravityValue / 100 * 0.4); // More visible with gravity
     
-    // Subtle dashed ring
     ctx.save();
     ctx.strokeStyle = `rgba(255, 165, 0, ${alpha})`;
-    ctx.lineWidth = 0.5;
-    ctx.setLineDash([3, 8]);
-    ctx.lineDashOffset = -time * 15 * (i % 2 === 0 ? 1 : -1);
+    ctx.lineWidth = 0.5 + (gravityValue / 100) * 0.8;
+    ctx.setLineDash([4, 10]);
+    ctx.lineDashOffset = -time * 12 * (i % 2 === 0 ? 1 : -1); // Counter-rotating
     ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    
+    // Draw ellipse if orbit value is significant, otherwise circle
+    if (orbitValue > 15) {
+      ctx.ellipse(centerX, centerY, radius, radius * ellipseRatio, 0, 0, Math.PI * 2);
+    } else {
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    }
     ctx.stroke();
     ctx.restore();
   }
@@ -527,285 +640,122 @@ function drawOrbitalRings(ctx, centerX, centerY, time, gravityValue = 50) {
    CONTROL SETUP
    =================================================================== */
 
-/**
- * @brief Setup gravity knob control
- */
-function setupGravityKnob() {
-  const knob = document.getElementById('gravityKnob');
-  const indicator = knob.querySelector('.knob-indicator');
-  const valueDisplay = document.getElementById('gravityValue');
-  
-  const gravityKnob = new OrbitalsKnob(knob, {
-    min: 0,
-    max: 100,
-    value: 50,
-    onChange: (value) => {
-      valueDisplay.textContent = Math.round(value) + '%';
-      
-      // Update indicator rotation
-      const rotation = -135 + (value / 100) * 270; // -135° to 135°
-      indicator.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
-      
-      // Update orbital system - gravity affects orbital tightness
-      if (window.updateGravityValue) {
-        window.updateGravityValue(value);
+function setupControls() {
+  // Orbit Slider (Left)
+  const orbitSlider = document.getElementById('orbitSlider');
+  if (orbitSlider) {
+    new OrbitalsSlider(orbitSlider, {
+      min: 0, max: 100, value: 50,
+      orientation: 'vertical',
+      onChange: (v) => {
+        document.getElementById('orbitValue').textContent = Math.round(v) + '%';
+        const percent = (v - 0) / (100 - 0);
+        orbitSlider.style.setProperty('--slider-value', percent);
+        if (window.updateOrbitValue) window.updateOrbitValue(v);
+        sendParameterToJUCE('orbit', v);
       }
-      
-      // Send to JUCE
-      sendParameterToJUCE('gravity', value);
-    }
-  });
-}
-
-/**
- * @brief Setup solar point vertical slider
- */
-function setupSolarPointSlider() {
-  const slider = document.getElementById('solarPointSlider');
-  const valueDisplay = document.getElementById('solarPointValue');
-  
-  if (!slider) {
-    console.error('Solar point slider not found');
-    return;
+    });
+    orbitSlider.style.setProperty('--slider-value', 0.5);
   }
   
-  const fill = slider.querySelector('.slider-fill');
-  console.log('Solar slider found:', slider);
-  console.log('Solar fill element:', fill);
-  console.log('Solar slider computed style:', window.getComputedStyle(slider));
-  if (fill) {
-    console.log('Solar fill computed style:', window.getComputedStyle(fill));
-    console.log('Solar fill height:', fill.offsetHeight);
-  }
-  
-  const solarSlider = new OrbitalsSlider(slider, {
-    min: 1,
-    max: 127,
-    value: 64,
-    orientation: 'vertical',
-    onChange: (value) => {
-      valueDisplay.textContent = Math.round(value);
-      
-      // Ensure fill updates - force CSS variable update
-      const percent = (value - 1) / (127 - 1);
-      slider.style.setProperty('--slider-value', percent);
-      
-      console.log('Solar slider value changed:', value, 'percent:', percent);
-      console.log('Solar slider --slider-value:', slider.style.getPropertyValue('--slider-value'));
-      if (fill) {
-        const fillHeight = window.getComputedStyle(fill).height;
-        console.log('Solar fill height after update:', fillHeight);
+  // Gravity Knob (Center)
+  const gravityKnob = document.getElementById('gravityKnob');
+  if (gravityKnob) {
+    new OrbitalsKnob(gravityKnob, {
+      min: 0, max: 100, value: 50,
+      onChange: (v) => {
+        document.getElementById('gravityValue').textContent = Math.round(v) + '%';
+        if (window.updateGravityValue) window.updateGravityValue(v);
+        sendParameterToJUCE('gravity', v);
       }
-      
-      // Update orbital system - solar point affects orbital size
-      if (window.updateSolarPointValue) {
-        window.updateSolarPointValue(value);
+    });
+  }
+  
+  // Solar Point Slider (Right)
+  const solarPointSlider = document.getElementById('solarPointSlider');
+  if (solarPointSlider) {
+    new OrbitalsSlider(solarPointSlider, {
+      min: 1, max: 127, value: 64,
+      orientation: 'vertical',
+      onChange: (v) => {
+        document.getElementById('solarPointValue').textContent = Math.round(v);
+        const percent = (v - 1) / (127 - 1);
+        solarPointSlider.style.setProperty('--slider-value', percent);
+        if (window.updateSolarPointValue) window.updateSolarPointValue(v);
+        sendParameterToJUCE('solarPoint', v);
       }
-      
-      sendParameterToJUCE('solarPoint', value);
-    }
-  });
-  
-  // Force initial fill display
-  const initialPercent = (64 - 1) / (127 - 1);
-  slider.style.setProperty('--slider-value', initialPercent);
-  console.log('Solar slider initial --slider-value set to:', slider.style.getPropertyValue('--slider-value'));
-  if (fill) {
-    setTimeout(() => {
-      const fillHeight = window.getComputedStyle(fill).height;
-      console.log('Solar fill initial height:', fillHeight);
-      console.log('Solar fill display:', window.getComputedStyle(fill).display);
-      console.log('Solar fill visibility:', window.getComputedStyle(fill).visibility);
-      console.log('Solar fill opacity:', window.getComputedStyle(fill).opacity);
-      console.log('Solar fill z-index:', window.getComputedStyle(fill).zIndex);
-    }, 100);
-  }
-}
-
-/**
- * @brief Setup orbit arc control - controls orbital eccentricity
- */
-function setupOrbitSlider() {
-  const slider = document.getElementById('orbitSlider');
-  const valueDisplay = document.getElementById('orbitValue');
-  
-  if (!slider) {
-    console.error('Orbit slider not found');
-    return;
+    });
+    const initialPercent = (64 - 1) / (127 - 1);
+    solarPointSlider.style.setProperty('--slider-value', initialPercent);
   }
   
-  const fill = slider.querySelector('.slider-fill');
-  console.log('Orbit slider found:', slider);
-  console.log('Orbit fill element:', fill);
-  console.log('Orbit slider computed style:', window.getComputedStyle(slider));
-  if (fill) {
-    console.log('Orbit fill computed style:', window.getComputedStyle(fill));
-    console.log('Orbit fill height:', fill.offsetHeight);
-  }
-  
-  // Use OrbitalsSlider component for consistent behavior
-  const orbitSlider = new OrbitalsSlider(slider, {
-    min: 0,
-    max: 100,
-    value: 50,
-    step: 1,
-    orientation: 'vertical',
-    onChange: (value) => {
-      valueDisplay.textContent = Math.round(value) + '%';
-      
-      // Ensure fill updates - force CSS variable update
-      const percent = (value - 0) / (100 - 0);
-      slider.style.setProperty('--slider-value', percent);
-      
-      console.log('Orbit slider value changed:', value, 'percent:', percent);
-      console.log('Orbit slider --slider-value:', slider.style.getPropertyValue('--slider-value'));
-      if (fill) {
-        const fillHeight = window.getComputedStyle(fill).height;
-        console.log('Orbit fill height after update:', fillHeight);
+  // Bias Slider (Bottom)
+  const biasSlider = document.getElementById('biasSlider');
+  if (biasSlider) {
+    new OrbitalsSlider(biasSlider, {
+      min: -100, max: 100, value: 0,
+      orientation: 'horizontal',
+      onChange: (v) => {
+        document.getElementById('biasValue').textContent = Math.round(v);
+        const percent = (v - (-100)) / (100 - (-100));
+        biasSlider.style.setProperty('--slider-value', percent);
+        if (window.updateBiasValue) window.updateBiasValue(v);
+        sendParameterToJUCE('bias', v);
       }
-      
-      // Update orbital system - orbit affects eccentricity
-      if (window.updateOrbitValue) {
-        window.updateOrbitValue(value);
-      }
-      
-      sendParameterToJUCE('orbit', value);
-    }
-  });
-  
-  // Force initial fill display
-  slider.style.setProperty('--slider-value', 0.5);
-  console.log('Orbit slider initial --slider-value set to:', slider.style.getPropertyValue('--slider-value'));
-  if (fill) {
-    setTimeout(() => {
-      const fillHeight = window.getComputedStyle(fill).height;
-      console.log('Orbit fill initial height:', fillHeight);
-      console.log('Orbit fill display:', window.getComputedStyle(fill).display);
-      console.log('Orbit fill visibility:', window.getComputedStyle(fill).visibility);
-      console.log('Orbit fill opacity:', window.getComputedStyle(fill).opacity);
-      console.log('Orbit fill z-index:', window.getComputedStyle(fill).zIndex);
-    }, 100);
+    });
+    biasSlider.style.setProperty('--slider-value', 0.5);
   }
-}
-
-/**
- * @brief Setup inner/outer bias dual slider - controls orbital plane rotation
- */
-function setupBiasSlider() {
-  const slider = document.getElementById('biasSlider');
-  const handle = slider.querySelector('.bias-handle');
-  const valueDisplay = document.getElementById('biasValue');
   
-  let isDragging = false;
-  let currentValue = 0;
-  
-  const updateBias = (event) => {
-    const rect = slider.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const percent = Math.max(0, Math.min(1, x / rect.width));
-    
-    // Map 0-1 to -100 to +100
-    currentValue = (percent - 0.5) * 200;
-    
-    // Update handle position
-    handle.style.left = (percent * 100) + '%';
-    valueDisplay.textContent = Math.round(currentValue);
-    
-    // Update orbital system - bias affects orbital plane rotation
-    if (window.updateBiasValue) {
-      window.updateBiasValue(currentValue);
-    }
-    
-    sendParameterToJUCE('bias', currentValue);
-  };
-  
-  slider.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    updateBias(e);
-  });
-  
-  document.addEventListener('mousemove', (e) => {
-    if (isDragging) updateBias(e);
-  });
-  
-  document.addEventListener('mouseup', () => {
-    isDragging = false;
-  });
-}
-
-/**
- * @brief Setup bypass toggle
- */
-function setupBypassToggle() {
-  // Use shared bypass toggle implementation
+  // Setup bypass toggle
   if (window.setupBypassToggle) {
     window.setupBypassToggle(sendParameterToJUCE);
   }
 }
 
-/* ===================================================================
-   JUCE COMMUNICATION
-   =================================================================== */
-
-/**
- * @brief Send parameter change to JUCE
- * @param {string} param - Parameter name
- * @param {number} value - Parameter value
- */
 function sendParameterToJUCE(param, value) {
-  // Check if JUCE bridge exists (multiple methods for compatibility)
-  const message = {
-    type: 'parameterChange',
-    parameter: param,
-    value: value
-  };
-  
-  // Try Chrome WebView (Windows)
-  if (window.chrome && window.chrome.webview) {
-    window.chrome.webview.postMessage(message);
-    return;
+  if (window.chrome?.webview) {
+    window.chrome.webview.postMessage({ type: 'parameterChange', parameter: param, value });
   }
-  
-  // Try WebKit message handler (macOS)
-  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.message) {
-    window.webkit.messageHandlers.message.postMessage(message);
-    return;
-  }
-  
-  // Fallback: console log for debugging
-  console.log(`Parameter ${param} = ${value}`);
 }
 
-/**
- * @brief Receive messages from JUCE
- * @param {Object} message - Message from JUCE
- */
+// Receive messages from JUCE
 window.receiveMessageFromJUCE = function(message) {
-  console.log('Received from JUCE:', message);
+  if (!message || typeof message !== 'object') return;
   
-  // Handle incoming MIDI or parameter updates from JUCE
   if (message.type === 'midiNote') {
-    // Visualize MIDI note
-    visualizeMIDINote(message.velocity);
+    const noteCountEl = document.getElementById('noteCount');
+    if (noteCountEl) {
+      const currentCount = parseInt(noteCountEl.textContent.match(/\d+/)?.[0] || '0');
+      noteCountEl.textContent = `Notes: ${currentCount + 1}`;
+      clearTimeout(window.noteCountResetTimeout);
+      window.noteCountResetTimeout = setTimeout(() => {
+        noteCountEl.textContent = 'Notes: 0';
+      }, 2000);
+    }
+  } else if (message.type === 'parameterUpdate') {
+    const param = message.parameter;
+    const value = message.value;
+    
+    if (param === 'orbit') {
+      const slider = document.getElementById('orbitSlider');
+      if (slider && slider._orbitalsSlider) {
+        slider._orbitalsSlider.setValue(value * 100);
+      }
+    } else if (param === 'gravity') {
+      const knob = document.getElementById('gravityKnob');
+      if (knob && knob._orbitalsKnob) {
+        knob._orbitalsKnob.setValue(value * 100);
+      }
+    } else if (param === 'solarPoint') {
+      const slider = document.getElementById('solarPointSlider');
+      if (slider && slider._orbitalsSlider) {
+        slider._orbitalsSlider.setValue(Math.round(value * 126) + 1);
+      }
+    } else if (param === 'bias') {
+      const slider = document.getElementById('biasSlider');
+      if (slider && slider._orbitalsSlider) {
+        slider._orbitalsSlider.setValue((value * 200) - 100);
+      }
+    }
   }
 };
-
-/**
- * @brief Visualize incoming MIDI note
- * @param {number} velocity - MIDI velocity (0-127)
- */
-function visualizeMIDINote(velocity) {
-  // Update input meter
-  const inputMeter = document.getElementById('inputMeter');
-  if (inputMeter) {
-    const percent = (velocity / 127) * 100;
-    inputMeter.style.setProperty('--meter-height', percent + '%');
-  }
-  
-  // Create particle burst
-  const noteCount = document.getElementById('noteCount');
-  if (noteCount) {
-    const current = parseInt(noteCount.textContent.split(': ')[1] || 0);
-    noteCount.textContent = `Notes: ${current + 1}`;
-  }
-}

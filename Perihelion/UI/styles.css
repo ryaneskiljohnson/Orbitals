@@ -15,126 +15,93 @@
   --plugin-accent: #ffcc00;       /* Bright Yellow */
   --plugin-glow: rgba(255, 165, 0, 0.6);
   
-  /* Enhanced solar theme colors */
-  --solar-core: #ffff88;
-  --solar-corona: #ff8800;
-  --solar-flare: #ffdd44;
-  --perihelion-dark: #1a0f00;
-  --orbit-trail: rgba(255, 165, 0, 0.3);
-  
-  /* Enhanced gradients */
-  --solar-gradient: linear-gradient(135deg, #ffcc00 0%, #ffa500 50%, #ff6b00 100%);
-  --corona-gradient: radial-gradient(circle, #ffff88 0%, #ffa500 40%, #ff6b00 70%, transparent 100%);
-  
   /* Background image */
   --plugin-background-image: url('../../_Shared/Assets/backgrounds/perihelion-background.png');
   --plugin-background-opacity: 0.7;
 }
 
-/* Make the starfield layer not block the background image - remove the dark background */
-.perihelion-theme .plugin-container::before {
-  background: transparent !important;
-  background-image: 
-    radial-gradient(1px 1px at 20% 30%, white, transparent),
-    radial-gradient(1px 1px at 60% 70%, white, transparent),
-    radial-gradient(1px 1px at 50% 50%, white, transparent),
-    radial-gradient(1px 1px at 80% 10%, white, transparent),
-    radial-gradient(1px 1px at 90% 60%, white, transparent) !important;
-  background-size: 200% 200% !important;
-  opacity: 0.15 !important;
+/* ===================================================================
+   BACKGROUND IMAGE - CENTERED AND STATIC
+   =================================================================== */
+
+/* Completely disable starfield animation and remove it */
+.perihelion-theme.plugin-container::before {
+  display: none !important;
 }
 
-/* Remove dark background from body/html so background image shows through */
-body.perihelion-theme,
-html.perihelion-theme,
-body .perihelion-theme,
-html .perihelion-theme {
-  background: transparent !important;
-}
-
-/* Also ensure plugin-main doesn't have dark background */
-.perihelion-theme .plugin-main {
-  background: transparent !important;
-}
-
-/* Keep background image visible at all times (no fade-out) */
-.perihelion-theme .plugin-container::after {
-  animation: none !important;
+/* Force background image to be centered and static */
+.perihelion-theme.plugin-container::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-image: var(--plugin-background-image) !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
   opacity: var(--plugin-background-opacity, 0.7) !important;
   z-index: 0 !important;
-}
-
-/* Canvas stays above background image so animations are visible */
-.perihelion-theme #solarCanvas {
-  z-index: 1 !important;
+  pointer-events: none !important;
+  animation: none !important;
+  transform: none !important;
+  backface-visibility: visible !important;
+  box-sizing: border-box !important;
 }
 
 /* ===================================================================
-   SOLAR CANVAS
+   CONTROLS LAYOUT
    =================================================================== */
 
+.perihelion-theme .plugin-main {
+  padding: 0;
+  position: relative;
+}
+
+/* Particle Animation Canvas */
 #solarCanvas {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
   pointer-events: none;
-  background: transparent !important;
-  margin: 0;
-  padding: 0;
-  border: none;
-  display: block;
-  box-sizing: border-box;
-}
-
-/* ===================================================================
-   CONTROLS LAYOUT (Optimized for 1200x750)
-   =================================================================== */
-
-/* Override plugin-main padding for Perihelion */
-.perihelion-theme .plugin-main {
-  padding: 0;
-  position: relative;
+  z-index: 1;
   background: transparent;
 }
 
-.controls-area {
+.controls-layout {
   position: relative;
   z-index: 10;
-  width: 100%;
-  height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-lg) var(--spacing-xl);
+  width: 100%;
+  height: 100%;
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  gap: var(--spacing-2xl);
   box-sizing: border-box;
-  background: transparent;
+  pointer-events: none;
 }
 
-/* Left: Orbit Slider */
-.control-orbit-section {
+.controls-layout > * {
+  pointer-events: auto;
+}
+
+.control-orbit {
   position: absolute;
-  left: var(--spacing-xl);
+  left: calc(25% - 125px);
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-xs);
-  z-index: 15;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
 }
 
-.control-orbit-section .value-display {
-  margin-top: var(--spacing-md);
-}
-
-/* Center: Gravity Knob */
-.control-center-section {
+.control-center {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -142,206 +109,198 @@ html .perihelion-theme {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-sm);
-  z-index: 15;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  max-width: 500px;
 }
 
-/* Right: Solar Point Slider */
-.control-solar-section {
+.control-solar {
   position: absolute;
-  right: var(--spacing-xl);
+  left: calc(75% + 125px);
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-xs);
-  z-index: 15;
-}
-
-.control-solar-section .value-display {
-  margin-top: var(--spacing-md);
-}
-
-/* Bottom: Bias Slider */
-.control-bias-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-xs);
-  margin-top: auto;
+  gap: var(--spacing-sm);
   flex-shrink: 0;
+}
+
+.control-bias {
+  position: absolute;
+  left: 50%;
+  bottom: var(--spacing-lg);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
   width: 100%;
   max-width: 500px;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.control-bias .slider-horizontal {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  position: relative !important;
+}
 
 /* ===================================================================
-   ORBIT SLIDER (Vertical) - Mirrors Solar Point Slider
+   VERTICAL SLIDERS - Matching Lagrange Pattern
    =================================================================== */
 
-.orbit-slider {
-  width: 56px;
-  height: 320px;
+.slider-vertical-tall {
+  width: 24px;
+  height: 380px;
   position: relative;
   border-radius: var(--radius-lg);
-  background: transparent;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: var(--glass-blur);
   border: 2px solid var(--plugin-primary);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
-  --slider-value: 0.5; /* Default value */
+  box-shadow: 0 0 25px rgba(255, 165, 0, 0.4),
+              inset 0 0 20px rgba(255, 165, 0, 0.1);
+  transition: all var(--transition-medium);
+  margin: 0 auto;
+  isolation: isolate;
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
+  padding: 0;
+  box-sizing: content-box;
 }
 
-/* Fill from bottom to slider position */
-.orbit-slider .slider-fill {
+.slider-vertical-tall:hover {
+  border-color: var(--plugin-accent);
+  box-shadow: 0 0 35px rgba(255, 165, 0, 0.6),
+              inset 0 0 30px rgba(255, 165, 0, 0.2);
+  transform: scale(1.02);
+}
+
+.slider-vertical-tall::before {
+  content: '';
   position: absolute;
-  left: 0;
   bottom: 0;
-  width: 100%;
-  height: calc(var(--slider-value, 0.5) * 100%);
-  background: linear-gradient(to top,
-    #ff6b00,
-    #ffa500 50%,
-    #ffcc00 100%
-  );
-  opacity: 1;
-  pointer-events: none;
-  z-index: 1;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  min-height: 10px;
-}
-
-.orbit-slider .slider-track {
-  position: absolute;
-  top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  /* Fill calculation for 380px slider to match handle center */
+  /* Slider: 380px, handle: 24px, padding: 12px top/bottom (assumed by OrbitalsSlider) */
+  /* Handle bottom = 3.16% + (percent * 93.68%) for 380px slider */
+  /* But OrbitalsSlider uses hardcoded 220px calc: 5.45% + (percent * 89.09%) */
+  /* Handle center = bottom + 12px (half handle height) = bottom + 3.16% of 380px */
+  /* Fill height = handle center position from bottom */
+  /* Since OrbitalsSlider sets bottom incorrectly, we need to match its actual behavior */
+  /* The component uses translateY(50%) which moves handle down 12px */
+  /* Actual handle center = bottom% + (12px / 380px * 100%) = bottom% + 3.16% */
+  /* For 380px: padding = 12/380 = 3.16%, usable = 356/380 = 93.68% */
+  /* But component uses 220px calc, so we match that: 5.45% + (percent * 89.09%) + 3.16% */
+  /* Simplified: 8.61% + (percent * 89.09%) */
+  height: calc(8.61% + (var(--slider-value, 0.5) * 89.09%));
+  background: linear-gradient(to top,
+    rgba(255, 165, 0, 1) 0%,
+    rgba(255, 200, 0, 0.9) 50%,
+    rgba(255, 140, 0, 1) 100%
+  );
+  opacity: 0.8 !important;
   pointer-events: none;
-  z-index: 0;
-  background: rgba(10, 10, 26, 0.3);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  z-index: 2 !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
-.orbit-gradient {
+.slider-vertical-tall .slider-track {
   display: none;
 }
 
-.orbit-slider .slider-handle {
-  position: absolute !important;
-  width: 56px;
-  height: 56px;
-  background: 
-    radial-gradient(circle at 30% 30%, #ffffff 0%, transparent 3%),
-    radial-gradient(circle, var(--plugin-accent), var(--plugin-primary), var(--plugin-secondary));
-  border: 4px solid white;
-  border-radius: var(--radius-full);
-  box-shadow: 
-    0 0 25px var(--plugin-glow),
-    0 0 50px rgba(255, 165, 0, 0.6),
-    inset 0 0 20px rgba(255, 255, 100, 0.6);
+.slider-vertical-tall .slider-handle {
+  position: absolute;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(180deg, var(--plugin-accent), var(--plugin-primary));
+  border-radius: var(--radius-md);
+  border: 2px solid white;
+  box-shadow: 0 0 20px var(--plugin-glow),
+              0 4px 12px rgba(0, 0, 0, 0.5);
   cursor: grab;
   transition: none !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
+  will-change: bottom;
+  transform: translateX(-50%);
+  z-index: 10 !important;
+  box-sizing: border-box;
+  pointer-events: auto;
 }
 
-.orbit-slider .slider-handle::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: -8px;
-  right: -8px;
-  bottom: -8px;
-  background: radial-gradient(circle,
-    rgba(255, 165, 0, 0.3) 0%,
-    transparent 60%);
-  border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
-  pointer-events: none;
+.slider-vertical-tall .slider-handle:hover {
+  box-shadow: 0 0 30px var(--plugin-glow);
 }
 
-.orbit-slider .slider-handle:hover {
-  transform: translate(-50%, 50%) scale(1.08);
-  box-shadow: 
-    0 0 35px var(--plugin-glow),
-    0 0 70px rgba(255, 165, 0, 0.8);
-}
-
-.orbit-slider .slider-handle:active {
+.slider-vertical-tall .slider-handle:active {
   cursor: grabbing;
-  transform: translate(-50%, 50%) scale(1.05);
-}
-
-.orbit-icon {
-  font-size: 26px;
-  text-shadow: 
-    0 0 15px rgba(255, 255, 255, 1),
-    0 0 30px rgba(255, 200, 0, 0.8);
-  animation: rotate 10s linear infinite;
-  filter: drop-shadow(0 0 5px white);
 }
 
 /* ===================================================================
-   LARGE GRAVITY KNOB
+   CONTROL LABELS AND VALUE DISPLAYS
    =================================================================== */
 
-.large-knob {
-  width: 160px;
-  height: 160px;
-  border-radius: var(--radius-full);
-  background: 
-    radial-gradient(circle at 35% 35%, #ffffff 0%, transparent 3%),
-    radial-gradient(circle at 30% 30%, #ffff88 0%, #ffaa00 30%, #ff6b00 60%, #cc5500 100%);
-  border: 4px solid var(--plugin-primary);
-  box-shadow: 
-    0 0 40px var(--plugin-glow),
-    0 0 80px rgba(255, 165, 0, 0.4),
-    inset 0 0 60px rgba(255, 200, 0, 0.4),
-    inset -10px -10px 40px rgba(0, 0, 0, 0.3);
+.control-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255, 165, 0, 0.9);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.value-display {
+  background: var(--glass-bg-dark);
+  border: 1px solid var(--plugin-primary);
+  box-shadow: 0 0 10px var(--plugin-glow);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--plugin-primary);
+  text-align: center;
+  min-width: 70px;
+}
+
+.value-display.large {
+  font-size: var(--font-size-lg);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  min-width: 80px;
+}
+
+/* ===================================================================
+   GRAVITY KNOB (Large) - Matching Lagrange Pattern
+   =================================================================== */
+
+.knob-large {
+  width: 170px;
+  height: 170px;
   position: relative;
-  cursor: grab;
-  transition: all var(--transition-medium);
-  overflow: visible;
-}
-
-.large-knob::before {
-  content: '';
-  position: absolute;
-  top: -30px;
-  left: -30px;
-  right: -30px;
-  bottom: -30px;
-  background: radial-gradient(circle, 
-    rgba(255, 165, 0, 0.2) 0%,
-    transparent 70%);
+  cursor: ns-resize;
   border-radius: 50%;
-  animation: solar-corona 4s ease-in-out infinite;
-  pointer-events: none;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.25), rgba(255, 165, 0, 0.15) 50%, rgba(255, 107, 0, 0.05) 80%, transparent),
+              var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 4px solid var(--plugin-primary);
+  box-shadow: 0 0 40px var(--plugin-glow),
+              0 0 65px rgba(255, 165, 0, 0.4),
+              inset 0 0 30px rgba(255, 255, 255, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes solar-corona {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.6;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-}
-
-.large-knob:hover {
-  box-shadow: 
-    0 0 60px var(--plugin-glow),
-    0 0 100px rgba(255, 165, 0, 0.6),
-    inset 0 0 70px rgba(255, 200, 0, 0.6);
-  transform: scale(1.05);
-  cursor: grab;
-}
-
-.large-knob:active {
-  cursor: grabbing;
-  transform: scale(1.02);
+.knob-large:hover {
+  transform: scale(1.08);
+  border-color: var(--plugin-accent);
+  box-shadow: 0 0 50px var(--plugin-glow),
+              0 0 85px rgba(255, 165, 0, 0.6),
+              inset 0 0 40px rgba(255, 255, 255, 0.25);
 }
 
 .knob-inner {
@@ -353,462 +312,109 @@ html .perihelion-theme {
 
 .knob-indicator {
   position: absolute;
-  top: 8%;
-  left: 50%;
-  width: 6px;
-  height: 42%;
-  background: linear-gradient(to bottom,
-    #ffffff,
-    #ffff88,
-    var(--plugin-primary));
-  border-radius: var(--radius-full);
-  transform-origin: bottom center;
-  box-shadow: 
-    0 0 15px white,
-    0 0 30px var(--plugin-primary),
-    inset 0 1px 2px rgba(255, 255, 255, 0.8);
-  transform: translateX(-50%) rotate(0deg);
-  transition: transform var(--transition-medium);
-}
-
-.knob-indicator::before {
-  content: '';
-  position: absolute;
-  top: 0;
+  top: 15%;
   left: 50%;
   transform: translateX(-50%);
-  width: 10px;
-  height: 10px;
-  background: white;
-  border-radius: 50%;
-  box-shadow: 0 0 15px white;
-}
-
-.knob-rings {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 140%;
-  height: 140%;
-  pointer-events: none;
-}
-
-.knob-rings::before,
-.knob-rings::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border: 2px solid var(--plugin-primary);
-  border-radius: 50%;
-  opacity: 0.3;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-.knob-rings::before {
-  width: 100%;
-  height: 100%;
-}
-
-.knob-rings::after {
-  width: 120%;
-  height: 120%;
-  animation-delay: 0.5s;
+  width: 5px;
+  height: 40%;
+  background: linear-gradient(to bottom, #ffffff, var(--plugin-secondary), transparent);
+  border-radius: 3px;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.8),
+              0 0 20px rgba(255, 165, 0, 0.4);
+  transform-origin: bottom center;
 }
 
 /* ===================================================================
-   SOLAR POINT SLIDER
+   HORIZONTAL SLIDER - Matching Lagrange Pattern
    =================================================================== */
 
-.solar-slider {
-  width: 56px;
-  height: 320px;
+.slider-horizontal {
+  width: 450px;
+  height: 24px;
   position: relative;
   border-radius: var(--radius-lg);
-  background: transparent;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
   border: 2px solid var(--plugin-primary);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
-  --slider-value: 0.5; /* Default value */
-}
-
-/* Fill from bottom to slider position */
-.solar-slider .slider-fill {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: calc(var(--slider-value, 0.5) * 100%);
-  background: linear-gradient(to top,
-    #ff6b00 0%,
-    #ffa500 50%,
-    #ffcc00 100%
-  );
-  opacity: 1;
-  pointer-events: none;
-  z-index: 1;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  min-height: 10px;
-}
-
-.solar-slider .slider-track {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-  background: rgba(10, 10, 26, 0.3);
-}
-
-.velocity-heatmap {
-  display: none;
-}
-
-.solar-slider .slider-handle {
-  position: absolute !important;
-  width: 56px;
-  height: 56px;
-  background: 
-    radial-gradient(circle at 30% 30%, #ffffff 0%, transparent 3%),
-    radial-gradient(circle, #ffff88, #ffdd00, #ffaa00, #ff6600);
-  border: 4px solid white;
-  border-radius: var(--radius-full);
-  box-shadow: 
-    0 0 25px var(--plugin-glow),
-    0 0 50px rgba(255, 165, 0, 0.6),
-    inset 0 0 20px rgba(255, 255, 100, 0.6);
-  cursor: grab;
-  transition: none !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 0 20px rgba(255, 165, 0, 0.3),
+              inset 0 0 15px rgba(255, 165, 0, 0.1);
+  margin: 0 auto;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  isolation: isolate;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  padding: 0 !important;
+  box-sizing: border-box;
+  pointer-events: auto;
   z-index: 10;
 }
 
-.solar-slider .slider-handle::before {
+.slider-horizontal:hover {
+  border-color: var(--plugin-accent);
+  box-shadow: 0 0 30px rgba(255, 165, 0, 0.5),
+              inset 0 0 20px rgba(255, 165, 0, 0.2);
+}
+
+/* Temperature/heat map gradient background - always visible */
+.slider-horizontal::before {
   content: '';
-  position: absolute;
-  top: -8px;
-  left: -8px;
-  right: -8px;
-  bottom: -8px;
-  background: radial-gradient(circle,
-    rgba(255, 165, 0, 0.3) 0%,
-    transparent 60%);
-  border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
-  pointer-events: none;
-}
-
-.solar-slider .slider-handle:hover {
-  transform: translate(-50%, 50%) scale(1.08);
-  box-shadow: 
-    0 0 35px var(--plugin-glow),
-    0 0 70px rgba(255, 165, 0, 0.8);
-}
-
-.solar-slider .slider-handle:active {
-  cursor: grabbing;
-  transform: translate(-50%, 50%) scale(1.05);
-}
-
-.sun-icon {
-  font-size: 26px;
-  text-shadow: 
-    0 0 15px rgba(255, 255, 255, 1),
-    0 0 30px rgba(255, 200, 0, 0.8);
-  animation: rotate 10s linear infinite;
-  filter: drop-shadow(0 0 5px white);
-}
-
-
-/* ===================================================================
-   DUAL BIAS SLIDER
-   =================================================================== */
-
-.dual-slider {
-  width: 450px;
-  height: 60px;
-  position: relative;
-  max-width: 100%;
-}
-
-.bias-track {
-  width: 100%;
-  height: 8px;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  border-radius: var(--radius-full);
-  background: var(--glass-bg);
-  border: 2px solid var(--glass-border);
-  overflow: hidden;
-}
-
-.bias-gradient {
-  width: 100%;
-  height: 100%;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  /* Temperature/heat map gradient: blue (inner/cold) -> gray (center) -> orange/red (outer/hot) */
   background: linear-gradient(to right,
     #0066ff 0%,
-    #00aaff 25%,
+    #00aaff 15%,
     #888888 50%,
-    #ff6600 75%,
+    #ff6600 85%,
     #ff0000 100%
-  );
-  opacity: 0.6;
+  ) !important;
+  opacity: 0.6 !important;
+  pointer-events: none !important;
+  border-radius: var(--radius-lg) !important;
+  z-index: 0 !important;
+  transform: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
-.bias-handle {
+/* No dynamic fill for horizontal slider - temperature gradient is static background */
+.slider-horizontal::after {
+  display: none !important;
+}
+
+.slider-horizontal .slider-track {
+  display: none;
+}
+
+.slider-horizontal .slider-handle {
   position: absolute;
-  left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
   width: 24px;
-  height: 40px;
-  background: var(--plugin-primary);
+  height: 24px;
+  background: linear-gradient(180deg, var(--plugin-accent), var(--plugin-primary));
+  border-radius: var(--radius-md);
   border: 2px solid white;
-  border-radius: var(--radius-md);
-  box-shadow: 0 0 15px var(--plugin-glow);
-  cursor: ew-resize;
-  transition: transform var(--transition-fast);
-}
-
-.bias-handle:hover {
-  transform: translate(-50%, -50%) scale(1.1);
-}
-
-.bias-labels {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-between;
-  margin-top: var(--spacing-sm);
-  font-size: var(--font-size-xs);
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-/* ===================================================================
-   VELOCITY METERS
-   =================================================================== */
-
-.velocity-meters {
-  position: absolute;
-  left: var(--spacing-lg);
-  top: 50%;
+  box-shadow: 0 0 20px var(--plugin-glow),
+              0 4px 12px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+  transition: none !important;
+  will-change: left;
   transform: translateY(-50%);
-  display: flex;
-  gap: var(--spacing-md);
-  z-index: 12;
+  z-index: 10;
+  box-sizing: border-box;
+  pointer-events: auto;
 }
 
-.meter-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-sm);
+.slider-horizontal .slider-handle:hover {
+  box-shadow: 0 0 30px var(--plugin-glow);
 }
 
-.meter-column label {
-  font-size: var(--font-size-xs);
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.velocity-meter {
-  width: 28px;
-  height: 180px;
-  background: var(--glass-bg-dark);
-  border: 2px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  position: relative;
-  overflow: hidden;
-}
-
-.velocity-meter::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 0%;
-  background: linear-gradient(to top,
-    var(--plugin-secondary) 0%,
-    var(--plugin-primary) 50%,
-    var(--plugin-accent) 100%
-  );
-  transition: height var(--transition-fast);
-  box-shadow: 0 0 20px var(--plugin-glow);
-}
-
-/* ===================================================================
-   INFO DISPLAY
-   =================================================================== */
-
-.info-display {
-  display: flex;
-  gap: var(--spacing-lg);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  color: var(--plugin-primary);
-}
-
-/* ===================================================================
-   VALUE DISPLAYS
-   =================================================================== */
-
-.value-display {
-  background: var(--glass-bg-dark);
-  border: 1px solid var(--plugin-primary);
-  box-shadow: 0 0 10px var(--plugin-glow);
-}
-
-.value-display.large {
-  font-size: var(--font-size-lg);
-  padding: var(--spacing-sm) var(--spacing-lg);
-  min-width: 80px;
-}
-
-/* ===================================================================
-   ANIMATIONS
-   =================================================================== */
-
-@keyframes solar-pulse {
-  0%, 100% {
-    box-shadow: 0 0 30px var(--plugin-glow);
-  }
-  50% {
-    box-shadow: 0 0 50px var(--plugin-glow);
-  }
-}
-
-.large-knob {
-  animation: solar-pulse 3s ease-in-out infinite;
-}
-
-
-/* ===================================================================
-   ORBIT SLIDER FILL (For vertical slider visualization)
-   =================================================================== */
-
-
-/* ===================================================================
-   METER FILL (For velocity meters)
-   =================================================================== */
-
-.meter-fill {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 0%;
-  background: linear-gradient(to top,
-    var(--plugin-secondary) 0%,
-    var(--plugin-primary) 50%,
-    var(--plugin-accent) 100%
-  );
-  transition: height 0.15s ease;
-  box-shadow: 0 0 20px var(--plugin-glow);
-}
-
-/* ===================================================================
-   CONTROL LABELS (Plugin-specific styling)
-   =================================================================== */
-
-.control-label {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.8px;
-  color: rgba(255, 165, 0, 0.9);
-  text-shadow: 0 0 10px rgba(255, 165, 0, 0.4);
-  text-align: center;
-  line-height: 1.2;
-  margin-bottom: var(--spacing-xs);
-}
-
-.meter-label {
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: rgba(255, 165, 0, 0.7);
-}
-
-
-/* ===================================================================
-   PERIHELION-SPECIFIC ANIMATIONS
-   =================================================================== */
-
-@keyframes solar-flare {
-  0%, 100% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.large-knob::after {
-  content: '';
-  position: absolute;
-  top: -40px;
-  left: -40px;
-  right: -40px;
-  bottom: -40px;
-  background: radial-gradient(circle at 50% 50%,
-    transparent 40%,
-    rgba(255, 204, 0, 0.3) 45%,
-    transparent 50%);
-  border-radius: 50%;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition-medium);
-}
-
-.large-knob:hover::after {
-  animation: solar-flare 2s ease-in-out infinite;
-}
-
-/* Solar particles on hover */
-.solar-slider:hover .sun-icon {
-  animation: pulse-sun 1s ease-in-out infinite,
-             rotate 10s linear infinite;
-}
-
-/* Orbit slider glow on hover */
-.orbit-slider:hover {
-  filter: drop-shadow(0 0 30px rgba(255, 165, 0, 0.6));
-}
-
-/* Bias handle glow trail */
-.bias-handle:hover {
-  box-shadow: 0 0 35px var(--plugin-glow),
-              0 0 50px rgba(255, 204, 0, 0.5),
-              0 4px 20px rgba(0, 0, 0, 0.5);
-}
-
-.bias-handle::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 140%;
-  height: 140%;
-  background: radial-gradient(circle, rgba(255, 165, 0, 0.3), transparent 70%);
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity var(--transition-medium);
-}
-
-.bias-handle:hover::before {
-  opacity: 1;
-  animation: pulse-subtle 1.5s ease-in-out infinite;
+.slider-horizontal .slider-handle:active {
+  cursor: grabbing;
 }

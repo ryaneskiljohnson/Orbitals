@@ -10,7 +10,6 @@
 </head>
 <body>
     <div class="plugin-container perihelion-theme">
-        <!-- Header -->
         <header class="orbitals-header">
             <div class="orbitals-logo" title="NNAudio"></div>
             <h1 data-help-title="PERIHELION"
@@ -18,101 +17,62 @@
             <button class="help-toggle" title="Toggle contextual help"></button>
         </header>
 
-        <!-- Main Content -->
         <main class="plugin-main">
-            <!-- Background Canvas for Solar Animation -->
+            <!-- Particle Animation Canvas -->
             <canvas id="solarCanvas"></canvas>
-
-            <!-- Controls Area -->
-            <div class="controls-area">
+            
+            <div class="controls-layout">
                 <!-- Left: Orbit Slider -->
-                <div class="control-vertical-section control-orbit-section">
+                <div class="control-orbit">
                     <label class="control-label">ORBIT</label>
-                    <div class="slider-vertical-tall orbit-slider" id="orbitSlider" data-param="orbit"
+                    <div class="slider-vertical-tall" id="orbitSlider" data-param="orbit"
                          data-help-title="ORBIT"
                          data-help-description="Controls orbital eccentricity. Low values create circular orbits, high values create highly elliptical paths with varying velocity.">
-                        <div class="slider-fill"></div>
-                        <div class="slider-track">
-                            <div class="orbit-gradient"></div>
-                        </div>
-                        <div class="slider-handle">
-                            <div class="orbit-icon">○</div>
-                        </div>
+                        <div class="slider-track"></div>
+                        <div class="slider-handle"></div>
                     </div>
                     <div class="value-display" id="orbitValue">50%</div>
                 </div>
 
                 <!-- Center: Gravity Knob -->
-                <div class="control-center-section">
+                <div class="control-center">
                     <label class="control-label">GRAVITY</label>
-                    <div class="large-knob" id="gravityKnob" data-param="gravity"
+                    <div class="knob-large" id="gravityKnob" data-param="gravity"
                          data-help-title="GRAVITY"
                          data-help-description="Controls how tightly notes are pulled toward the solar point. Higher values create tighter orbits and more intense velocity shaping.">
                         <div class="knob-inner">
                             <div class="knob-indicator"></div>
-                            <div class="knob-rings"></div>
                         </div>
                     </div>
                     <div class="value-display large" id="gravityValue">50%</div>
                 </div>
 
                 <!-- Right: Solar Point Slider -->
-                <div class="control-vertical-section control-solar-section">
+                <div class="control-solar">
                     <label class="control-label">SOLAR POINT</label>
-                    <div class="slider-vertical-tall solar-slider" id="solarPointSlider" data-param="solarPoint"
+                    <div class="slider-vertical-tall" id="solarPointSlider" data-param="solarPoint"
                          data-help-title="SOLAR POINT"
                          data-help-description="Target velocity value (1-127) that notes are pulled toward. Acts as the gravitational center for velocity shaping.">
-                        <div class="slider-fill"></div>
-                        <div class="slider-track">
-                            <div class="velocity-heatmap"></div>
-                        </div>
-                        <div class="slider-handle">
-                            <div class="sun-icon">☀</div>
-                        </div>
+                        <div class="slider-track"></div>
+                        <div class="slider-handle"></div>
                     </div>
                     <div class="value-display" id="solarPointValue">64</div>
                 </div>
-
-                <!-- Bottom: Inner/Outer Bias -->
-                <div class="control-bias-section">
-                    <label class="control-label">INNER / OUTER BIAS</label>
-                    <div class="dual-slider" id="biasSlider" data-param="bias"
-                         data-help-title="INNER / OUTER BIAS"
-                         data-help-description="Rotates the orbital plane. Negative values favor notes below the solar point (inner orbit), positive values favor notes above (outer orbit).">
-                        <div class="bias-track">
-                            <div class="bias-gradient"></div>
-                        </div>
-                        <div class="bias-handle"></div>
-                        <div class="bias-labels">
-                            <span class="label-inner">INNER</span>
-                            <span class="label-center">CENTER</span>
-                            <span class="label-outer">OUTER</span>
-                        </div>
-                    </div>
-                    <div class="value-display" id="biasValue">0</div>
-                </div>
             </div>
 
-            <!-- Velocity Meters (Left Side) -->
-            <div class="velocity-meters"
-                 data-help-title="VELOCITY METERS"
-                 data-help-description="Real-time visualization of input and output velocity levels. Shows how Perihelion shapes incoming note velocities.">
-                <div class="meter-column">
-                    <label class="meter-label">INPUT</label>
-                    <div class="velocity-meter" id="inputMeter">
-                        <div class="meter-fill"></div>
-                    </div>
+            <!-- Bottom: Bias Slider -->
+            <div class="control-bias">
+                <label class="control-label">INNER / OUTER BIAS</label>
+                <div class="slider-horizontal" id="biasSlider" data-param="bias"
+                     data-help-title="INNER / OUTER BIAS"
+                     data-help-description="Rotates the orbital plane. Negative values favor notes below the solar point (inner orbit), positive values favor notes above (outer orbit).">
+                    <div class="slider-track"></div>
+                    <div class="slider-handle"></div>
                 </div>
-                <div class="meter-column">
-                    <label class="meter-label">OUTPUT</label>
-                    <div class="velocity-meter" id="outputMeter">
-                        <div class="meter-fill"></div>
-                    </div>
-                </div>
+                <div class="value-display" id="biasValue">0</div>
             </div>
         </main>
 
-        <!-- Footer -->
         <footer class="orbitals-footer">
             <button class="bypass-toggle" id="bypassToggle"
                     data-help-title="BYPASS"
@@ -126,12 +86,10 @@
             </button>
             <div class="info-display">
                 <span id="noteCount">Notes: 0</span>
-                <span id="cpuLoad">CPU: 0%</span>
             </div>
         </footer>
     </div>
 
-    <!-- Load shared libraries -->
     <script src="../../_Shared/UI/orbitals-animations.js"></script>
     <script src="../../_Shared/UI/orbitals-particles.js"></script>
     <script src="../../_Shared/UI/orbitals-components.js"></script>
