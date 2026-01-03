@@ -207,6 +207,10 @@ void PerihelionAudioProcessorEditor::loadAuthScreen()
             <p class="auth-status">Checking license...</p>
         </div>
     </div>
+    <script>
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+        document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
+    </script>
 </body>
 </html>)";
     

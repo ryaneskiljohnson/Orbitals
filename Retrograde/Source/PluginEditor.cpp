@@ -202,6 +202,10 @@ void RetrogradeAudioProcessorEditor::loadAuthScreen()
             <p class="auth-status">Checking license...</p>
         </div>
     </div>
+    <script>
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+        document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
+    </script>
 </body>
 </html>)";
     
@@ -274,7 +278,7 @@ bool RetrogradeAudioProcessorEditor::checkAuthorization()
     if (!product_list.isEmpty())
         expiration_date = juce::Time::fromISO8601(product_list[0]);
     
-    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("retrograde"));
+    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200008"));
     
     if (authorized != isAuthorized)
     {

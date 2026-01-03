@@ -159,6 +159,20 @@ void ApogeeAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
         }
     }
 
+    // Disable right-click context menu
+    juce::String disableRightClickScript = R"(<script>
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+        document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
+    </script>)";
+    
+    // Inject script before closing body tag
+    if (htmlContent.contains("</body>"))
+        htmlContent = htmlContent.replace("</body>", disableRightClickScript + "</body>");
+    else if (htmlContent.contains("</html>"))
+        htmlContent = htmlContent.replace("</html>", disableRightClickScript + "</html>");
+    else
+        htmlContent += disableRightClickScript;
+    
     // Load HTML using temporary file approach (avoids data URL encoding issues)
     auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
         .getChildFile("ApogeeUI_" + juce::String(juce::Time::currentTimeMillis()));
@@ -303,6 +317,10 @@ void ApogeeAudioProcessorEditor::loadAuthScreen()
             <p class="auth-status">Checking license...</p>
         </div>
     </div>
+    <script>
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+        document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
+    </script>
 </body>
 </html>)";
     

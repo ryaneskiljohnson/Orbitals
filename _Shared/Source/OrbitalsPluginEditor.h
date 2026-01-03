@@ -91,6 +91,20 @@ public:
             }
         }
         
+        // Disable right-click context menu
+        juce::String disableRightClickScript = R"(<script>
+            document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+            document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
+        </script>)";
+        
+        // Inject script before closing body tag
+        if (htmlContent.contains("</body>"))
+            htmlContent = htmlContent.replace("</body>", disableRightClickScript + "</body>");
+        else if (htmlContent.contains("</html>"))
+            htmlContent = htmlContent.replace("</html>", disableRightClickScript + "</html>");
+        else
+            htmlContent += disableRightClickScript;
+        
         return htmlContent;
     }
 };
