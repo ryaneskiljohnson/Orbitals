@@ -13,7 +13,7 @@
 
 //==============================================================================
 PerihelionAudioProcessorEditor::PerihelionAudioProcessorEditor (PerihelionAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+    : AudioProcessorEditor (&p), audioProcessor (p), m_auth_component("perihelion")
 {
     // Enable native title bar on the top-level window (for standalone builds)
     if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
@@ -21,6 +21,9 @@ PerihelionAudioProcessorEditor::PerihelionAudioProcessorEditor (PerihelionAudioP
 
     setSize (1200, 750);
     setResizable (false, false);
+    
+    // Add authentication component (hidden by default, shown if not authorized)
+    addChildComponent(m_auth_component);
 
     auto options = juce::WebBrowserComponent::Options{}
         .withNativeIntegrationEnabled (true)
@@ -47,6 +50,9 @@ void PerihelionAudioProcessorEditor::paint (juce::Graphics& g)
 
 void PerihelionAudioProcessorEditor::resized()
 {
+    // Resize auth component to match editor bounds
+    m_auth_component.setBounds(getLocalBounds());
+    
     if (webView != nullptr)
         webView->setBounds (getLocalBounds());
 }

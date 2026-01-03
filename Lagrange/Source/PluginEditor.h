@@ -11,6 +11,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "../../_Shared/Authentication/HubAuthComponent.h"
 
 //==============================================================================
 class LagrangeAudioProcessorEditor  : public juce::AudioProcessorEditor
@@ -30,5 +31,7 @@ private:
     void loadHTMLFile (const juce::File& htmlFile);
     void handleJavaScriptMessage (const juce::var& message);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LagrangeAudioProcessorEditor)
+       // Authentication component
+    NNAudio::Authentication::HubAuthComponent m_auth_component;
+ JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LagrangeAudioProcessorEditor)
 };

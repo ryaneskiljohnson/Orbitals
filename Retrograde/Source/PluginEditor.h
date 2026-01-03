@@ -11,6 +11,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "../../_Shared/Authentication/HubAuthComponent.h"
 
 //==============================================================================
 class RetrogradeAudioProcessorEditor  : public juce::AudioProcessorEditor
@@ -29,5 +30,7 @@ private:
     void loadWebUI();
     void handleJavaScriptMessage (const juce::var& message);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RetrogradeAudioProcessorEditor)
+       // Authentication component
+    NNAudio::Authentication::HubAuthComponent m_auth_component;
+ JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RetrogradeAudioProcessorEditor)
 };

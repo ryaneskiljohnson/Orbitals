@@ -49,6 +49,11 @@ void TidalAudioProcessorEditor::paint (juce::Graphics& g)
 
 void TidalAudioProcessorEditor::resized()
 {
+    // Resize auth component to match editor bounds
+    m_auth_component.setBounds(getLocalBounds());
+    
+    // Resize web view
+{
     if (webView != nullptr)
         webView->setBounds (getLocalBounds());
 }

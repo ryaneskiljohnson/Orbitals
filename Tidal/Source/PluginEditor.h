@@ -11,6 +11,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "../../_Shared/Authentication/HubAuthComponent.h"
 
 //==============================================================================
 /**
@@ -31,6 +32,9 @@ private:
     
     // WebView for CSS-based UI
     std::unique_ptr<juce::WebBrowserComponent> webView;
+    
+    // Authentication component
+    NNAudio::Authentication::HubAuthComponent m_auth_component;
     
     // Helper methods
     void loadWebUI();

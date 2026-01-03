@@ -11,6 +11,8 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "../../_Shared/Authentication/HubAuthComponent.h"
+#include "../../_Shared/Authentication/HubAuthComponent.h"
 
 //==============================================================================
 /**
@@ -37,5 +39,7 @@ private:
     void loadHTMLFile (const juce::File& htmlFile);
     void handleJavaScriptMessage (const juce::var& message);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApogeeAudioProcessorEditor)
+       // Authentication component
+    NNAudio::Authentication::HubAuthComponent m_auth_component;
+ JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApogeeAudioProcessorEditor)
 };
