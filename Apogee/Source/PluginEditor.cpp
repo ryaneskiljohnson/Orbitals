@@ -23,6 +23,7 @@ ApogeeAudioProcessorEditor::ApogeeAudioProcessorEditor (ApogeeAudioProcessor& p)
     
     // Add authentication component (hidden by default, shown if not authorized)
     addChildComponent(m_auth_component);
+    m_auth_component.setAlwaysOnTop(true);  // Ensure it\'s always on top
 
     auto options = juce::WebBrowserComponent::Options{}
         .withNativeIntegrationEnabled (true)

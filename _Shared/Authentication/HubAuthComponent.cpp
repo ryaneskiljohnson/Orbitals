@@ -25,8 +25,9 @@ HubAuthComponent::HubAuthComponent(const juce::String& productId)
 {
   setInterceptsMouseClicks(true, false);
   setOpaque(true);
+  setVisible(false);     // Hidden by default until auth check completes
 
-  startTimer(1);
+  startTimer(1);  // Check immediately (1ms)
 }
 
 /**
@@ -103,13 +104,16 @@ void HubAuthComponent::checkAuthorization()
   {
     // plugin is authorized
     setVisible(false);
+    setAlwaysOnTop(false);
     startTimer(1000 * 60 * 15); // now re-check once every 15 minutes while the plugin is running
   }
   else
   {
-    toFront(true);
-    setVisible(true);
-    startTimer(5000);
+    // Not authorized - show overlay on top
+    setAlwaysOnTop(true);  // Ensure it's above webview
+    toFront(true);         // Bring to front
+    setVisible(true);      // Make visible
+    startTimer(5000);      // Re-check every 5 seconds
   }
 }
 
