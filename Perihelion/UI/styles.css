@@ -45,9 +45,15 @@
 }
 
 /* Remove dark background from body/html so background image shows through */
-.perihelion-theme,
 body.perihelion-theme,
-html.perihelion-theme {
+html.perihelion-theme,
+body .perihelion-theme,
+html .perihelion-theme {
+  background: transparent !important;
+}
+
+/* Also ensure plugin-main doesn't have dark background */
+.perihelion-theme .plugin-main {
   background: transparent !important;
 }
 
@@ -77,7 +83,7 @@ html.perihelion-theme {
   height: 100%;
   z-index: 1;
   pointer-events: none;
-  background: transparent;
+  background: transparent !important;
   margin: 0;
   padding: 0;
   border: none;
