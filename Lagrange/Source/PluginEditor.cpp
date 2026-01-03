@@ -35,6 +35,11 @@ LagrangeAudioProcessorEditor::LagrangeAudioProcessorEditor (LagrangeAudioProcess
     webView->setOpaque (false);
     addAndMakeVisible (webView.get());
     webView->setBounds (getLocalBounds());
+    
+    // Add authentication component AFTER webview (so it renders on top)
+    // Hidden by default, shown if not authorized
+    addChildComponent(m_auth_component);
+    m_auth_component.setAlwaysOnTop(true);  // Ensure it's always on top
 
     loadWebUI();
 }
