@@ -486,6 +486,22 @@
 
 
 /* ===================================================================
+   BYPASS TOGGLE (Override for Eclipse theme - use corona gold instead of black)
+   =================================================================== */
+
+.eclipse-theme .bypass-toggle:not(.active) .bypass-text {
+  color: var(--plugin-secondary) !important; /* Corona Gold instead of black */
+  text-shadow: 0 0 8px var(--plugin-glow),
+               0 0 12px rgba(251, 191, 36, 0.6);
+}
+
+.eclipse-theme .bypass-toggle:not(.active) .power-icon svg {
+  stroke: var(--plugin-secondary) !important; /* Corona Gold instead of black */
+  filter: drop-shadow(0 0 6px var(--plugin-glow))
+          drop-shadow(0 0 10px rgba(251, 191, 36, 0.5));
+}
+
+/* ===================================================================
    INFO DISPLAY (Enhanced Contrast)
    =================================================================== */
 

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenith - Velocity Expander</title>
+    
+    <link rel="stylesheet" href="../../_Shared/UI/orbitals-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container zenith-theme">
+        <header class="orbitals-header">
+            <div class="orbitals-logo" title="NNAudio"></div>
+            <h1 data-help-title="ZENITH"
+                data-help-description="Velocity Expander - Amplifies MIDI velocity towards maximum values. Creates more expressive and dynamic performances by expanding the dynamic range of your playing.">ZENITH</h1>
+            <button class="help-toggle" title="Toggle contextual help"></button>
+        </header>
+
+        <main class="plugin-main">
+            <!-- Visualization Canvas -->
+            <canvas id="zenithCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: rgba(56, 189, 248, 0.2);"></canvas>
+            
+            <div class="controls-layout">
+                <!-- Top: Threshold Slider -->
+                <div class="control-threshold">
+                    <label class="control-label">THRESHOLD</label>
+                    <div class="slider-horizontal" id="thresholdSlider" data-param="threshold"
+                         data-help-title="THRESHOLD"
+                         data-help-description="Sets the velocity threshold. Only notes above this value will be expanded. Range: 0-127">
+                        <div class="slider-track"></div>
+                        <div class="slider-handle"></div>
+                    </div>
+                    <div class="value-display" id="thresholdValue">64</div>
+                </div>
+
+                <!-- Left: Expansion Slider -->
+                <div class="control-expansion">
+                    <label class="control-label">EXPANSION</label>
+                    <div class="slider-vertical-tall" id="expansionSlider" data-param="expansion"
+                         data-help-title="EXPANSION"
+                         data-help-description="Controls the amount of velocity expansion applied. Higher values push velocities closer to the ceiling.">
+                        <div class="slider-track"></div>
+                        <div class="slider-handle"></div>
+                    </div>
+                    <div class="value-display" id="expansionValue">50%</div>
+                </div>
+
+                <!-- Right: Curve Slider -->
+                <div class="control-curve">
+                    <label class="control-label">CURVE</label>
+                    <div class="slider-vertical-tall" id="curveSlider" data-param="curve"
+                         data-help-title="CURVE"
+                         data-help-description="Shapes the expansion curve. Low values create softer expansion, high values create more aggressive expansion.">
+                        <div class="slider-track"></div>
+                        <div class="slider-handle"></div>
+                    </div>
+                    <div class="value-display" id="curveValue">50%</div>
+                </div>
+
+                <!-- Bottom: Ceiling Slider -->
+                <div class="control-ceiling">
+                    <label class="control-label">CEILING</label>
+                    <div class="slider-horizontal" id="ceilingSlider" data-param="ceiling"
+                         data-help-title="CEILING"
+                         data-help-description="Sets the maximum velocity limit. Expanded velocities will not exceed this value. Range: 0-127">
+                        <div class="slider-track"></div>
+                        <div class="slider-handle"></div>
+                    </div>
+                    <div class="value-display" id="ceilingValue">127</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="orbitals-footer">
+            <button class="bypass-toggle" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Disables all processing and passes MIDI through unaffected. Use to A/B compare or temporarily disable the effect.">
+                <span class="power-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2v10M18 6a9 9 0 1 1-12 0"/>
+                    </svg>
+                </span>
+                <span class="bypass-text">ON</span>
+            </button>
+            <div class="info-display">
+                <span id="noteCount">Notes: 0</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../../_Shared/UI/orbitals-animations.js"></script>
+    <script src="../../_Shared/UI/orbitals-particles.js"></script>
+    <script src="../../_Shared/UI/orbitals-components.js"></script>
+    
+    <script src="app.js"></script>
+</body>
+</html>

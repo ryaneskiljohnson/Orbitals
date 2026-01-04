@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    Eclipse - Velocity Masking
+    Zenith - Timing Stabilizer
     MIDI FX Plugin Editor Implementation
 
   ==============================================================================
@@ -9,10 +9,9 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "../../_Shared/Source/OrbitalsPluginEditor.h"
 
 //==============================================================================
-EclipseAudioProcessorEditor::EclipseAudioProcessorEditor (EclipseAudioProcessor& p)
+ZenithAudioProcessorEditor::ZenithAudioProcessorEditor (ZenithAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
     // Enable native title bar on the top-level window (for standalone builds)
@@ -49,33 +48,143 @@ EclipseAudioProcessorEditor::EclipseAudioProcessorEditor (EclipseAudioProcessor&
     }
 }
 
-EclipseAudioProcessorEditor::~EclipseAudioProcessorEditor()
+ZenithAudioProcessorEditor::~ZenithAudioProcessorEditor()
 {
 }
 
-void EclipseAudioProcessorEditor::paint (juce::Graphics& g)
+void ZenithAudioProcessorEditor::paint (juce::Graphics& g)
 {
     g.fillAll (juce::Colour (0xff12121a));
 }
 
-void EclipseAudioProcessorEditor::resized()
+void ZenithAudioProcessorEditor::resized()
 {
     if (webView != nullptr)
         webView->setBounds (getLocalBounds());
 }
 
-void EclipseAudioProcessorEditor::loadWebUI()
+void ZenithAudioProcessorEditor::loadWebUI()
 {
-    auto htmlContent = OrbitalsEditorHelpers::loadPluginHTML("Eclipse");
-    if (htmlContent.isNotEmpty())
+    // Find UI files relative to plugin binary
+    auto htmlFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+        .getParentDirectory()
+        .getChildFile("Resources")
+        .getChildFile("index.html");
+
+    // Fallback: try development path
+    if (!htmlFile.existsAsFile())
     {
-            // Load HTML using temporary file approach (avoids data URL encoding issues)
+        auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+        htmlFile = projectRoot.getChildFile ("Zenith").getChildFile ("UI").getChildFile ("index.html");
+    }
+
+    if (htmlFile.existsAsFile())
+    {
+        loadHTMLFile(htmlFile);
+    }
+    else
+    {
+        DBG ("Could not find index.html");
+    }
+}
+
+void ZenithAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
+{
+    auto htmlContent = htmlFile.loadFileAsString();
+    auto uiDir = htmlFile.getParentDirectory();
+    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+    auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
+
+    // Inline CSS
+    auto cssFile = uiDir.getChildFile ("styles.css");
+    if (cssFile.existsAsFile())
+    {
+        auto cssContent = cssFile.loadFileAsString();
+        htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"styles.css\">",
+                                           "<style>" + cssContent + "</style>");
+    }
+
+    auto designSystemFile = sharedDir.getChildFile ("orbitals-design-system.css");
+    if (designSystemFile.existsAsFile())
+    {
+        auto designSystemContent = designSystemFile.loadFileAsString();
+        
+        // Replace logo image path with relative path for temp directory
+        // Handle both single and double quotes
+        juce::String logoPattern = "../../_Shared/Assets/logos/nnaudio-logo.png";
+        juce::String logoOldPattern1 = "url('" + logoPattern + "')";
+        juce::String logoOldPattern2 = "url(\"" + logoPattern + "\")";
+        juce::String logoNewPattern = "url('nnaudio-logo.png')";
+        designSystemContent = designSystemContent.replace (logoOldPattern1, logoNewPattern);
+        designSystemContent = designSystemContent.replace (logoOldPattern2, logoNewPattern);
+        
+        htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"../../_Shared/UI/orbitals-design-system.css\">",
+                                           "<style>" + designSystemContent + "</style>");
+    }
+
+    // Inline JavaScript
+    auto jsFile = uiDir.getChildFile ("app.js");
+    if (jsFile.existsAsFile())
+    {
+        auto jsContent = jsFile.loadFileAsString();
+        htmlContent = htmlContent.replace ("<script src=\"app.js\"></script>",
+                                           "<script>" + jsContent + "</script>");
+    }
+
+    auto animationsFile = sharedDir.getChildFile ("orbitals-animations.js");
+    if (animationsFile.existsAsFile())
+    {
+        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-animations.js\"></script>",
+                                           "<script>" + animationsFile.loadFileAsString() + "</script>");
+    }
+
+    auto particlesFile = sharedDir.getChildFile ("orbitals-particles.js");
+    if (particlesFile.existsAsFile())
+    {
+        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-particles.js\"></script>",
+                                           "<script>" + particlesFile.loadFileAsString() + "</script>");
+    }
+
+    auto componentsFile = sharedDir.getChildFile ("orbitals-components.js");
+    if (componentsFile.existsAsFile())
+    {
+        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-components.js\"></script>",
+                                           "<script>" + componentsFile.loadFileAsString() + "</script>");
+    }
+
+    // Handle background image
+    auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/zenith-background.png");
+    if (backgroundImage.existsAsFile())
+    {
+        juce::MemoryBlock imageData;
+        if (backgroundImage.loadFileAsData(imageData))
+        {
+            juce::String base64 = juce::Base64::toBase64(imageData.getData(), imageData.getSize());
+            htmlContent = htmlContent.replace("../../_Shared/Assets/backgrounds/zenith-background.png", 
+                                            "data:image/png;base64," + base64);
+        }
+    }
+
+    // Disable right-click context menu
+    juce::String disableRightClickScript = R"(<script>
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+        document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
+    </script>)";
+    
+    // Inject script before closing body tag
+    if (htmlContent.contains("</body>"))
+        htmlContent = htmlContent.replace("</body>", disableRightClickScript + "</body>");
+    else if (htmlContent.contains("</html>"))
+        htmlContent = htmlContent.replace("</html>", disableRightClickScript + "</html>");
+    else
+        htmlContent += disableRightClickScript;
+    
+    // Load HTML using temporary file approach (avoids data URL encoding issues)
     auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
-        .getChildFile("EclipseUI_" + juce::String(juce::Time::currentTimeMillis()));
+        .getChildFile("ZenithUI_" + juce::String(juce::Time::currentTimeMillis()));
     tempDir.createDirectory();
     
     // Copy logo image to temp directory if it exists
-    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
     auto logosDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("logos");
     auto logoFile = logosDir.getChildFile ("nnaudio-logo.png");
     if (logoFile.existsAsFile())
@@ -90,15 +199,9 @@ void EclipseAudioProcessorEditor::loadWebUI()
     auto filePath = tempFile.getFullPathName().replace(" ", "%20");
     juce::String fileURL = "file://" + filePath;
     webView->goToURL(fileURL);
-    }
 }
 
-void EclipseAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
-{
-    // Not used - using helper instead
-}
-
-void EclipseAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
+void ZenithAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
 {
     if (!message.isObject())
         return;
@@ -114,53 +217,25 @@ void EclipseAudioProcessorEditor::handleJavaScriptMessage (const juce::var& mess
         auto param = obj->getProperty("parameter").toString();
         auto value = obj->getProperty("value");
 
-        if (param == "threshold")
+        auto* p = audioProcessor.parameters.getParameter(param);
+        if (p != nullptr)
         {
-            auto* p = audioProcessor.parameters.getParameter(EclipseAudioProcessor::PARAM_THRESHOLD);
-            if (p != nullptr)
-                p->setValueNotifyingHost((int)value / 127.0f);
-        }
-        else if (param == "shadowMin")
-        {
-            auto* p = audioProcessor.parameters.getParameter(EclipseAudioProcessor::PARAM_SHADOW_MIN);
-            if (p != nullptr)
-                p->setValueNotifyingHost((float)value / 127.0f);
-        }
-        else if (param == "shadowMax")
-        {
-            auto* p = audioProcessor.parameters.getParameter(EclipseAudioProcessor::PARAM_SHADOW_MAX);
-            if (p != nullptr)
-                p->setValueNotifyingHost((float)value / 127.0f);
-        }
-        else if (param == "umbra")
-        {
-            auto* p = audioProcessor.parameters.getParameter(EclipseAudioProcessor::PARAM_UMBRA);
-            if (p != nullptr)
+            if (param == "expansion")
                 p->setValueNotifyingHost((float)value / 100.0f);
-        }
-        else if (param == "penumbra")
-        {
-            auto* p = audioProcessor.parameters.getParameter(EclipseAudioProcessor::PARAM_PENUMBRA);
-            if (p != nullptr)
+            else if (param == "threshold")
+                p->setValueNotifyingHost((float)value / 127.0f);
+            else if (param == "ceiling")
+                p->setValueNotifyingHost((float)value / 127.0f);
+            else if (param == "curve")
                 p->setValueNotifyingHost((float)value / 100.0f);
-        }
-        else if (param == "eclipseMode")
-        {
-            auto* p = audioProcessor.parameters.getParameter(EclipseAudioProcessor::PARAM_ECLIPSE_MODE);
-            if (p != nullptr)
-                p->setValueNotifyingHost((bool)value ? 1.0f : 0.0f);
-        }
-        else if (param == "bypass")
-        {
-            auto* p = audioProcessor.parameters.getParameter(EclipseAudioProcessor::PARAM_BYPASS);
-            if (p != nullptr)
+            else if (param == "bypass")
                 p->setValueNotifyingHost((float)value);
         }
     }
 }
 
 //==============================================================================
-void EclipseAudioProcessorEditor::loadAuthScreen()
+void ZenithAudioProcessorEditor::loadAuthScreen()
 {
     // Create auth HTML content with background image
     juce::String authHTML = R"(<!DOCTYPE html>
@@ -168,7 +243,7 @@ void EclipseAudioProcessorEditor::loadAuthScreen()
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eclipse - Authentication Required</title>
+    <title>Zenith - Authentication Required</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
@@ -232,7 +307,7 @@ void EclipseAudioProcessorEditor::loadAuthScreen()
             <img src="PLACEHOLDER_LOGO" alt="NNAudio Logo">
         </div>
         <div class="text-content">
-            <h1 class="auth-title">ECLIPSE</h1>
+            <h1 class="auth-title">ZENITH</h1>
             <p class="auth-message">
                 Your plugin's authentication needs to be refreshed.<br><br>
                 Please launch the NNAudio Access app to continue.
@@ -249,7 +324,7 @@ void EclipseAudioProcessorEditor::loadAuthScreen()
     
     // Load and inline background image as base64
     auto projectRoot = juce::File("/Users/rjmacbookpro/Development/Orbitals");
-    auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/eclipse-background.png");
+    auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/zenith-background.png");
     
     if (backgroundImage.existsAsFile())
     {
@@ -288,7 +363,7 @@ void EclipseAudioProcessorEditor::loadAuthScreen()
     
     // Load auth HTML using temporary file approach
     auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
-        .getChildFile("EclipseAuth_" + juce::String(juce::Time::currentTimeMillis()));
+        .getChildFile("ZenithAuth_" + juce::String(juce::Time::currentTimeMillis()));
     tempDir.createDirectory();
     
     auto tempFile = tempDir.getChildFile("auth.html");
@@ -300,7 +375,7 @@ void EclipseAudioProcessorEditor::loadAuthScreen()
 }
 
 //==============================================================================
-bool EclipseAudioProcessorEditor::checkAuthorization()
+bool ZenithAudioProcessorEditor::checkAuthorization()
 {
     const auto decrypted_text = loadAndDecryptLicenseFile();
     
@@ -316,7 +391,7 @@ bool EclipseAudioProcessorEditor::checkAuthorization()
     if (!product_list.isEmpty())
         expiration_date = juce::Time::fromISO8601(product_list[0]);
     
-    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200005"));
+    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200004"));
     
     if (authorized != isAuthorized)
     {
@@ -337,7 +412,7 @@ bool EclipseAudioProcessorEditor::checkAuthorization()
 }
 
 //==============================================================================
-juce::File EclipseAudioProcessorEditor::getAuthFile()
+juce::File ZenithAudioProcessorEditor::getAuthFile()
 {
     juce::File app_data_dir;
 
@@ -358,7 +433,7 @@ juce::File EclipseAudioProcessorEditor::getAuthFile()
 }
 
 //==============================================================================
-juce::String EclipseAudioProcessorEditor::loadAndDecryptLicenseFile()
+juce::String ZenithAudioProcessorEditor::loadAndDecryptLicenseFile()
 {
     const auto auth_file = getAuthFile();
 
@@ -386,8 +461,29 @@ juce::String EclipseAudioProcessorEditor::loadAndDecryptLicenseFile()
 }
 
 //==============================================================================
-void EclipseAudioProcessorEditor::timerCallback()
+void ZenithAudioProcessorEditor::timerCallback()
 {
-    // Periodically check authorization status
-    checkAuthorization();
+    if (!isAuthorized)
+    {
+        bool newAuthState = checkAuthorization();
+        if (newAuthState != isAuthorized)
+        {
+            isAuthorized = newAuthState;
+            if (isAuthorized)
+            {
+                loadWebUI();
+                startTimer(1000 * 60 * 15);
+            }
+        }
+    }
+}
+
+void ZenithAudioProcessorEditor::notifyMIDINote(int noteNumber, int velocity)
+{
+    if (webView != nullptr && isAuthorized)
+    {
+        juce::String script = "if (window.receiveMessageFromJUCE) { window.receiveMessageFromJUCE({ type: 'midiNote', note: " 
+            + juce::String(noteNumber) + ", velocity: " + juce::String(velocity) + " }); }";
+        webView->emitEventIfBrowserIsVisible("eval", script);
+    }
 }

@@ -130,7 +130,9 @@ void EclipseAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     if (bypass)
         return;
 
-    int threshold = (int)*parameters.getRawParameterValue(PARAM_THRESHOLD);
+    // Threshold parameter (currently not used in processing, reserved for future use)
+    juce::ignoreUnused(*parameters.getRawParameterValue(PARAM_THRESHOLD));
+    
     float shadowMin = *parameters.getRawParameterValue(PARAM_SHADOW_MIN);
     float shadowMax = *parameters.getRawParameterValue(PARAM_SHADOW_MAX);
     float umbra = *parameters.getRawParameterValue(PARAM_UMBRA) / 100.0f;

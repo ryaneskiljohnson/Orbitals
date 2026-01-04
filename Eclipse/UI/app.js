@@ -523,7 +523,9 @@ function setupControls() {
   });
 });
   }
-}function sendToJUCE(param, value) {
+}
+
+function sendToJUCE(param, value) {
   if (window.chrome?.webview) {
     window.chrome.webview.postMessage({ type: 'parameterChange', parameter: param, value });
   }

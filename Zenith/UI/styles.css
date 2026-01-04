@@ -1,0 +1,384 @@
+/**
+ * @fileoverview Zenith - Velocity Expander Styles
+ * @module Zenith Styles
+ * 
+ * Sky-themed velocity expansion with clean, bright design
+ * Aspect Ratio: 16:10 (1200x750)
+ */
+
+/* ===================================================================
+   ZENITH THEME VARIABLES
+   =================================================================== */
+
+.zenith-theme {
+  --plugin-primary: #f0f9ff;      /* Sky Blue */
+  --plugin-secondary: #38bdf8;    /* Bright Cyan */
+  --plugin-accent: #0ea5e9;       /* Deep Sky Blue */
+  --plugin-glow: rgba(56, 189, 248, 0.6);
+  
+  /* Background image */
+  --plugin-background-image: url('../../_Shared/Assets/backgrounds/zenith-background.png');
+  --plugin-background-opacity: 0.7;
+}
+
+/* ===================================================================
+   BACKGROUND IMAGE - CENTERED AND STATIC
+   =================================================================== */
+
+/* Completely disable starfield animation and remove it */
+.zenith-theme.plugin-container::before {
+  display: none !important;
+}
+
+/* Force background image to be centered and static */
+.zenith-theme.plugin-container::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-image: var(--plugin-background-image) !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  opacity: var(--plugin-background-opacity, 0.7) !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  animation: none !important;
+  transform: none !important;
+  backface-visibility: visible !important;
+  box-sizing: border-box !important;
+}
+
+/* ===================================================================
+   CONTROLS LAYOUT
+   =================================================================== */
+
+.zenith-theme .plugin-main {
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Visualization Canvas - IN FRONT but clicks go through to controls */
+#zenithCanvas {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  z-index: 10 !important;
+  background: transparent !important;
+  display: block !important;
+  visibility: visible !important;
+  isolation: isolate !important;
+}
+
+.controls-layout {
+  position: relative;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  gap: var(--spacing-2xl);
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.controls-layout > * {
+  pointer-events: auto;
+  isolation: isolate;
+}
+
+/* Top: Threshold Slider */
+.control-threshold {
+  position: absolute;
+  left: 50%;
+  top: var(--spacing-lg);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: auto;
+  min-width: 400px;
+  max-width: 600px;
+  z-index: 100;
+}
+
+/* Left: Expansion Slider */
+.control-expansion {
+  position: absolute;
+  left: calc(25% - 125px);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+/* Right: Curve Slider */
+.control-curve {
+  position: absolute;
+  left: calc(75% + 125px);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+/* Bottom: Ceiling Slider */
+.control-ceiling {
+  position: absolute;
+  left: 50%;
+  bottom: var(--spacing-lg);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: auto;
+  min-width: 400px;
+  max-width: 600px;
+  z-index: 100;
+}
+
+/* ===================================================================
+   SLIDER & KNOB STYLING
+   =================================================================== */
+
+/* Vertical Slider Styling */
+.zenith-theme .slider-vertical-tall {
+  position: relative;
+  width: 40px;
+  height: 380px;
+  background: transparent;
+  cursor: ns-resize;
+  z-index: 100 !important;
+}
+
+.zenith-theme .slider-vertical-tall .slider-track {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 8px;
+  height: 100%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.6),
+              0 0 8px rgba(56, 189, 248, 0.2);
+  z-index: 1;
+}
+
+.zenith-theme .slider-vertical-tall .slider-handle {
+  position: absolute;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #38bdf8 50%, #0ea5e9 100%);
+  border: 2px solid var(--plugin-secondary);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 20px var(--plugin-glow),
+              0 4px 12px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+  transform: translateX(-50%);
+  z-index: 10;
+  transition: none;
+}
+
+.zenith-theme .slider-vertical-tall .slider-handle:hover {
+  box-shadow: 0 0 30px var(--plugin-glow),
+              0 6px 16px rgba(0, 0, 0, 0.6);
+}
+
+.zenith-theme .slider-vertical-tall .slider-handle:active {
+  cursor: grabbing;
+}
+
+/* Horizontal Slider Styling */
+.zenith-theme .slider-horizontal {
+  position: relative;
+  width: 400px;
+  height: 40px;
+  background: transparent;
+  cursor: ew-resize;
+  z-index: 100 !important;
+}
+
+.zenith-theme .slider-horizontal .slider-track {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.6),
+              0 0 8px rgba(56, 189, 248, 0.2);
+  z-index: 1;
+}
+
+.zenith-theme .slider-horizontal .slider-handle {
+  position: absolute;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #38bdf8 50%, #0ea5e9 100%);
+  border: 2px solid var(--plugin-secondary);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 20px var(--plugin-glow),
+              0 4px 12px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  transition: none;
+}
+
+.zenith-theme .slider-horizontal .slider-handle:hover {
+  box-shadow: 0 0 30px var(--plugin-glow),
+              0 6px 16px rgba(0, 0, 0, 0.6);
+}
+
+.zenith-theme .slider-horizontal .slider-handle:active {
+  cursor: grabbing;
+}
+
+/* Knob styling - Large size like other plugins */
+.zenith-theme .knob-large {
+  width: 170px;
+  height: 170px;
+  background: radial-gradient(circle at 30% 30%, rgba(240, 249, 255, 0.25), rgba(56, 189, 248, 0.15) 50%, rgba(14, 165, 233, 0.05) 80%, transparent),
+              rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  border: 4px solid rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 40px rgba(56, 189, 248, 0.3),
+              0 0 65px rgba(56, 189, 248, 0.25),
+              inset 0 0 30px rgba(240, 249, 255, 0.15),
+              0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.zenith-theme .knob-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 50%;
+}
+
+.zenith-theme .knob-indicator {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  width: 6px;
+  height: 40%;
+  background: linear-gradient(180deg, #f0f9ff 0%, #38bdf8 70%, #0ea5e9 100%);
+  border-radius: 3px;
+  transform-origin: center bottom;
+  box-shadow: 0 0 12px var(--plugin-glow),
+              0 0 20px rgba(56, 189, 248, 0.4);
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+}
+
+.zenith-theme .knob-large:hover {
+  transform: scale(1.08);
+  border-color: var(--plugin-secondary);
+  box-shadow: 0 0 50px rgba(56, 189, 248, 0.4),
+              0 0 80px rgba(56, 189, 248, 0.3),
+              inset 0 0 40px rgba(240, 249, 255, 0.2),
+              0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.zenith-theme .knob-large:active {
+  transform: scale(1.05);
+}
+
+/* ===================================================================
+   CONTROL LABELS WITH BACKGROUND MASKS
+   =================================================================== */
+
+.zenith-theme .control-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--plugin-secondary);
+  text-shadow: 0 0 8px var(--plugin-glow);
+  margin-bottom: var(--spacing-xs);
+  text-align: center;
+  
+  /* Semi-transparent background mask */
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ===================================================================
+   VALUE DISPLAYS WITH BACKGROUND MASKS
+   =================================================================== */
+
+.zenith-theme .value-display {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--plugin-secondary);
+  text-shadow: 0 0 8px var(--plugin-glow);
+  text-align: center;
+  min-width: 60px;
+  
+  /* Semi-transparent background mask */
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  padding: 4px var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.zenith-theme .value-display.large {
+  font-size: 18px;
+  min-width: 80px;
+  padding: var(--spacing-xs) var(--spacing-md);
+}
+
+/* ===================================================================
+   BYPASS TOGGLE (Override for Zenith theme)
+   =================================================================== */
+
+.zenith-theme .bypass-toggle:not(.active) .bypass-text {
+  color: var(--plugin-secondary) !important;
+  text-shadow: 0 0 8px var(--plugin-glow),
+               0 0 12px rgba(56, 189, 248, 0.6);
+}
+
+.zenith-theme .bypass-toggle:not(.active) .power-icon svg {
+  stroke: var(--plugin-secondary) !important;
+  filter: drop-shadow(0 0 6px var(--plugin-glow))
+          drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));
+}
+
+/* ===================================================================
+   INFO DISPLAY
+   =================================================================== */
+
+.zenith-theme .info-display {
+  color: var(--plugin-secondary);
+  text-shadow: 0 0 8px var(--plugin-glow);
+}

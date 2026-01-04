@@ -599,91 +599,25 @@ label {
    =================================================================== */
 
 .knob-medium,
+/* Knob base styles - plugins define their own dimensions and styling */
 .knob-large,
 .large-knob {
-  width: 80px;
-  height: 80px;
-  border-radius: var(--radius-full);
-  background: 
-    radial-gradient(circle at 30% 30%, 
-      rgba(255, 255, 255, 0.15), 
-      transparent 50%),
-    var(--glass-bg);
-  border: 3px solid var(--glass-border);
-  box-shadow: 
-    var(--shadow-md),
-    inset 0 2px 4px rgba(255, 255, 255, 0.1),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.5);
   position: relative;
   cursor: grab;
-  transition: all var(--transition-fast);
   user-select: none;
-}
-
-.knob-large,
-.large-knob {
-  width: 120px;
-  height: 120px;
-  border-width: 4px;
+  -webkit-user-select: none;
 }
 
 .knob-medium:hover,
 .knob-large:hover,
 .large-knob:hover {
-  border-color: var(--plugin-primary, var(--orbit-cyan));
-  box-shadow: 
-    var(--shadow-glow),
-    0 0 30px var(--plugin-glow),
-    inset 0 2px 4px rgba(255, 255, 255, 0.2);
-  transform: scale(1.02);
+  cursor: grab;
 }
 
 .knob-medium:active,
 .knob-large:active,
 .large-knob:active {
   cursor: grabbing;
-  transform: scale(0.98);
-  box-shadow: 
-    var(--shadow-glow),
-    inset 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Knob indicator line */
-.knob-medium::after,
-.knob-large::after,
-.large-knob::after {
-  content: '';
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  width: 4px;
-  height: 40%;
-  background: linear-gradient(to bottom, 
-    white,
-    var(--plugin-primary, var(--orbit-cyan)));
-  border-radius: var(--radius-full);
-  transform-origin: bottom center;
-  box-shadow: 
-    0 0 12px var(--plugin-primary, var(--orbit-cyan)),
-    0 0 6px white;
-  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
-}
-
-/* Knob center dot */
-.knob-medium::before,
-.knob-large::before,
-.large-knob::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  background: var(--plugin-primary, var(--orbit-cyan));
-  border-radius: 50%;
-  box-shadow: 0 0 8px var(--plugin-primary, var(--orbit-cyan));
-  z-index: 2;
 }
 
 /* ===================================================================
@@ -693,10 +627,14 @@ label {
 /* Base slider styles - width/height removed: Plugins define their own dimensions
    This was conflicting with plugin-specific slider sizes (e.g., Lagrange 56px vs shared 40px) */
 .slider-vertical,
+/* Slider base - plugins define their own dimensions and styling */
 .slider-vertical-tall,
 .slider-horizontal {
   position: relative;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: auto;
 }
 
 /* Slider track - REMOVED: Plugins define their own ::before fills
@@ -721,36 +659,17 @@ label {
   box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
 }
 
-/* Slider handle (will be created by JS but style it here) */
+/* Slider handle base - plugins define their own dimensions and styling */
 .slider-handle {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  background: 
-    radial-gradient(circle at 30% 30%,
-      rgba(255, 255, 255, 0.8),
-      var(--plugin-primary, var(--orbit-cyan)));
-  border: 3px solid rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
-  box-shadow: 
-    0 0 15px var(--plugin-glow),
-    0 2px 8px rgba(0, 0, 0, 0.4),
-    inset 0 1px 2px rgba(255, 255, 255, 0.5);
   cursor: grab;
-  transition: all var(--transition-fast);
-  z-index: 10;
-}
-
-.slider-handle:hover {
-  transform: scale(1.15);
-  box-shadow: 
-    0 0 25px var(--plugin-glow),
-    0 4px 12px rgba(0, 0, 0, 0.5);
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: auto;
 }
 
 .slider-handle:active {
   cursor: grabbing;
-  transform: scale(1.05);
 }
 
 /* ===================================================================
@@ -1358,14 +1277,7 @@ button:hover::before {
 }
 
 /* All sliders get enhanced hover */
-[class*="slider"]:not(.slider-handle):not(.slider-track) {
-  transition: all var(--transition-medium);
-}
-
-[class*="slider"]:hover:not(.slider-handle):not(.slider-track) {
-  transform: scale(1.02);
-  filter: brightness(1.08);
-}
+/* Removed generic slider hover effects - plugins define their own */
 
 /* Hide track line on hover for horizontal sliders */
 .slider-horizontal:hover::before {
