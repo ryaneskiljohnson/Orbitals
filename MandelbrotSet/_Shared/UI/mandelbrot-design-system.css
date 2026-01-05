@@ -1,0 +1,797 @@
+/**
+ * @fileoverview Mandelbrot Set Design System - Shared CSS Variables and Base Styles
+ * @module Mandelbrot Set Design System
+ * 
+ * Master stylesheet for the Mandelbrot Set Audio FX plugin line.
+ * Provides unified branding, color system, typography, and reusable components.
+ * Each plugin has unique colors but shared design language.
+ */
+
+/* ===================================================================
+   GOOGLE FONTS IMPORT - RAJDHANI
+   =================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
+
+/* ===================================================================
+   CSS VARIABLES - MANDELBROT SET DESIGN SYSTEM
+   =================================================================== */
+
+:root {
+  /* === BASE PALETTE - QUANTUM THEME === */
+  --quantum-black: #05050a;
+  --fractal-purple: #8b3dff;
+  --quantum-cyan: #00e5ff;
+  --energy-pink: #ff0080;
+  --planck-white: #f0f0f8;
+  --void-deep: #0d0d15;
+  --particle-gold: #ffd700;
+  
+  /* === SPACING SYSTEM === */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  
+  /* === BORDER RADIUS === */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  
+  /* === GLASSMORPHISM === */
+  --glass-bg: rgba(13, 13, 21, 0.7);
+  --glass-bg-light: rgba(13, 13, 21, 0.5);
+  --glass-bg-dark: rgba(13, 13, 21, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: blur(16px);
+  
+  /* === TYPOGRAPHY === */
+  --font-header: 'Rajdhani', 'Orbitron', 'Exo 2', sans-serif;
+  --font-body: 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'SF Mono', 'Monaco', 'Courier New', monospace;
+  
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-md: 15px;
+  --font-size-lg: 18px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 32px;
+  --font-size-3xl: 48px;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.8;
+  
+  /* === TRANSITIONS === */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-medium: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* === Z-INDEX LAYERS === */
+  --z-background: 0;
+  --z-canvas: 5;
+  --z-controls: 10;
+  --z-header: 50;
+  --z-modal: 100;
+  --z-tooltip: 200;
+}
+
+/* ===================================================================
+   PLUGIN-SPECIFIC COLOR OVERRIDES
+   =================================================================== */
+
+/* Singularity - Black Hole Compressor */
+.singularity-theme {
+  --plugin-primary: #8b3dff;
+  --plugin-secondary: #ff0080;
+  --plugin-accent: #00e5ff;
+  --plugin-glow: rgba(139, 61, 255, 0.5);
+}
+
+/* Fabric - Spacetime Reverb */
+.fabric-theme {
+  --plugin-primary: #00e5ff;
+  --plugin-secondary: #8b3dff;
+  --plugin-accent: #ffd700;
+  --plugin-glow: rgba(0, 229, 255, 0.5);
+}
+
+/* Entanglement - Quantum Delay */
+.entanglement-theme {
+  --plugin-primary: #ff0080;
+  --plugin-secondary: #00e5ff;
+  --plugin-accent: #8b3dff;
+  --plugin-glow: rgba(255, 0, 128, 0.5);
+}
+
+/* Planck - Quantum Compressor */
+.planck-theme {
+  --plugin-primary: #ffd700;
+  --plugin-secondary: #8b3dff;
+  --plugin-accent: #00e5ff;
+  --plugin-glow: rgba(255, 215, 0, 0.5);
+}
+
+/* Observer - Wavefunction Collapse Dynamic EQ */
+.observer-theme {
+  --plugin-primary: #00e5ff;
+  --plugin-secondary: #ffd700;
+  --plugin-accent: #ff0080;
+  --plugin-glow: rgba(0, 229, 255, 0.5);
+}
+
+/* Hadron - Particle Collision Distortion */
+.hadron-theme {
+  --plugin-primary: #ff0080;
+  --plugin-secondary: #ffd700;
+  --plugin-accent: #8b3dff;
+  --plugin-glow: rgba(255, 0, 128, 0.5);
+}
+
+/* Mandelbrot - Fractal Modulation */
+.mandelbrot-theme {
+  --plugin-primary: #8b3dff;
+  --plugin-secondary: #00e5ff;
+  --plugin-accent: #ff0080;
+  --plugin-glow: rgba(139, 61, 255, 0.5);
+}
+
+/* Quarks - Subatomic Granular Synthesis */
+.quarks-theme {
+  --plugin-primary: #ffd700;
+  --plugin-secondary: #ff0080;
+  --plugin-accent: #00e5ff;
+  --plugin-glow: rgba(255, 215, 0, 0.5);
+}
+
+/* Rabbithole - Quantum Descent Flanger */
+.rabbithole-theme {
+  --plugin-primary: #8b3dff;
+  --plugin-secondary: #ff0080;
+  --plugin-accent: #ffd700;
+  --plugin-glow: rgba(139, 61, 255, 0.5);
+}
+
+/* ===================================================================
+   GLOBAL RESETS & BASE STYLES
+   =================================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 1200px;
+  height: 750px;
+  overflow: hidden;
+  font-family: var(--font-body);
+  background: var(--quantum-black);
+  color: var(--planck-white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+}
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* ===================================================================
+   PLUGIN CONTAINER
+   =================================================================== */
+
+.plugin-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--quantum-black);
+  overflow: hidden;
+}
+
+.plugin-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: var(--plugin-background-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: var(--plugin-background-opacity, 0.4);
+  z-index: var(--z-background);
+  pointer-events: none;
+}
+
+/* ===================================================================
+   HEADER
+   =================================================================== */
+
+.mandelbrot-header {
+  display: grid;
+  grid-template-columns: 120px 1fr 120px;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  min-height: 64px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--glass-border);
+  z-index: var(--z-header);
+  position: relative;
+}
+
+.mandelbrot-header h1 {
+  font-family: var(--font-header);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--plugin-primary);
+  text-shadow: 0 0 20px var(--plugin-glow), 0 0 40px var(--plugin-glow);
+  margin: 0;
+  cursor: help;
+  transition: all var(--transition-medium);
+  position: relative;
+}
+
+.mandelbrot-header h1:hover {
+  transform: scale(1.05);
+  text-shadow: 0 0 30px var(--plugin-glow), 0 0 60px var(--plugin-glow);
+  letter-spacing: 6px;
+}
+
+.mandelbrot-logo {
+  width: 80px;
+  height: 40px;
+  background-image: url('../../_Shared/Assets/logos/nnaudio-logo.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.9;
+  transition: opacity var(--transition-fast);
+}
+
+.mandelbrot-logo:hover {
+  opacity: 1;
+}
+
+.help-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--glass-bg-light);
+  border: 2px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  justify-self: end;
+  position: relative;
+  overflow: hidden;
+}
+
+.help-toggle::before {
+  content: '?';
+  font-family: var(--font-header);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--planck-white);
+  transition: all var(--transition-fast);
+  position: relative;
+  z-index: 1;
+}
+
+.help-toggle::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, var(--plugin-primary), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.help-toggle:hover {
+  border-color: var(--plugin-primary);
+  box-shadow: 0 0 15px var(--plugin-glow), 0 0 30px var(--plugin-glow);
+  transform: scale(1.1) rotate(5deg);
+}
+
+.help-toggle:hover::before {
+  transform: scale(1.1);
+  text-shadow: 0 0 10px var(--plugin-glow);
+}
+
+.help-toggle:hover::after {
+  opacity: 0.15;
+}
+
+.help-toggle:active {
+  transform: scale(0.95) rotate(-5deg);
+}
+
+.help-toggle.active {
+  background: var(--plugin-primary);
+  border-color: var(--plugin-primary);
+  box-shadow: 0 0 25px var(--plugin-glow);
+}
+
+.help-toggle.active::before {
+  color: var(--quantum-black);
+}
+
+/* ===================================================================
+   MAIN CONTENT AREA
+   =================================================================== */
+
+.plugin-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  position: relative;
+  z-index: var(--z-controls);
+}
+
+/* ===================================================================
+   CONTROL LABELS
+   =================================================================== */
+
+.control-label {
+  font-family: var(--font-header);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--planck-white);
+  opacity: 0.8;
+  margin-bottom: var(--spacing-xs);
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.control-group:hover .control-label {
+  opacity: 1;
+  color: var(--plugin-primary);
+  text-shadow: 0 0 10px var(--plugin-glow);
+  transform: translateY(-2px);
+}
+
+.control-group {
+  transition: transform var(--transition-fast);
+}
+
+.control-group:active {
+  transform: scale(0.98);
+}
+
+/* ===================================================================
+   VALUE DISPLAYS
+   =================================================================== */
+
+.value-display {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--plugin-primary);
+  text-align: center;
+  margin-top: var(--spacing-xs);
+  text-shadow: 0 0 8px var(--plugin-glow), 0 0 16px var(--plugin-glow);
+  transition: all var(--transition-fast);
+  position: relative;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+}
+
+.value-display::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--plugin-primary);
+  opacity: 0;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--transition-fast);
+  z-index: -1;
+}
+
+.control-group:hover .value-display {
+  transform: scale(1.05);
+  text-shadow: 0 0 12px var(--plugin-glow), 0 0 24px var(--plugin-glow);
+}
+
+.control-group:hover .value-display::before {
+  opacity: 0.1;
+}
+
+/* ===================================================================
+   KNOB BASE STYLES
+   =================================================================== */
+
+.knob {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-full);
+  background: var(--glass-bg);
+  border: 3px solid var(--glass-border);
+  position: relative;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center;
+}
+
+.knob:hover {
+  border-color: var(--plugin-primary);
+  box-shadow: 0 0 20px var(--plugin-glow), 0 0 40px var(--plugin-glow);
+  transform: scale(1.05);
+}
+
+.knob:active {
+  transform: scale(0.98);
+  box-shadow: 0 0 30px var(--plugin-glow), 0 0 60px var(--plugin-glow);
+}
+
+.knob-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.05), transparent);
+}
+
+.knob-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  background: radial-gradient(circle at center, transparent 40%, var(--plugin-primary) 100%);
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.knob:hover .knob-inner::before {
+  opacity: 0.1;
+}
+
+.knob-indicator {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 4px;
+  height: 30px;
+  background: linear-gradient(180deg, var(--plugin-primary), var(--plugin-accent));
+  border-radius: var(--radius-sm);
+  transform-origin: center 32px;
+  transform: translateX(-50%) rotate(-135deg);
+  box-shadow: 0 0 10px var(--plugin-glow), 0 0 20px var(--plugin-glow);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  will-change: transform;
+}
+
+.knob:hover .knob-indicator {
+  box-shadow: 0 0 15px var(--plugin-glow), 0 0 30px var(--plugin-glow);
+  filter: brightness(1.2);
+}
+
+.knob:active .knob-indicator {
+  box-shadow: 0 0 20px var(--plugin-glow), 0 0 40px var(--plugin-glow);
+}
+
+/* ===================================================================
+   SLIDER BASE STYLES
+   =================================================================== */
+
+.slider {
+  width: 200px;
+  height: 8px;
+  background: var(--glass-bg);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  position: relative;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.slider:hover {
+  border-color: var(--plugin-primary);
+  box-shadow: 0 0 15px var(--plugin-glow), 0 0 30px var(--plugin-glow);
+  transform: scaleY(1.2);
+}
+
+.slider:active {
+  box-shadow: 0 0 25px var(--plugin-glow), 0 0 50px var(--plugin-glow);
+}
+
+.slider-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--plugin-primary), var(--plugin-accent));
+  border-radius: var(--radius-full);
+  transition: width var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 0 10px var(--plugin-glow);
+  position: relative;
+  overflow: hidden;
+}
+
+.slider-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.slider:hover .slider-fill {
+  box-shadow: 0 0 15px var(--plugin-glow), 0 0 30px var(--plugin-glow);
+}
+
+.slider-handle {
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.9));
+  border: 3px solid var(--plugin-primary);
+  border-radius: var(--radius-full);
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  transition: all var(--transition-fast);
+  box-shadow: 0 0 15px var(--plugin-glow), 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.slider-handle:hover {
+  transform: translate(-50%, -50%) scale(1.15);
+  box-shadow: 0 0 25px var(--plugin-glow), 0 0 50px var(--plugin-glow), 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.slider-handle:active {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.05);
+  box-shadow: 0 0 30px var(--plugin-glow), 0 0 60px var(--plugin-glow);
+}
+
+/* ===================================================================
+   PAGE LOAD ANIMATIONS
+   =================================================================== */
+
+.plugin-container {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.mandelbrot-header {
+  animation: slideUp 0.8s ease-out;
+}
+
+.control-group {
+  animation: fadeIn 0.8s ease-out backwards;
+}
+
+.control-group:nth-child(1) { animation-delay: 0.1s; }
+.control-group:nth-child(2) { animation-delay: 0.2s; }
+.control-group:nth-child(3) { animation-delay: 0.3s; }
+.control-group:nth-child(4) { animation-delay: 0.4s; }
+.control-group:nth-child(5) { animation-delay: 0.5s; }
+
+.mandelbrot-footer {
+  animation: slideUp 1s ease-out 0.6s backwards;
+}
+
+/* ===================================================================
+   FOOTER
+   =================================================================== */
+
+.mandelbrot-footer {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  min-height: 56px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border-top: 1px solid var(--glass-border);
+  z-index: var(--z-header);
+  position: relative;
+}
+
+/* ===================================================================
+   ANIMATIONS
+   =================================================================== */
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 10px var(--plugin-glow);
+  }
+  50% {
+    box-shadow: 0 0 25px var(--plugin-glow), 0 0 50px var(--plugin-glow);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--plugin-glow), 0 0 40px var(--plugin-glow);
+  }
+  50% {
+    box-shadow: 0 0 30px var(--plugin-glow), 0 0 60px var(--plugin-glow);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  50%, 100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes rippleOut {
+  from {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* ===================================================================
+   CONTEXTUAL HELP TOOLTIPS
+   =================================================================== */
+
+.mandelbrot-tooltip {
+  position: fixed;
+  z-index: var(--z-tooltip);
+  max-width: 280px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(18, 18, 26, 0.98);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--plugin-primary, var(--quantum-cyan));
+  border-radius: var(--radius-md);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 20px var(--plugin-glow, rgba(0, 229, 255, 0.4));
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  color: var(--planck-white);
+  line-height: 1.5;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.mandelbrot-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mandelbrot-tooltip-title {
+  font-family: var(--font-header);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--plugin-primary, var(--quantum-cyan));
+  margin-bottom: var(--spacing-xs);
+  text-shadow: 0 0 8px var(--plugin-glow, rgba(0, 229, 255, 0.6));
+}
+
+.mandelbrot-tooltip-description {
+  color: rgba(232, 232, 240, 0.9);
+}
+
+/* Arrow pointer */
+.mandelbrot-tooltip::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 8px solid transparent;
+  border-bottom-color: var(--plugin-primary, var(--quantum-cyan));
+  top: -16px;
+}
+
+.mandelbrot-tooltip.tooltip-above::before {
+  top: auto;
+  bottom: -16px;
+  border-bottom-color: transparent;
+  border-top-color: var(--plugin-primary, var(--quantum-cyan));
+}

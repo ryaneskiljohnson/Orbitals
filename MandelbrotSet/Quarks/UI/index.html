@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quarks - Color Charge Gate</title>
+    <link rel="stylesheet" href="../../_Shared/UI/mandelbrot-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container quarks-theme">
+        <header class="mandelbrot-header">
+            <div class="mandelbrot-logo"></div>
+            <h1 data-help-title="QUARKS"
+                data-help-description="Color Charge Gate - Subatomic particles bound by strong nuclear force. Quantum chromodynamics-inspired noise gate with color charge confinement.">QUARKS</h1>
+            <button class="help-toggle" title="Toggle contextual help"></button>
+        </header>
+
+        <main class="plugin-main">
+            <canvas id="quarksCanvas"></canvas>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label class="control-label">STRONG FORCE</label>
+                    <div class="knob" id="thresholdKnob" data-param="threshold"
+                         data-help-title="STRONG FORCE"
+                         data-help-description="Strong nuclear force threshold. Below this, quarks are confined and signal is gated.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="thresholdValue">-40 dB</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">COLOR CHARGE</label>
+                    <div class="knob" id="ratioKnob" data-param="ratio"
+                         data-help-title="COLOR CHARGE"
+                         data-help-description="Quantum chromodynamic ratio. How much signal is attenuated when quarks are confined.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="ratioValue">2:1</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">BINDING</label>
+                    <div class="knob" id="attackKnob" data-param="attack"
+                         data-help-title="BINDING"
+                         data-help-description="Quark binding time. How fast the strong force binds particles together.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="attackValue">5 ms</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">DECAY</label>
+                    <div class="knob" id="releaseKnob" data-param="release"
+                         data-help-title="DECAY"
+                         data-help-description="Quark decay time. How fast particles decouple after signal drops.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="releaseValue">50 ms</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">CONFINEMENT</label>
+                    <div class="knob" id="rangeKnob" data-param="range"
+                         data-help-title="CONFINEMENT"
+                         data-help-description="Color confinement range. Maximum attenuation when gate is closed.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="rangeValue">60 dB</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mandelbrot-footer">
+            <button class="bypass-toggle active" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Breaks strong force. Quarks roam free without confinement.">
+                <span class="power-icon"><svg viewBox="0 0 24 24"><path d="M12 2v10M18 6a9 9 0 1 1-12 0"/></svg></span>
+                <span class="bypass-text">ON</span>
+            </button>
+            <div class="info-display"><span>Gate/Expander</span></div>
+        </footer>
+    </div>
+
+    <script src="../../_Shared/UI/mandelbrot-animations.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-particles.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-components.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

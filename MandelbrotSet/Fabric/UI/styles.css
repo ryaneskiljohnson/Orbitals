@@ -1,0 +1,124 @@
+/**
+ * @fileoverview Fabric - Spacetime Reverb Styles
+ * @module Fabric Styles
+ */
+
+:root {
+    --plugin-background-image: url('../../_Shared/Assets/backgrounds/fabric.png');
+    --plugin-background-opacity: 0.4;
+}
+
+.controls-reverb {
+    position: relative;
+    z-index: var(--z-controls);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-3xl);
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--spacing-xl) 0;
+}
+
+.control-row-top,
+.control-row-middle,
+.control-row-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-3xl);
+    width: 100%;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-width: 120px;
+}
+
+.large-knob {
+    width: 100px;
+    height: 100px;
+}
+
+.slider-container {
+    width: 300px;
+    margin: var(--spacing-md) 0;
+}
+
+.horizontal-slider {
+    width: 100%;
+    height: 8px;
+}
+
+#fabricCanvas {
+    width: 700px;
+    height: 700px;
+    opacity: 0.6;
+}
+
+.mandelbrot-footer {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    min-height: 56px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border-top: 1px solid var(--glass-border);
+    z-index: var(--z-header);
+}
+
+.bypass-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    background: var(--glass-bg-light);
+    border: 2px solid var(--glass-border);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    font-family: var(--font-header);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--planck-white);
+}
+
+.bypass-toggle:hover {
+    border-color: var(--plugin-primary);
+    box-shadow: 0 0 15px var(--plugin-glow);
+}
+
+.bypass-toggle.active {
+    background: var(--plugin-primary);
+    border-color: var(--plugin-primary);
+}
+
+.power-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.power-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.info-display {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--spacing-lg);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--planck-white);
+    opacity: 0.8;
+}

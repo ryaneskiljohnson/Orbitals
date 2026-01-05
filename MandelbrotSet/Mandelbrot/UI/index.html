@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandelbrot - Fractal Phaser</title>
+    <link rel="stylesheet" href="../../_Shared/UI/mandelbrot-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container mandelbrot-theme">
+        <header class="mandelbrot-header">
+            <div class="mandelbrot-logo"></div>
+            <h1 data-help-title="MANDELBROT"
+                data-help-description="Fractal Phaser - Infinite self-similar phase shifting. Zooms into fractal boundaries creating complex modulation patterns.">MANDELBROT</h1>
+            <button class="help-toggle" title="Toggle contextual help"></button>
+        </header>
+
+        <main class="plugin-main">
+            <canvas id="mandelbrotCanvas"></canvas>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label class="control-label">ZOOM</label>
+                    <div class="knob" id="rateKnob" data-param="rate"
+                         data-help-title="ZOOM"
+                         data-help-description="Fractal zoom rate. How fast we dive into self-similar patterns.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="rateValue">0.5 Hz</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">BOUNDARY</label>
+                    <div class="knob" id="depthKnob" data-param="depth"
+                         data-help-title="BOUNDARY"
+                         data-help-description="Fractal boundary depth. How deep into the set we explore.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="depthValue">50%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">SELF-SIMILARITY</label>
+                    <div class="knob" id="feedbackKnob" data-param="feedback"
+                         data-help-title="SELF-SIMILARITY"
+                         data-help-description="Fractal feedback. Patterns repeat at every scale.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="feedbackValue">30%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">ITERATIONS</label>
+                    <div class="knob" id="stagesKnob" data-param="stages"
+                         data-help-title="ITERATIONS"
+                         data-help-description="Fractal iteration count. Number of phaser stages in the recursive pattern.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="stagesValue">4</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">DIMENSION</label>
+                    <div class="knob" id="mixKnob" data-param="mix"
+                         data-help-title="DIMENSION"
+                         data-help-description="Fractal dimension. Blend between Euclidean and fractal space.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="mixValue">50%</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mandelbrot-footer">
+            <button class="bypass-toggle active" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Exits fractal space. Returns to Euclidean geometry.">
+                <span class="power-icon"><svg viewBox="0 0 24 24"><path d="M12 2v10M18 6a9 9 0 1 1-12 0"/></svg></span>
+                <span class="bypass-text">ON</span>
+            </button>
+            <div class="info-display"><span>Phaser</span></div>
+        </footer>
+    </div>
+
+    <script src="../../_Shared/UI/mandelbrot-animations.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-particles.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-components.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='utf-8'?>
+<JUCERPROJECT id="Plck1" name="Planck" projectType="audioplug" useAppConfig="0" addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1" version="1.0.0" companyName="NNAudio" companyCopyright="Copyright (c) 2026" companyWebsite="https://nnaud.io" companyEmail="info@nnaudio.com" cppLanguageStandard="17" pluginFormats="buildAU,buildVST3,buildStandalone" pluginCharacteristicsValue="pluginWantsMidiInput" pluginManufacturerCode="NNau" pluginCode="Plck" bundleIdentifier="com.nnaudio.planck">
+  <MAINGROUP id="Plck1" name="Planck">
+    <GROUP id="{D7F8A864-8ECA-4FE0-8FEC-20B87407D899}" name="Source">
+      <FILE id="PluginProcessor.h" name="PluginProcessor.h" compile="0" resource="0" file="Source/PluginProcessor.h" />
+      <FILE id="PluginProcessor.cpp" name="PluginProcessor.cpp" compile="1" resource="0" file="Source/PluginProcessor.cpp" />
+      <FILE id="PluginEditor.h" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h" />
+      <FILE id="PluginEditor.cpp" name="PluginEditor.cpp" compile="1" resource="0" file="Source/PluginEditor.cpp" />
+    <FILE id="HubAuthComponent_h" name="HubAuthComponent.h" compile="0" resource="0" file="../_Shared/Authentication/HubAuthComponent.h" /><FILE id="HubAuthComponent_cpp" name="HubAuthComponent.cpp" compile="1" resource="0" file="../_Shared/Authentication/HubAuthComponent.cpp" /></GROUP>
+    
+    <GROUP id="{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}" name="UI">
+      <FILE id="app_js" name="app.js" compile="0" resource="1" file="UI/app.js" />
+      <FILE id="index_html" name="index.html" compile="0" resource="1" file="UI/index.html" />
+      <FILE id="styles_css" name="styles.css" compile="0" resource="1" file="UI/styles.css" />
+    </GROUP>
+    <GROUP id="{B2C3D4E5-F6A7-8901-BCDE-F23456789012}" name="SharedAssets">
+      <FILE id="planck_bg" name="planck.png" compile="0" resource="1" file="../_Shared/Assets/backgrounds/planck.png" />
+    <FILE id="hub_auth_bg" name="hub_auth_background.png" compile="0" resource="1" file="../_Shared/Assets/auth/hub_auth_background.png" /><FILE id="hub_auth_logo" name="hub_auth_logo.png" compile="0" resource="1" file="../_Shared/Assets/auth/hub_auth_logo.png" /><FILE id="product_id" name="product_id.txt" compile="0" resource="1" file="product_id.txt" /></GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="1" useGlobalPath="0" /><MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
+  </MODULES>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0" />
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Planck" osxSDK="default" osxCompatibility="10.15 osxLatest" osxArchitectures="arm64;x86_64" cppLanguageStandard="17" cppLibType="0" optimisation="0" targetFolder="Builds/MacOSX/build/Debug" headerPath="" preprocessorDefs="DEBUG=1 JUCE_DEBUG=1 JUCE_DISPLAY_SPLASH_SCREEN=1 JUCE_USE_DARK_SPLASH_SCREEN=0 JUCE_PROJUCER_VERSION=0x70005" xcodeResourceType="default" xcodeResourceFlags="0" xcodeResourcePhase="0" xcodeResourcePhaseFlags="0" xcodeResourcePhaseFileTypes="" />
+        <CONFIGURATION isDebug="0" name="Release" targetName="Planck" osxSDK="default" osxCompatibility="10.15 osxLatest" osxArchitectures="arm64;x86_64" cppLanguageStandard="17" cppLibType="0" optimisation="3" targetFolder="Builds/MacOSX/build/Release" headerPath="" preprocessorDefs="NDEBUG=1 JUCE_DISPLAY_SPLASH_SCREEN=1 JUCE_USE_DARK_SPLASH_SCREEN=0 JUCE_PROJUCER_VERSION=0x70005" xcodeResourceType="default" xcodeResourceFlags="0" xcodeResourcePhase="0" xcodeResourcePhaseFlags="0" xcodeResourcePhaseFileTypes="" />
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_devices" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_formats" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_plugin_client" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_processors" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_utils" path="JUCE/modules" />
+        <MODULEPATH id="juce_core" path="JUCE/modules" />
+        <MODULEPATH id="juce_cryptography" path="JUCE/modules" /><MODULEPATH id="juce_data_structures" path="JUCE/modules" />
+        <MODULEPATH id="juce_dsp" path="JUCE/modules" />
+        <MODULEPATH id="juce_events" path="JUCE/modules" />
+        <MODULEPATH id="juce_graphics" path="JUCE/modules" />
+        <MODULEPATH id="juce_gui_basics" path="JUCE/modules" />
+        <MODULEPATH id="juce_gui_extra" path="JUCE/modules" />
+      </MODULEPATHS>
+    </XCODE_MAC>
+    <VS2022 targetFolder="Builds/VisualStudio2022">
+      <CONFIGURATION isDebug="1" name="Debug" targetName="Planck" cppLanguageStandard="17" cppLibType="0" optimisation="0" targetFolder="Builds/VisualStudio2022/build/Debug" headerPath="" preprocessorDefs="DEBUG=1 _DEBUG=1 JUCE_DEBUG=1 JUCE_DISPLAY_SPLASH_SCREEN=1 JUCE_USE_DARK_SPLASH_SCREEN=0 JUCE_PROJUCER_VERSION=0x70005" warningLevel="4" useRuntimeLib="0" runtimeLibrary="2" useXP="0" characterSet="1" toolset="0" />
+      <CONFIGURATION isDebug="0" name="Release" targetName="Planck" cppLanguageStandard="17" cppLibType="0" optimisation="3" targetFolder="Builds/VisualStudio2022/build/Release" headerPath="" preprocessorDefs="NDEBUG=1 JUCE_DISPLAY_SPLASH_SCREEN=1 JUCE_USE_DARK_SPLASH_SCREEN=0 JUCE_PROJUCER_VERSION=0x70005" warningLevel="3" useRuntimeLib="0" runtimeLibrary="3" useXP="0" characterSet="1" toolset="0" />
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_devices" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_formats" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_plugin_client" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_processors" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_utils" path="JUCE/modules" />
+        <MODULEPATH id="juce_core" path="JUCE/modules" />
+        <MODULEPATH id="juce_cryptography" path="JUCE/modules" /><MODULEPATH id="juce_data_structures" path="JUCE/modules" />
+        <MODULEPATH id="juce_dsp" path="JUCE/modules" />
+        <MODULEPATH id="juce_events" path="JUCE/modules" />
+        <MODULEPATH id="juce_graphics" path="JUCE/modules" />
+        <MODULEPATH id="juce_gui_basics" path="JUCE/modules" />
+        <MODULEPATH id="juce_gui_extra" path="JUCE/modules" />
+      </MODULEPATHS>
+    </VS2022>
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
+      <CONFIGURATION isDebug="1" name="Debug" targetName="Planck" cppLanguageStandard="17" cppLibType="0" optimisation="0" targetFolder="Builds/LinuxMakefile/build/Debug" headerPath="" preprocessorDefs="DEBUG=1 JUCE_DEBUG=1 JUCE_DISPLAY_SPLASH_SCREEN=1 JUCE_USE_DARK_SPLASH_SCREEN=0 JUCE_PROJUCER_VERSION=0x70005" pkgConfigLibraries="" />
+      <CONFIGURATION isDebug="0" name="Release" targetName="Planck" cppLanguageStandard="17" cppLibType="0" optimisation="3" targetFolder="Builds/LinuxMakefile/build/Release" headerPath="" preprocessorDefs="NDEBUG=1 JUCE_DISPLAY_SPLASH_SCREEN=1 JUCE_USE_DARK_SPLASH_SCREEN=0 JUCE_PROJUCER_VERSION=0x70005" pkgConfigLibraries="" />
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_devices" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_formats" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_plugin_client" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_processors" path="JUCE/modules" />
+        <MODULEPATH id="juce_audio_utils" path="JUCE/modules" />
+        <MODULEPATH id="juce_core" path="JUCE/modules" />
+        <MODULEPATH id="juce_cryptography" path="JUCE/modules" /><MODULEPATH id="juce_data_structures" path="JUCE/modules" />
+        <MODULEPATH id="juce_dsp" path="JUCE/modules" />
+        <MODULEPATH id="juce_events" path="JUCE/modules" />
+        <MODULEPATH id="juce_graphics" path="JUCE/modules" />
+        <MODULEPATH id="juce_gui_basics" path="JUCE/modules" />
+        <MODULEPATH id="juce_gui_extra" path="JUCE/modules" />
+      </MODULEPATHS>
+    </LINUX_MAKE>
+  </EXPORTFORMATS>
+  <MODULEPATHS>
+    <MODULEPATH id="juce_audio_basics" path="JUCE/modules" />
+    <MODULEPATH id="juce_audio_devices" path="JUCE/modules" />
+    <MODULEPATH id="juce_audio_formats" path="JUCE/modules" />
+    <MODULEPATH id="juce_audio_processors" path="JUCE/modules" />
+    <MODULEPATH id="juce_audio_utils" path="JUCE/modules" />
+    <MODULEPATH id="juce_core" path="JUCE/modules" />
+    <MODULEPATH id="juce_cryptography" path="JUCE/modules" /><MODULEPATH id="juce_data_structures" path="JUCE/modules" />
+    <MODULEPATH id="juce_dsp" path="JUCE/modules" />
+    <MODULEPATH id="juce_events" path="JUCE/modules" />
+    <MODULEPATH id="juce_graphics" path="JUCE/modules" />
+    <MODULEPATH id="juce_gui_basics" path="JUCE/modules" />
+    <MODULEPATH id="juce_gui_extra" path="JUCE/modules" />
+  </MODULEPATHS>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0" />
+</JUCERPROJECT>

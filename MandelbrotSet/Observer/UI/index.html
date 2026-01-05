@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Observer - Wavefunction Collapse Dynamic EQ</title>
+    <link rel="stylesheet" href="../../_Shared/UI/mandelbrot-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container observer-theme">
+        <header class="mandelbrot-header">
+            <div class="mandelbrot-logo"></div>
+            <h1 data-help-title="OBSERVER"
+                data-help-description="Wavefunction Collapse Dynamic EQ - Observation collapses quantum states into compressed reality. Dynamic EQ that responds to measurement.">OBSERVER</h1>
+            <button class="help-toggle" title="Toggle contextual help"></button>
+        </header>
+
+        <main class="plugin-main">
+            <canvas id="observerCanvas"></canvas>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label class="control-label">MEASUREMENT</label>
+                    <div class="knob" id="thresholdKnob" data-param="threshold"
+                         data-help-title="MEASUREMENT"
+                         data-help-description="Observation threshold. When wavefunction is measured and collapses.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="thresholdValue">-20 dB</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">PRECISION</label>
+                    <div class="knob" id="freqKnob" data-param="frequency"
+                         data-help-title="PRECISION"
+                         data-help-description="Measurement precision. Center frequency where observation occurs.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="freqValue">1k Hz</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">COLLAPSE RATIO</label>
+                    <div class="knob" id="ratioKnob" data-param="ratio"
+                         data-help-title="COLLAPSE RATIO"
+                         data-help-description="How much the wavefunction collapses. Compression ratio after observation.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="ratioValue">2:1</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">OBSERVATION TIME</label>
+                    <div class="knob" id="attackKnob" data-param="attack"
+                         data-help-title="OBSERVATION TIME"
+                         data-help-description="How quickly observation occurs. Attack time of dynamic EQ.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="attackValue">10 ms</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">UNCERTAINTY</label>
+                    <div class="knob" id="releaseKnob" data-param="release"
+                         data-help-title="UNCERTAINTY"
+                         data-help-description="Return to quantum uncertainty. Release time after observation.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="releaseValue">100 ms</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mandelbrot-footer">
+            <button class="bypass-toggle active" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Prevents observation. Wavefunction remains uncollapsed.">
+                <span class="power-icon"><svg viewBox="0 0 24 24"><path d="M12 2v10M18 6a9 9 0 1 1-12 0"/></svg></span>
+                <span class="bypass-text">ON</span>
+            </button>
+            <div class="info-display"><span>Dynamic EQ</span></div>
+        </footer>
+    </div>
+
+    <script src="../../_Shared/UI/mandelbrot-animations.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-particles.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-components.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rabbithole - Quantum Descent Flanger</title>
+    <link rel="stylesheet" href="../../_Shared/UI/mandelbrot-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container rabbithole-theme">
+        <header class="mandelbrot-header">
+            <div class="mandelbrot-logo"></div>
+            <h1 data-help-title="RABBITHOLE"
+                data-help-description="Quantum Descent Flanger - Falling down the quantum rabbit hole. Descending through layers of reality with flanging modulation.">RABBITHOLE</h1>
+            <button class="help-toggle" title="Toggle contextual help"></button>
+        </header>
+
+        <main class="plugin-main">
+            <canvas id="rabbitholeCanvas"></canvas>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label class="control-label">DESCENT RATE</label>
+                    <div class="knob" id="rateKnob" data-param="rate"
+                         data-help-title="DESCENT RATE"
+                         data-help-description="How fast you fall down the rabbit hole. Flanger LFO rate.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="rateValue">0.5 Hz</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">TUNNEL DEPTH</label>
+                    <div class="knob" id="depthKnob" data-param="depth"
+                         data-help-title="TUNNEL DEPTH"
+                         data-help-description="Depth of the quantum tunnel. Flanger modulation depth.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="depthValue">50%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">GRAVITY WELL</label>
+                    <div class="knob" id="feedbackKnob" data-param="feedback"
+                         data-help-title="GRAVITY WELL"
+                         data-help-description="Gravitational pull deeper into the hole. Flanger feedback creates resonance.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="feedbackValue">30%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">DUALITY</label>
+                    <div class="knob" id="stereoKnob" data-param="stereo"
+                         data-help-title="DUALITY"
+                         data-help-description="Quantum duality. Stereo width between left and right channels.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="stereoValue">100%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">WONDERLAND</label>
+                    <div class="knob" id="mixKnob" data-param="mix"
+                         data-help-title="WONDERLAND"
+                         data-help-description="How deep in wonderland. Blend of dry and flanged signal.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="mixValue">50%</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mandelbrot-footer">
+            <button class="bypass-toggle active" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Climbs back out of the rabbit hole. Returns to normal reality.">
+                <span class="power-icon"><svg viewBox="0 0 24 24"><path d="M12 2v10M18 6a9 9 0 1 1-12 0"/></svg></span>
+                <span class="bypass-text">ON</span>
+            </button>
+            <div class="info-display"><span>Flanger</span></div>
+        </footer>
+    </div>
+
+    <script src="../../_Shared/UI/mandelbrot-animations.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-particles.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-components.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

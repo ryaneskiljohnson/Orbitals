@@ -1,0 +1,249 @@
+/**
+ * @fileoverview Singularity - Black Hole Compressor Styles
+ * @module Singularity Styles
+ */
+
+/* ===================================================================
+   SINGULARITY THEME OVERRIDES
+   =================================================================== */
+
+:root {
+    --plugin-background-image: url('../../_Shared/Assets/backgrounds/singularity.png');
+    --plugin-background-opacity: 0.5;
+}
+
+/* ===================================================================
+   LAYOUT - COMPRESSOR CONTROLS
+   =================================================================== */
+
+.controls-compressor {
+    position: relative;
+    z-index: var(--z-controls);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-2xl);
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--spacing-xl) 0;
+}
+
+.control-row-top,
+.control-row-middle,
+.control-row-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-3xl);
+    width: 100%;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-width: 120px;
+}
+
+.meter-group {
+    min-width: 200px;
+}
+
+/* ===================================================================
+   GAIN REDUCTION METER
+   =================================================================== */
+
+.gain-reduction-meter {
+    width: 200px;
+    height: 20px;
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    position: relative;
+    overflow: hidden;
+    margin: var(--spacing-sm) 0;
+}
+
+.meter-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, 
+        var(--plugin-primary) 0%, 
+        var(--plugin-accent) 100%
+    );
+    box-shadow: 0 0 20px var(--plugin-glow);
+    transition: width 50ms ease-out;
+}
+
+.meter-scale {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    color: var(--planck-white);
+    opacity: 0.6;
+    padding: 0 4px;
+}
+
+/* ===================================================================
+   FOOTER STYLES
+   =================================================================== */
+
+.mandelbrot-footer {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    min-height: 56px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border-top: 1px solid var(--glass-border);
+    z-index: var(--z-header);
+    position: relative;
+}
+
+.bypass-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    background: var(--glass-bg-light);
+    border: 2px solid var(--glass-border);
+    cursor: pointer;
+    transition: all var(--transition-medium);
+    font-family: var(--font-header);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--planck-white);
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.bypass-toggle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, var(--plugin-primary), transparent);
+    opacity: 0;
+    transition: opacity var(--transition-medium);
+}
+
+.bypass-toggle:hover {
+    border-color: var(--plugin-primary);
+    box-shadow: 0 0 15px var(--plugin-glow), 0 0 30px var(--plugin-glow);
+    transform: scale(1.05);
+}
+
+.bypass-toggle:hover::before {
+    opacity: 0.1;
+}
+
+.bypass-toggle:active {
+    transform: scale(0.98);
+}
+
+.bypass-toggle.active {
+    background: linear-gradient(135deg, var(--plugin-primary), var(--plugin-accent));
+    border-color: var(--plugin-primary);
+    box-shadow: 0 0 25px var(--plugin-glow), 0 0 50px var(--plugin-glow);
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+.bypass-toggle.active .bypass-text {
+    color: var(--quantum-black);
+    font-weight: var(--font-weight-bold);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.bypass-toggle.active .power-icon svg {
+    stroke: var(--quantum-black);
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+}
+
+.power-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.power-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.info-display {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--spacing-lg);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--planck-white);
+    opacity: 0.8;
+}
+
+/* ===================================================================
+   CANVAS ANIMATION
+   =================================================================== */
+
+#singularityCanvas {
+    width: 600px;
+    height: 600px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.8;
+}
+
+/* ===================================================================
+   ANIMATIONS
+   =================================================================== */
+
+@keyframes singularityPull {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+}
+
+@keyframes eventHorizonGlow {
+    0%, 100% {
+        box-shadow: 0 0 20px var(--plugin-glow);
+    }
+    50% {
+        box-shadow: 0 0 40px var(--plugin-glow);
+    }
+}
+
+.knob:active {
+    animation: singularityPull 0.3s ease-in-out;
+}
+
+.meter-bar {
+    animation: eventHorizonGlow 2s ease-in-out infinite;
+}

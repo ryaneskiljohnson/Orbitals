@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entanglement - Quantum Delay</title>
+    
+    <link rel="stylesheet" href="../../_Shared/UI/mandelbrot-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container entanglement-theme">
+        <header class="mandelbrot-header">
+            <div class="mandelbrot-logo" title="NNAudio"></div>
+            <h1 data-help-title="ENTANGLEMENT"
+                data-help-description="Quantum Delay - Particles entangled across spacetime create echoing delays. Quantum coupling creates feedback loops.">ENTANGLEMENT</h1>
+            <button class="help-toggle" title="Toggle contextual help"></button>
+        </header>
+
+        <main class="plugin-main">
+            <canvas id="entanglementCanvas"></canvas>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label class="control-label">DISTANCE</label>
+                    <div class="knob" id="timeKnob" data-param="time"
+                         data-help-title="DISTANCE"
+                         data-help-description="Spacetime separation between entangled particles. Controls delay time.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="timeValue">250 ms</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">COUPLING</label>
+                    <div class="knob" id="feedbackKnob" data-param="feedback"
+                         data-help-title="COUPLING"
+                         data-help-description="Quantum coupling strength. How much delayed signal feeds back into itself.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="feedbackValue">30%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">COHERENCE</label>
+                    <div class="knob" id="mixKnob" data-param="mix"
+                         data-help-title="COHERENCE"
+                         data-help-description="Quantum coherence level. Blends dry and delayed signals.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="mixValue">50%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">DECAY</label>
+                    <div class="knob" id="dampingKnob" data-param="damping"
+                         data-help-title="DECAY"
+                         data-help-description="Quantum decoherence rate. High frequency damping over time.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="dampingValue">50%</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mandelbrot-footer">
+            <button class="bypass-toggle active" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Breaks quantum entanglement. Passes audio through unaffected.">
+                <span class="power-icon"><svg viewBox="0 0 24 24"><path d="M12 2v10M18 6a9 9 0 1 1-12 0"/></svg></span>
+                <span class="bypass-text">ON</span>
+            </button>
+            <div class="info-display">
+                <span>Stereo Delay</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../../_Shared/UI/mandelbrot-components.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

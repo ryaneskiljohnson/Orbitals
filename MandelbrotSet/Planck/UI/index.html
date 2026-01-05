@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Planck - Quantum Scale EQ</title>
+    <link rel="stylesheet" href="../../_Shared/UI/mandelbrot-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container planck-theme">
+        <header class="mandelbrot-header">
+            <div class="mandelbrot-logo"></div>
+            <h1 data-help-title="PLANCK"
+                data-help-description="Quantum Scale EQ - Manipulates frequency at the Planck scale. Three-band parametric EQ with quantum precision.">PLANCK</h1>
+            <button class="help-toggle" title="Toggle contextual help"></button>
+        </header>
+        <main class="plugin-main">
+            <canvas id="planckCanvas"></canvas>
+            <div class="controls-eq">
+                <div class="eq-band">
+                    <label class="control-label">LOW SCALE</label>
+                    <div class="knob" id="lowFreqKnob" data-param="lowfreq"
+                         data-help-title="LOW FREQUENCY"
+                         data-help-description="Center frequency for low band. Quantum scale adjustment."><div class="knob-inner"><div class="knob-indicator"></div></div></div>
+                    <div class="value-display" id="lowFreqValue">100 Hz</div>
+                    <div class="knob" id="lowGainKnob" data-param="lowgain"
+                         data-help-title="LOW GAIN"
+                         data-help-description="Boost or cut low frequencies at Planck precision."><div class="knob-inner"><div class="knob-indicator"></div></div></div>
+                    <div class="value-display" id="lowGainValue">0 dB</div>
+                </div>
+                <div class="eq-band">
+                    <label class="control-label">MID SCALE</label>
+                    <div class="knob" id="midFreqKnob" data-param="midfreq"
+                         data-help-title="MID FREQUENCY"
+                         data-help-description="Center frequency for mid band. Most sensitive quantum region."><div class="knob-inner"><div class="knob-indicator"></div></div></div>
+                    <div class="value-display" id="midFreqValue">1k Hz</div>
+                    <div class="knob" id="midGainKnob" data-param="midgain"
+                         data-help-title="MID GAIN"
+                         data-help-description="Boost or cut mid frequencies with quantum accuracy."><div class="knob-inner"><div class="knob-indicator"></div></div></div>
+                    <div class="value-display" id="midGainValue">0 dB</div>
+                </div>
+                <div class="eq-band">
+                    <label class="control-label">HIGH SCALE</label>
+                    <div class="knob" id="highFreqKnob" data-param="highfreq"
+                         data-help-title="HIGH FREQUENCY"
+                         data-help-description="Center frequency for high band. Ultra-precise quantum control."><div class="knob-inner"><div class="knob-indicator"></div></div></div>
+                    <div class="value-display" id="highFreqValue">10k Hz</div>
+                    <div class="knob" id="highGainKnob" data-param="highgain"
+                         data-help-title="HIGH GAIN"
+                         data-help-description="Boost or cut high frequencies at the Planck limit."><div class="knob-inner"><div class="knob-indicator"></div></div></div>
+                    <div class="value-display" id="highGainValue">0 dB</div>
+                </div>
+                <div class="eq-band">
+                    <label class="control-label">RESONANCE</label>
+                    <div class="knob" id="qKnob" data-param="q"
+                         data-help-title="RESONANCE (Q)"
+                         data-help-description="Bandwidth of EQ bands. Higher Q creates sharper, more focused curves."><div class="knob-inner"><div class="knob-indicator"></div></div></div>
+                    <div class="value-display" id="qValue">1.0</div>
+                </div>
+            </div>
+        </main>
+        <footer class="mandelbrot-footer">
+            <button class="bypass-toggle active" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Exits quantum realm. Passes audio through unaffected.">
+                <span class="power-icon"><svg viewBox="0 0 24 24"><path d="M12 2v10M18 6a9 9 0 1 1-12 0"/></svg></span>
+                <span class="bypass-text">ON</span>
+            </button>
+            <div class="info-display"><span>3-Band Parametric EQ</span></div>
+        </footer>
+    </div>
+    <script src="../../_Shared/UI/mandelbrot-components.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

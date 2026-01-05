@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fabric - Spacetime Reverb</title>
+    
+    <link rel="stylesheet" href="../../_Shared/UI/mandelbrot-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container fabric-theme">
+        <header class="mandelbrot-header">
+            <div class="mandelbrot-logo" title="NNAudio"></div>
+            <h1 data-help-title="FABRIC"
+                data-help-description="Spacetime Reverb - Weaves echoes through the fabric of spacetime. Creates dimensional acoustic spaces.">FABRIC</h1>
+            <button class="help-toggle" title="Toggle contextual help"></button>
+        </header>
+
+        <main class="plugin-main">
+            <canvas id="fabricCanvas"></canvas>
+
+            <div class="controls-reverb">
+                <!-- Top Row: Space Controls -->
+                <div class="control-row-top">
+                    <!-- Weave (Size) -->
+                    <div class="control-group">
+                        <label class="control-label">WEAVE</label>
+                        <div class="knob large-knob" id="sizeKnob" data-param="size"
+                             data-help-title="WEAVE"
+                             data-help-description="How much fabric of spacetime. Larger weaves create bigger spaces.">
+                            <div class="knob-inner">
+                                <div class="knob-indicator"></div>
+                            </div>
+                        </div>
+                        <div class="value-display large" id="sizeValue">50%</div>
+                    </div>
+
+                    <!-- Thread Density (Diffusion) -->
+                    <div class="control-group">
+                        <label class="control-label">THREAD DENSITY</label>
+                        <div class="knob" id="diffusionKnob" data-param="diffusion"
+                             data-help-title="THREAD DENSITY"
+                             data-help-description="Texture detail of the fabric. Higher density creates more complex reflections.">
+                            <div class="knob-inner">
+                                <div class="knob-indicator"></div>
+                            </div>
+                        </div>
+                        <div class="value-display" id="diffusionValue">50%</div>
+                    </div>
+                </div>
+
+                <!-- Middle Row: Character Controls -->
+                <div class="control-row-middle">
+                    <!-- Fold (Damping) -->
+                    <div class="control-group">
+                        <label class="control-label">FOLD</label>
+                        <div class="knob" id="dampingKnob" data-param="damping"
+                             data-help-title="FOLD"
+                             data-help-description="How fabric absorbs energy. More fold dampens high frequencies.">
+                            <div class="knob-inner">
+                                <div class="knob-indicator"></div>
+                            </div>
+                        </div>
+                        <div class="value-display" id="dampingValue">50%</div>
+                    </div>
+
+                    <!-- Time Dilation (Pre-Delay) -->
+                    <div class="control-group">
+                        <label class="control-label">TIME DILATION</label>
+                        <div class="knob" id="predelayKnob" data-param="predelay"
+                             data-help-title="TIME DILATION"
+                             data-help-description="Relativity effect. Delays initial reflection as if time is warped.">
+                            <div class="knob-inner">
+                                <div class="knob-indicator"></div>
+                            </div>
+                        </div>
+                        <div class="value-display" id="predelayValue">0 ms</div>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Mix -->
+                <div class="control-row-bottom">
+                    <!-- Warp (Mix) -->
+                    <div class="control-group">
+                        <label class="control-label">WARP</label>
+                        <div class="slider-container">
+                            <div class="slider horizontal-slider" id="mixSlider" data-param="mix"
+                                 data-help-title="WARP"
+                                 data-help-description="How much you bend into the reverb space. Dry/wet mix.">
+                                <div class="slider-track"></div>
+                                <div class="slider-handle"></div>
+                            </div>
+                        </div>
+                        <div class="value-display" id="mixValue">50%</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mandelbrot-footer">
+            <button class="bypass-toggle" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Leaves the fabric untouched. Passes audio through unaffected.">
+                <span class="power-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2v10M18 6a9 9 0 1 1-12 0"/>
+                    </svg>
+                </span>
+                <span class="bypass-text">ON</span>
+            </button>
+            <div class="info-display">
+                <span id="spaceInfo">Space: Medium</span>
+                <span id="reverbTime">Decay: 2.0s</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../../_Shared/UI/mandelbrot-animations.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-particles.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-components.js"></script>
+    
+    <script src="app.js"></script>
+</body>
+</html>

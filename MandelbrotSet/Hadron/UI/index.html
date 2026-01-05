@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hadron - Particle Collision Saturation</title>
+    <link rel="stylesheet" href="../../_Shared/UI/mandelbrot-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container hadron-theme">
+        <header class="mandelbrot-header">
+            <div class="mandelbrot-logo"></div>
+            <h1 data-help-title="HADRON"
+                data-help-description="Particle Collision Saturation - Accelerates particles to near light speed and smashes them together. Creates harmonic distortion from quantum collisions.">HADRON</h1>
+            <button class="help-toggle" title="Toggle contextual help"></button>
+        </header>
+
+        <main class="plugin-main">
+            <canvas id="hadronCanvas"></canvas>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label class="control-label">COLLISION ENERGY</label>
+                    <div class="knob" id="driveKnob" data-param="drive"
+                         data-help-title="COLLISION ENERGY"
+                         data-help-description="Particle acceleration energy. How hard particles collide to create distortion.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="driveValue">50%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">PARTICLE MASS</label>
+                    <div class="knob" id="toneKnob" data-param="tone"
+                         data-help-title="PARTICLE MASS"
+                         data-help-description="Mass of colliding particles. Tonal character of the saturation.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="toneValue">50%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">ACCELERATION</label>
+                    <div class="knob" id="biasKnob" data-param="bias"
+                         data-help-title="ACCELERATION"
+                         data-help-description="Asymmetric acceleration. Adds even-order harmonics through particle bias.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="biasValue">0%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">LUMINOSITY</label>
+                    <div class="knob" id="mixKnob" data-param="mix"
+                         data-help-title="LUMINOSITY"
+                         data-help-description="Collision luminosity. Blend of clean and saturated signal.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="mixValue">100%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">BEAM FOCUS</label>
+                    <div class="knob" id="outputKnob" data-param="output"
+                         data-help-title="BEAM FOCUS"
+                         data-help-description="Particle beam focus. Output level after collision.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="outputValue">0 dB</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mandelbrot-footer">
+            <button class="bypass-toggle active" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Shuts down particle accelerator. No collisions occur.">
+                <span class="power-icon"><svg viewBox="0 0 24 24"><path d="M12 2v10M18 6a9 9 0 1 1-12 0"/></svg></span>
+                <span class="bypass-text">ON</span>
+            </button>
+            <div class="info-display"><span>Saturation/Distortion</span></div>
+        </footer>
+    </div>
+
+    <script src="../../_Shared/UI/mandelbrot-animations.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-particles.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-components.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
