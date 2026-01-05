@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    Retrograde - MIDI Motion Reversal
+    Retrograde - Timing Stabilizer
     MIDI FX Plugin Editor
 
   ==============================================================================
@@ -41,6 +41,9 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void timerCallback() override;
+    
+    // MIDI note notification
+    void notifyMIDINote(int noteNumber, int velocity);
 
 private:
     RetrogradeAudioProcessor& audioProcessor;

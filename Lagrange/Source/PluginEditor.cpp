@@ -16,6 +16,7 @@ LagrangeAudioProcessorEditor::LagrangeAudioProcessorEditor (LagrangeAudioProcess
 {
     // Make component opaque so black background shows through (like NNAudioAccess)
     setOpaque(true);
+    
     // Enable native title bar on the top-level window (for standalone builds)
     if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
         top_level->setUsingNativeTitleBar(true);
@@ -78,6 +79,7 @@ LagrangeAudioProcessorEditor::LagrangeAudioProcessorEditor (LagrangeAudioProcess
     };
     
     // Fallback: Show webView after 3 seconds if callback doesn't fire (like NNAudioAccess fallback)
+    // Longer delay ensures HTML/CSS is fully loaded and rendered
     juce::Timer::callAfterDelay(3000, [this]() {
         if (webView != nullptr && !webView->isVisible()) {
             webView->setVisible(true);
@@ -117,49 +119,8 @@ void LagrangeAudioProcessorEditor::resized()
 
 void LagrangeAudioProcessorEditor::loadWebUI()
 {
-    // First, load a minimal black HTML to prevent white flash (like NNAudioAccess)
-    juce::String blackHTML = R"(<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lagrange</title>
-    <style>
-        /* Set background to black immediately to prevent white flash */
-        html, body { 
-            background-color: #000000; 
-            margin: 0; 
-            padding: 0; 
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-    </style>
-</head>
-<body></body>
-</html>)";
-    
-    // Load black HTML using temporary file
-    auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
-        .getChildFile("LagrangeUI_" + juce::String(juce::Time::currentTimeMillis()));
-    tempDir.createDirectory();
-    
-    auto blackFile = tempDir.getChildFile("black.html");
-    blackFile.replaceWithText(blackHTML);
-    auto blackFilePath = blackFile.getFullPathName().replace(" ", "%20");
-    juce::String blackFileURL = "file://" + blackFilePath;
-    // Load black HTML first (while webView is still hidden)
-    webView->goToURL(blackFileURL);
-    
-    // Show webView after a brief delay to ensure black HTML has loaded
-    // This prevents white flash - parent's black background shows until webView is visible
-    juce::Timer::callAfterDelay(50, [this]()
-    {
-        webView->setVisible(true);
-        addAndMakeVisible(webView.get());
-    });
-    
-    // Then load the actual UI after a brief delay to ensure black page is rendered
+    // Navigate DIRECTLY to actual content while webView is HIDDEN (like NNAudioAccess)
+    // Content has inline black styles, so it will be black when it loads
     juce::MessageManager::callAsync([this]()
     {
         // Find UI files relative to plugin binary
@@ -178,6 +139,7 @@ void LagrangeAudioProcessorEditor::loadWebUI()
         if (htmlFile.existsAsFile())
         {
             loadHTMLFile(htmlFile);
+            // webView will be shown automatically via onPageFinishedLoading callback
         }
         else
         {
@@ -192,6 +154,40 @@ void LagrangeAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
     auto uiDir = htmlFile.getParentDirectory();
     auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
     auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
+
+    // CRITICAL: Inject inline black styles FIRST (before any CSS links)
+    // This prevents white flash - black background applies immediately when HTML loads
+    juce::String blackStyles = R"(<style>
+        /* Set background to black immediately to prevent white flash */
+        html, body { 
+            background-color: #000000 !important; 
+            margin: 0; 
+            padding: 0; 
+        }
+    </style>)";
+    
+    // Inject black styles right after <head> tag (before any CSS links)
+    if (htmlContent.contains("<head>"))
+    {
+        htmlContent = htmlContent.replace("<head>", "<head>\n    " + blackStyles);
+    }
+    else if (htmlContent.contains("<head "))
+    {
+        // Handle <head> with attributes - find the closing > of <head ...>
+        int headStart = htmlContent.indexOf("<head");
+        if (headStart >= 0)
+        {
+            // Find the closing > after <head
+            for (int i = headStart; i < htmlContent.length(); ++i)
+            {
+                if (htmlContent[i] == '>')
+                {
+                    htmlContent = htmlContent.substring(0, i + 1) + "\n    " + blackStyles + htmlContent.substring(i + 1);
+                    break;
+                }
+            }
+        }
+    }
 
     // Inline CSS
     auto cssFile = uiDir.getChildFile ("styles.css");
@@ -318,12 +314,16 @@ void LagrangeAudioProcessorEditor::handleJavaScriptMessage (const juce::var& mes
         auto* p = audioProcessor.parameters.getParameter(param);
         if (p != nullptr)
         {
-            if (param == "stability" || param == "mass")
+            if (param == "expansion")
                 p->setValueNotifyingHost((float)value / 100.0f);
-            else if (param == "driftMin" || param == "driftMax")
+            else if (param == "threshold")
+                p->setValueNotifyingHost((float)value / 127.0f);
+            else if (param == "ceiling")
+                p->setValueNotifyingHost((float)value / 127.0f);
+            else if (param == "curve")
                 p->setValueNotifyingHost((float)value / 100.0f);
-            else if (param == "chaosX" || param == "chaosY")
-                p->setValueNotifyingHost((float)value / 100.0f);
+            else if (param == "bypass")
+                p->setValueNotifyingHost((float)value);
         }
     }
 }
@@ -331,59 +331,25 @@ void LagrangeAudioProcessorEditor::handleJavaScriptMessage (const juce::var& mes
 //==============================================================================
 void LagrangeAudioProcessorEditor::loadAuthScreen()
 {
-    // First, load a minimal black HTML to prevent white flash (like NNAudioAccess)
-    juce::String blackHTML = R"(<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lagrange</title>
-    <style>
-        /* Set background to black immediately to prevent white flash */
-        html, body { 
-            background-color: #000000; 
-            margin: 0; 
-            padding: 0; 
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-    </style>
-</head>
-<body></body>
-</html>)";
-    
-    // Load black HTML using temporary file
-    auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
-        .getChildFile("LagrangeAuth_" + juce::String(juce::Time::currentTimeMillis()));
-    tempDir.createDirectory();
-    
-    auto blackFile = tempDir.getChildFile("black.html");
-    blackFile.replaceWithText(blackHTML);
-    auto blackFilePath = blackFile.getFullPathName().replace(" ", "%20");
-    juce::String blackFileURL = "file://" + blackFilePath;
-    // Load black HTML first (while webView is still hidden)
-    webView->goToURL(blackFileURL);
-    
-    // Show webView after a brief delay to ensure black HTML has loaded
-    // This prevents white flash - parent's black background shows until webView is visible
-    juce::Timer::callAfterDelay(50, [this]()
-    {
-        webView->setVisible(true);
-        addAndMakeVisible(webView.get());
-    });
-    
-    // Then load the actual auth screen after a brief delay
+    // Navigate DIRECTLY to auth content while webView is HIDDEN (like NNAudioAccess)
+    // Content has inline black styles, so it will be black when it loads
     juce::MessageManager::callAsync([this]()
     {
         // Create auth HTML content with background image
-        juce::String authHTML = R"(<!DOCTYPE html>// Create auth HTML content with background image
-    juce::String authHTML = R"(<!DOCTYPE html>
+        juce::String authHTML = R"(<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lagrange - Authentication Required</title>
+    <style>
+        /* Set background to black immediately to prevent white flash */
+        html, body { 
+            background-color: #000000 !important; 
+            margin: 0; 
+            padding: 0; 
+        }
+    </style>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
@@ -511,8 +477,12 @@ void LagrangeAudioProcessorEditor::loadAuthScreen()
     
     auto filePath = tempFile.getFullPathName().replace(" ", "%20");
     juce::String fileURL = "file://" + filePath;
+    
+    // Navigate to auth screen while webView is HIDDEN
     webView->goToURL(fileURL);
-}    });
+    // webView will be shown automatically via onPageFinishedLoading callback
+    });
+}
 
 //==============================================================================
 bool LagrangeAudioProcessorEditor::checkAuthorization()
@@ -603,6 +573,27 @@ juce::String LagrangeAudioProcessorEditor::loadAndDecryptLicenseFile()
 //==============================================================================
 void LagrangeAudioProcessorEditor::timerCallback()
 {
-    // Periodically check authorization status
-    checkAuthorization();
+    if (!isAuthorized)
+    {
+        bool newAuthState = checkAuthorization();
+        if (newAuthState != isAuthorized)
+        {
+            isAuthorized = newAuthState;
+            if (isAuthorized)
+            {
+                loadWebUI();
+                startTimer(1000 * 60 * 15);
+            }
+        }
+    }
+}
+
+void LagrangeAudioProcessorEditor::notifyMIDINote(int noteNumber, int velocity)
+{
+    if (webView != nullptr && isAuthorized)
+    {
+        juce::String script = "if (window.receiveMessageFromJUCE) { window.receiveMessageFromJUCE({ type: 'midiNote', note: " 
+            + juce::String(noteNumber) + ", velocity: " + juce::String(velocity) + " }); }";
+        webView->emitEventIfBrowserIsVisible("eval", script);
+    }
 }

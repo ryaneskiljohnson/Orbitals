@@ -36,6 +36,40 @@ public:
         auto uiDir = htmlFile.getParentDirectory();
         auto sharedDir = projectRoot.getChildFile("_Shared").getChildFile("UI");
         
+        // CRITICAL: Inject inline black styles FIRST (before any CSS links) - like Zenith
+        // This prevents white flash - black background applies immediately when HTML loads
+        juce::String blackStyles = R"(<style>
+            /* Set background to black immediately to prevent white flash */
+            html, body { 
+                background-color: #000000 !important; 
+                margin: 0; 
+                padding: 0; 
+            }
+        </style>)";
+        
+        // Inject black styles right after <head> tag (before any CSS links)
+        if (htmlContent.contains("<head>"))
+        {
+            htmlContent = htmlContent.replace("<head>", "<head>\n    " + blackStyles);
+        }
+        else if (htmlContent.contains("<head "))
+        {
+            // Handle <head> with attributes - find the closing > of <head ...>
+            int headStart = htmlContent.indexOf("<head");
+            if (headStart >= 0)
+            {
+                // Find the closing > after <head
+                for (int i = headStart; i < htmlContent.length(); ++i)
+                {
+                    if (htmlContent[i] == '>')
+                    {
+                        htmlContent = htmlContent.substring(0, i + 1) + "\n    " + blackStyles + htmlContent.substring(i + 1);
+                        break;
+                    }
+                }
+            }
+        }
+        
         // Handle background image as base64 first (needed for CSS replacement)
         juce::String backgroundDataURL;
         auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds")

@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    Kepler - MIDI Orbit Generator
+    Kepler - Timing Stabilizer
     MIDI FX Plugin Editor Implementation
 
   ==============================================================================
@@ -9,7 +9,6 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "../../_Shared/Source/OrbitalsPluginEditor.h"
 
 //==============================================================================
 KeplerAudioProcessorEditor::KeplerAudioProcessorEditor (KeplerAudioProcessor& p)
@@ -17,6 +16,7 @@ KeplerAudioProcessorEditor::KeplerAudioProcessorEditor (KeplerAudioProcessor& p)
 {
     // Make component opaque so black background shows through (like NNAudioAccess)
     setOpaque(true);
+    
     // Enable native title bar on the top-level window (for standalone builds)
     if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
         top_level->setUsingNativeTitleBar(true);
@@ -148,6 +148,153 @@ void KeplerAudioProcessorEditor::loadWebUI()
     });
 }
 
+void KeplerAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
+{
+    auto htmlContent = htmlFile.loadFileAsString();
+    auto uiDir = htmlFile.getParentDirectory();
+    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+    auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
+
+    // CRITICAL: Inject inline black styles FIRST (before any CSS links)
+    // This prevents white flash - black background applies immediately when HTML loads
+    juce::String blackStyles = R"(<style>
+        /* Set background to black immediately to prevent white flash */
+        html, body { 
+            background-color: #000000 !important; 
+            margin: 0; 
+            padding: 0; 
+        }
+    </style>)";
+    
+    // Inject black styles right after <head> tag (before any CSS links)
+    if (htmlContent.contains("<head>"))
+    {
+        htmlContent = htmlContent.replace("<head>", "<head>\n    " + blackStyles);
+    }
+    else if (htmlContent.contains("<head "))
+    {
+        // Handle <head> with attributes - find the closing > of <head ...>
+        int headStart = htmlContent.indexOf("<head");
+        if (headStart >= 0)
+        {
+            // Find the closing > after <head
+            for (int i = headStart; i < htmlContent.length(); ++i)
+            {
+                if (htmlContent[i] == '>')
+                {
+                    htmlContent = htmlContent.substring(0, i + 1) + "\n    " + blackStyles + htmlContent.substring(i + 1);
+                    break;
+                }
+            }
+        }
+    }
+
+    // Inline CSS
+    auto cssFile = uiDir.getChildFile ("styles.css");
+    if (cssFile.existsAsFile())
+    {
+        auto cssContent = cssFile.loadFileAsString();
+        htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"styles.css\">",
+                                           "<style>" + cssContent + "</style>");
+    }
+
+    auto designSystemFile = sharedDir.getChildFile ("orbitals-design-system.css");
+    if (designSystemFile.existsAsFile())
+    {
+        auto designSystemContent = designSystemFile.loadFileAsString();
+        
+        // Replace logo image path with relative path for temp directory
+        // Handle both single and double quotes
+        juce::String logoPattern = "../../_Shared/Assets/logos/nnaudio-logo.png";
+        juce::String logoOldPattern1 = "url('" + logoPattern + "')";
+        juce::String logoOldPattern2 = "url(\"" + logoPattern + "\")";
+        juce::String logoNewPattern = "url('nnaudio-logo.png')";
+        designSystemContent = designSystemContent.replace (logoOldPattern1, logoNewPattern);
+        designSystemContent = designSystemContent.replace (logoOldPattern2, logoNewPattern);
+        
+        htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"../../_Shared/UI/orbitals-design-system.css\">",
+                                           "<style>" + designSystemContent + "</style>");
+    }
+
+    // Inline JavaScript
+    auto jsFile = uiDir.getChildFile ("app.js");
+    if (jsFile.existsAsFile())
+    {
+        auto jsContent = jsFile.loadFileAsString();
+        htmlContent = htmlContent.replace ("<script src=\"app.js\"></script>",
+                                           "<script>" + jsContent + "</script>");
+    }
+
+    auto animationsFile = sharedDir.getChildFile ("orbitals-animations.js");
+    if (animationsFile.existsAsFile())
+    {
+        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-animations.js\"></script>",
+                                           "<script>" + animationsFile.loadFileAsString() + "</script>");
+    }
+
+    auto particlesFile = sharedDir.getChildFile ("orbitals-particles.js");
+    if (particlesFile.existsAsFile())
+    {
+        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-particles.js\"></script>",
+                                           "<script>" + particlesFile.loadFileAsString() + "</script>");
+    }
+
+    auto componentsFile = sharedDir.getChildFile ("orbitals-components.js");
+    if (componentsFile.existsAsFile())
+    {
+        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-components.js\"></script>",
+                                           "<script>" + componentsFile.loadFileAsString() + "</script>");
+    }
+
+    // Handle background image
+    auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/kepler-background.png");
+    if (backgroundImage.existsAsFile())
+    {
+        juce::MemoryBlock imageData;
+        if (backgroundImage.loadFileAsData(imageData))
+        {
+            juce::String base64 = juce::Base64::toBase64(imageData.getData(), imageData.getSize());
+            htmlContent = htmlContent.replace("../../_Shared/Assets/backgrounds/kepler-background.png", 
+                                            "data:image/png;base64," + base64);
+        }
+    }
+
+    // Disable right-click context menu
+    juce::String disableRightClickScript = R"(<script>
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+        document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
+    </script>)";
+    
+    // Inject script before closing body tag
+    if (htmlContent.contains("</body>"))
+        htmlContent = htmlContent.replace("</body>", disableRightClickScript + "</body>");
+    else if (htmlContent.contains("</html>"))
+        htmlContent = htmlContent.replace("</html>", disableRightClickScript + "</html>");
+    else
+        htmlContent += disableRightClickScript;
+    
+    // Load HTML using temporary file approach (avoids data URL encoding issues)
+    auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
+        .getChildFile("KeplerUI_" + juce::String(juce::Time::currentTimeMillis()));
+    tempDir.createDirectory();
+    
+    // Copy logo image to temp directory if it exists
+    auto logosDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("logos");
+    auto logoFile = logosDir.getChildFile ("nnaudio-logo.png");
+    if (logoFile.existsAsFile())
+    {
+        auto tempLogoFile = tempDir.getChildFile ("nnaudio-logo.png");
+        logoFile.copyFileTo (tempLogoFile);
+    }
+    
+    auto tempFile = tempDir.getChildFile("index.html");
+    tempFile.replaceWithText(htmlContent);
+    
+    auto filePath = tempFile.getFullPathName().replace(" ", "%20");
+    juce::String fileURL = "file://" + filePath;
+    webView->goToURL(fileURL);
+}
+
 void KeplerAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
 {
     if (!message.isObject())
@@ -167,14 +314,15 @@ void KeplerAudioProcessorEditor::handleJavaScriptMessage (const juce::var& messa
         auto* p = audioProcessor.parameters.getParameter(param);
         if (p != nullptr)
         {
-            // Normalize values based on parameter ranges
-            if (param == "orbitCount")
-                p->setValueNotifyingHost(((int)value - 1) / 7.0f);
-            else if (param == "eccentricity")
-                p->setValueNotifyingHost((float)value / 0.95f);
-            else if (param == "rotationSpeed" || param == "stabilityX" || param == "stabilityY")
+            if (param == "expansion")
                 p->setValueNotifyingHost((float)value / 100.0f);
-            else
+            else if (param == "threshold")
+                p->setValueNotifyingHost((float)value / 127.0f);
+            else if (param == "ceiling")
+                p->setValueNotifyingHost((float)value / 127.0f);
+            else if (param == "curve")
+                p->setValueNotifyingHost((float)value / 100.0f);
+            else if (param == "bypass")
                 p->setValueNotifyingHost((float)value);
         }
     }
@@ -329,6 +477,8 @@ void KeplerAudioProcessorEditor::loadAuthScreen()
     
     auto filePath = tempFile.getFullPathName().replace(" ", "%20");
     juce::String fileURL = "file://" + filePath;
+    
+    // Navigate to auth screen while webView is HIDDEN
     webView->goToURL(fileURL);
     // webView will be shown automatically via onPageFinishedLoading callback
     });
@@ -423,6 +573,27 @@ juce::String KeplerAudioProcessorEditor::loadAndDecryptLicenseFile()
 //==============================================================================
 void KeplerAudioProcessorEditor::timerCallback()
 {
-    // Periodically check authorization status
-    checkAuthorization();
+    if (!isAuthorized)
+    {
+        bool newAuthState = checkAuthorization();
+        if (newAuthState != isAuthorized)
+        {
+            isAuthorized = newAuthState;
+            if (isAuthorized)
+            {
+                loadWebUI();
+                startTimer(1000 * 60 * 15);
+            }
+        }
+    }
+}
+
+void KeplerAudioProcessorEditor::notifyMIDINote(int noteNumber, int velocity)
+{
+    if (webView != nullptr && isAuthorized)
+    {
+        juce::String script = "if (window.receiveMessageFromJUCE) { window.receiveMessageFromJUCE({ type: 'midiNote', note: " 
+            + juce::String(noteNumber) + ", velocity: " + juce::String(velocity) + " }); }";
+        webView->emitEventIfBrowserIsVisible("eval", script);
+    }
 }

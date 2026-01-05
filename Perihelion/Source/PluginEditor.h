@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    Perihelion - Velocity Sculptor
+    Perihelion - Timing Stabilizer
     MIDI FX Plugin Editor
 
   ==============================================================================
@@ -41,6 +41,9 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void timerCallback() override;
+    
+    // MIDI note notification
+    void notifyMIDINote(int noteNumber, int velocity);
 
 private:
     PerihelionAudioProcessor& audioProcessor;

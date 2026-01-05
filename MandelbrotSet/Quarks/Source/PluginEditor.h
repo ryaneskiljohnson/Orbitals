@@ -1,8 +1,8 @@
 /*
   ==============================================================================
 
-    Quarks - Color Charge Gate/Expander
-    Audio FX Plugin Editor
+    Quarks - Timing Stabilizer
+    MIDI FX Plugin Editor
 
   ==============================================================================
 */
@@ -38,11 +38,12 @@ public:
     QuarksAudioProcessorEditor (QuarksAudioProcessor&);
     ~QuarksAudioProcessorEditor() override;
 
-    //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
     void timerCallback() override;
-    void sendMeteringData();
+    
+    // MIDI note notification
+    void notifyMIDINote(int noteNumber, int velocity);
 
 private:
     QuarksAudioProcessor& audioProcessor;
@@ -55,7 +56,6 @@ private:
     void loadAuthScreen();
     void loadHTMLFile (const juce::File& htmlFile);
     void handleJavaScriptMessage (const juce::var& message);
-    void openAudioSettings();
     bool checkAuthorization();
     static juce::File getAuthFile();
     static juce::String loadAndDecryptLicenseFile();

@@ -16,6 +16,7 @@ ApogeeAudioProcessorEditor::ApogeeAudioProcessorEditor (ApogeeAudioProcessor& p)
 {
     // Make component opaque so black background shows through (like NNAudioAccess)
     setOpaque(true);
+    
     // Enable native title bar on the top-level window (for standalone builds)
     if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
         top_level->setUsingNativeTitleBar(true);
@@ -78,6 +79,7 @@ ApogeeAudioProcessorEditor::ApogeeAudioProcessorEditor (ApogeeAudioProcessor& p)
     };
     
     // Fallback: Show webView after 3 seconds if callback doesn't fire (like NNAudioAccess fallback)
+    // Longer delay ensures HTML/CSS is fully loaded and rendered
     juce::Timer::callAfterDelay(3000, [this]() {
         if (webView != nullptr && !webView->isVisible()) {
             webView->setVisible(true);
@@ -104,7 +106,6 @@ ApogeeAudioProcessorEditor::~ApogeeAudioProcessorEditor()
 {
 }
 
-//==============================================================================
 void ApogeeAudioProcessorEditor::paint (juce::Graphics& g)
 {
     g.fillAll (juce::Colours::black); // Fill with black background to prevent white flash (like NNAudioAccess)
@@ -151,6 +152,8 @@ void ApogeeAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
 {
     auto htmlContent = htmlFile.loadFileAsString();
     auto uiDir = htmlFile.getParentDirectory();
+    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+    auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
 
     // CRITICAL: Inject inline black styles FIRST (before any CSS links)
     // This prevents white flash - black background applies immediately when HTML loads
@@ -185,10 +188,8 @@ void ApogeeAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
             }
         }
     }
-    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
-    auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
 
-    // Inline CSS files
+    // Inline CSS
     auto cssFile = uiDir.getChildFile ("styles.css");
     if (cssFile.existsAsFile())
     {
@@ -215,7 +216,7 @@ void ApogeeAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
                                            "<style>" + designSystemContent + "</style>");
     }
 
-    // Inline JavaScript files
+    // Inline JavaScript
     auto jsFile = uiDir.getChildFile ("app.js");
     if (jsFile.existsAsFile())
     {
@@ -227,25 +228,22 @@ void ApogeeAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
     auto animationsFile = sharedDir.getChildFile ("orbitals-animations.js");
     if (animationsFile.existsAsFile())
     {
-        auto animationsContent = animationsFile.loadFileAsString();
         htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-animations.js\"></script>",
-                                           "<script>" + animationsContent + "</script>");
+                                           "<script>" + animationsFile.loadFileAsString() + "</script>");
     }
 
     auto particlesFile = sharedDir.getChildFile ("orbitals-particles.js");
     if (particlesFile.existsAsFile())
     {
-        auto particlesContent = particlesFile.loadFileAsString();
         htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-particles.js\"></script>",
-                                           "<script>" + particlesContent + "</script>");
+                                           "<script>" + particlesFile.loadFileAsString() + "</script>");
     }
 
     auto componentsFile = sharedDir.getChildFile ("orbitals-components.js");
     if (componentsFile.existsAsFile())
     {
-        auto componentsContent = componentsFile.loadFileAsString();
         htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-components.js\"></script>",
-                                           "<script>" + componentsContent + "</script>");
+                                           "<script>" + componentsFile.loadFileAsString() + "</script>");
     }
 
     // Handle background image
@@ -256,8 +254,8 @@ void ApogeeAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
         if (backgroundImage.loadFileAsData(imageData))
         {
             juce::String base64 = juce::Base64::toBase64(imageData.getData(), imageData.getSize());
-            juce::String dataURL = "data:image/png;base64," + base64;
-            htmlContent = htmlContent.replace("../../_Shared/Assets/backgrounds/apogee-background.png", dataURL);
+            htmlContent = htmlContent.replace("../../_Shared/Assets/backgrounds/apogee-background.png", 
+                                            "data:image/png;base64," + base64);
         }
     }
 
@@ -520,7 +518,7 @@ bool ApogeeAudioProcessorEditor::checkAuthorization()
     if (!product_list.isEmpty())
         expiration_date = juce::Time::fromISO8601(product_list[0]);
     
-    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200002"));
+    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200001"));
     
     if (authorized != isAuthorized)
     {
@@ -592,6 +590,17 @@ juce::String ApogeeAudioProcessorEditor::loadAndDecryptLicenseFile()
 //==============================================================================
 void ApogeeAudioProcessorEditor::timerCallback()
 {
-    // Periodically check authorization status
-    checkAuthorization();
+    if (!isAuthorized)
+    {
+        bool newAuthState = checkAuthorization();
+        if (newAuthState != isAuthorized)
+        {
+            isAuthorized = newAuthState;
+            if (isAuthorized)
+            {
+                loadWebUI();
+                startTimer(1000 * 60 * 15);
+            }
+        }
+    }
 }

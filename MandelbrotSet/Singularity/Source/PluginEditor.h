@@ -1,8 +1,8 @@
 /*
   ==============================================================================
 
-    Singularity - Black Hole Compressor
-    Audio FX Plugin Editor
+    Singularity - Timing Stabilizer
+    MIDI FX Plugin Editor
 
   ==============================================================================
 */
@@ -32,31 +32,26 @@ public:
 };
 
 //==============================================================================
-/**
-    Singularity Plugin Editor - WebView-based UI
-*/
 class SingularityAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Timer
 {
 public:
     SingularityAudioProcessorEditor (SingularityAudioProcessor&);
     ~SingularityAudioProcessorEditor() override;
 
-    //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
     void timerCallback() override;
-    void sendMeteringData();
+    
+    // MIDI note notification
+    void notifyMIDINote(int noteNumber, int velocity);
 
 private:
     SingularityAudioProcessor& audioProcessor;
-    
-    // WebView for CSS-based UI
     std::unique_ptr<WebBrowserWithCallbacks> webView;
     
     // Authentication state
     bool isAuthorized = false;
     
-    // Helper methods
     void loadWebUI();
     void loadAuthScreen();
     void loadHTMLFile (const juce::File& htmlFile);
@@ -64,7 +59,6 @@ private:
     bool checkAuthorization();
     static juce::File getAuthFile();
     static juce::String loadAndDecryptLicenseFile();
-    void openAudioSettings();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SingularityAudioProcessorEditor)
 };

@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    Tidal - Rhythmic Push & Pull
+    Tidal - Timing Stabilizer
     MIDI FX Plugin Editor Implementation
 
   ==============================================================================
@@ -16,6 +16,7 @@ TidalAudioProcessorEditor::TidalAudioProcessorEditor (TidalAudioProcessor& p)
 {
     // Make component opaque so black background shows through (like NNAudioAccess)
     setOpaque(true);
+    
     // Enable native title bar on the top-level window (for standalone builds)
     if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
         top_level->setUsingNativeTitleBar(true);
@@ -78,6 +79,7 @@ TidalAudioProcessorEditor::TidalAudioProcessorEditor (TidalAudioProcessor& p)
     };
     
     // Fallback: Show webView after 3 seconds if callback doesn't fire (like NNAudioAccess fallback)
+    // Longer delay ensures HTML/CSS is fully loaded and rendered
     juce::Timer::callAfterDelay(3000, [this]() {
         if (webView != nullptr && !webView->isVisible()) {
             webView->setVisible(true);
@@ -104,7 +106,6 @@ TidalAudioProcessorEditor::~TidalAudioProcessorEditor()
 {
 }
 
-//==============================================================================
 void TidalAudioProcessorEditor::paint (juce::Graphics& g)
 {
     g.fillAll (juce::Colours::black); // Fill with black background to prevent white flash (like NNAudioAccess)
@@ -151,6 +152,8 @@ void TidalAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
 {
     auto htmlContent = htmlFile.loadFileAsString();
     auto uiDir = htmlFile.getParentDirectory();
+    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+    auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
 
     // CRITICAL: Inject inline black styles FIRST (before any CSS links)
     // This prevents white flash - black background applies immediately when HTML loads
@@ -195,10 +198,6 @@ void TidalAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
                                            "<style>" + cssContent + "</style>");
     }
 
-    // Inline shared design system
-    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
-    auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
-    
     auto designSystemFile = sharedDir.getChildFile ("orbitals-design-system.css");
     if (designSystemFile.existsAsFile())
     {
@@ -217,7 +216,7 @@ void TidalAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
                                            "<style>" + designSystemContent + "</style>");
     }
 
-    // Inline JavaScript files
+    // Inline JavaScript
     auto jsFile = uiDir.getChildFile ("app.js");
     if (jsFile.existsAsFile())
     {
@@ -226,51 +225,59 @@ void TidalAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
                                            "<script>" + jsContent + "</script>");
     }
 
-    // Shared JS
     auto animationsFile = sharedDir.getChildFile ("orbitals-animations.js");
     if (animationsFile.existsAsFile())
     {
-        auto animationsContent = animationsFile.loadFileAsString();
         htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-animations.js\"></script>",
-                                           "<script>" + animationsContent + "</script>");
+                                           "<script>" + animationsFile.loadFileAsString() + "</script>");
     }
 
     auto particlesFile = sharedDir.getChildFile ("orbitals-particles.js");
     if (particlesFile.existsAsFile())
     {
-        auto particlesContent = particlesFile.loadFileAsString();
         htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-particles.js\"></script>",
-                                           "<script>" + particlesContent + "</script>");
+                                           "<script>" + particlesFile.loadFileAsString() + "</script>");
     }
 
     auto componentsFile = sharedDir.getChildFile ("orbitals-components.js");
     if (componentsFile.existsAsFile())
     {
-        auto componentsContent = componentsFile.loadFileAsString();
         htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-components.js\"></script>",
-                                           "<script>" + componentsContent + "</script>");
+                                           "<script>" + componentsFile.loadFileAsString() + "</script>");
     }
 
     // Handle background image
     auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/tidal-background.png");
     if (backgroundImage.existsAsFile())
     {
-        // Create data URL for the image
         juce::MemoryBlock imageData;
         if (backgroundImage.loadFileAsData(imageData))
         {
             juce::String base64 = juce::Base64::toBase64(imageData.getData(), imageData.getSize());
-            juce::String dataURL = "data:image/png;base64," + base64;
-            htmlContent = htmlContent.replace("../../_Shared/Assets/backgrounds/tidal-background.png", dataURL);
+            htmlContent = htmlContent.replace("../../_Shared/Assets/backgrounds/tidal-background.png", 
+                                            "data:image/png;base64," + base64);
         }
     }
 
+    // Disable right-click context menu
+    juce::String disableRightClickScript = R"(<script>
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+        document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
+    </script>)";
+    
+    // Inject script before closing body tag
+    if (htmlContent.contains("</body>"))
+        htmlContent = htmlContent.replace("</body>", disableRightClickScript + "</body>");
+    else if (htmlContent.contains("</html>"))
+        htmlContent = htmlContent.replace("</html>", disableRightClickScript + "</html>");
+    else
+        htmlContent += disableRightClickScript;
+    
     // Load HTML using temporary file approach (avoids data URL encoding issues)
-    // Create temporary directory for UI files
     auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
         .getChildFile("TidalUI_" + juce::String(juce::Time::currentTimeMillis()));
     tempDir.createDirectory();
-
+    
     // Copy logo image to temp directory if it exists
     auto logosDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("logos");
     auto logoFile = logosDir.getChildFile ("nnaudio-logo.png");
@@ -279,17 +286,46 @@ void TidalAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
         auto tempLogoFile = tempDir.getChildFile ("nnaudio-logo.png");
         logoFile.copyFileTo (tempLogoFile);
     }
-
-    // Write HTML to temp file
+    
     auto tempFile = tempDir.getChildFile("index.html");
     tempFile.replaceWithText(htmlContent);
     
-    // Copy any referenced assets if needed (background images already inlined as base64)
-    
-    // Load via file:// URL
     auto filePath = tempFile.getFullPathName().replace(" ", "%20");
     juce::String fileURL = "file://" + filePath;
     webView->goToURL(fileURL);
+}
+
+void TidalAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
+{
+    if (!message.isObject())
+        return;
+
+    auto obj = message.getDynamicObject();
+    if (obj == nullptr)
+        return;
+
+    auto type = obj->getProperty("type").toString();
+    
+    if (type == "parameterChange")
+    {
+        auto param = obj->getProperty("parameter").toString();
+        auto value = obj->getProperty("value");
+
+        auto* p = audioProcessor.parameters.getParameter(param);
+        if (p != nullptr)
+        {
+            if (param == "expansion")
+                p->setValueNotifyingHost((float)value / 100.0f);
+            else if (param == "threshold")
+                p->setValueNotifyingHost((float)value / 127.0f);
+            else if (param == "ceiling")
+                p->setValueNotifyingHost((float)value / 127.0f);
+            else if (param == "curve")
+                p->setValueNotifyingHost((float)value / 100.0f);
+            else if (param == "bypass")
+                p->setValueNotifyingHost((float)value);
+        }
+    }
 }
 
 //==============================================================================
@@ -535,67 +571,29 @@ juce::String TidalAudioProcessorEditor::loadAndDecryptLicenseFile()
 }
 
 //==============================================================================
-//==============================================================================
 void TidalAudioProcessorEditor::timerCallback()
 {
-    // Periodically check authorization status
-    checkAuthorization();
+    if (!isAuthorized)
+    {
+        bool newAuthState = checkAuthorization();
+        if (newAuthState != isAuthorized)
+        {
+            isAuthorized = newAuthState;
+            if (isAuthorized)
+            {
+                loadWebUI();
+                startTimer(1000 * 60 * 15);
+            }
+        }
+    }
 }
 
-//==============================================================================
-void TidalAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
+void TidalAudioProcessorEditor::notifyMIDINote(int noteNumber, int velocity)
 {
-    if (!message.isObject())
-        return;
-
-    auto obj = message.getDynamicObject();
-    if (obj == nullptr)
-        return;
-
-    auto type = obj->getProperty("type").toString();
-    
-    if (type == "parameterChange")
+    if (webView != nullptr && isAuthorized)
     {
-        auto param = obj->getProperty("parameter").toString();
-        auto value = obj->getProperty("value");
-
-        if (param == "amplitude")
-        {
-            auto* p = audioProcessor.parameters.getParameter(TidalAudioProcessor::PARAM_AMPLITUDE);
-            if (p != nullptr)
-                p->setValueNotifyingHost((float)value / 100.0f);
-        }
-        else if (param == "phase")
-        {
-            auto* p = audioProcessor.parameters.getParameter(TidalAudioProcessor::PARAM_PHASE);
-            if (p != nullptr)
-                p->setValueNotifyingHost((float)value / 360.0f);
-        }
-        else if (param == "rate")
-        {
-            juce::String rateStr = value.toString();
-            int rateIndex = 0;
-            if (rateStr == "1/4") rateIndex = 0;
-            else if (rateStr == "1/8") rateIndex = 1;
-            else if (rateStr == "1/16") rateIndex = 2;
-            else if (rateStr == "1/32") rateIndex = 3;
-            
-            auto* p = audioProcessor.parameters.getParameter(TidalAudioProcessor::PARAM_RATE);
-            if (p != nullptr)
-                p->setValueNotifyingHost(rateIndex / 3.0f);
-        }
-        else if (param == "shape")
-        {
-            juce::String shapeStr = value.toString();
-            int shapeIndex = 0;
-            if (shapeStr == "sine") shapeIndex = 0;
-            else if (shapeStr == "triangle") shapeIndex = 1;
-            else if (shapeStr == "saw") shapeIndex = 2;
-            else if (shapeStr == "square") shapeIndex = 3;
-            
-            auto* p = audioProcessor.parameters.getParameter(TidalAudioProcessor::PARAM_SHAPE);
-            if (p != nullptr)
-                p->setValueNotifyingHost(shapeIndex / 3.0f);
-        }
+        juce::String script = "if (window.receiveMessageFromJUCE) { window.receiveMessageFromJUCE({ type: 'midiNote', note: " 
+            + juce::String(noteNumber) + ", velocity: " + juce::String(velocity) + " }); }";
+        webView->emitEventIfBrowserIsVisible("eval", script);
     }
 }

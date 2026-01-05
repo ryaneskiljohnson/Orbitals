@@ -32,30 +32,23 @@ public:
 };
 
 //==============================================================================
-/**
-    Apogee Plugin Editor - WebView-based UI
-*/
 class ApogeeAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Timer
 {
 public:
     ApogeeAudioProcessorEditor (ApogeeAudioProcessor&);
     ~ApogeeAudioProcessorEditor() override;
 
-    //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
     void timerCallback() override;
 
 private:
     ApogeeAudioProcessor& audioProcessor;
-    
-    // WebView for CSS-based UI
     std::unique_ptr<WebBrowserWithCallbacks> webView;
     
     // Authentication state
     bool isAuthorized = false;
     
-    // Helper methods
     void loadWebUI();
     void loadAuthScreen();
     void loadHTMLFile (const juce::File& htmlFile);

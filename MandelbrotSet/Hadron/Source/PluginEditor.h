@@ -1,8 +1,8 @@
 /*
   ==============================================================================
 
-    Hadron - Particle Collision Saturation
-    Audio FX Plugin Editor
+    Hadron - Timing Stabilizer
+    MIDI FX Plugin Editor
 
   ==============================================================================
 */
@@ -41,7 +41,9 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void timerCallback() override;
-    void sendMeteringData();
+    
+    // MIDI note notification
+    void notifyMIDINote(int noteNumber, int velocity);
 
 private:
     HadronAudioProcessor& audioProcessor;
@@ -54,7 +56,6 @@ private:
     void loadAuthScreen();
     void loadHTMLFile (const juce::File& htmlFile);
     void handleJavaScriptMessage (const juce::var& message);
-    void openAudioSettings();
     bool checkAuthorization();
     static juce::File getAuthFile();
     static juce::String loadAndDecryptLicenseFile();

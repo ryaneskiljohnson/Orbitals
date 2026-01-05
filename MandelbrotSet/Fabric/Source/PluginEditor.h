@@ -13,7 +13,8 @@
 #include "PluginProcessor.h"
 
 //==============================================================================
-// Helper class to handle WebBrowserComponent callbacks (like NNAudioAccess)
+
+// Helper class to handle WebBrowserComponent callbacks (like Zenith)
 class WebBrowserWithCallbacks : public juce::WebBrowserComponent
 {
 public:
@@ -31,7 +32,6 @@ public:
     }
 };
 
-//==============================================================================
 /**
     Fabric Plugin Editor - WebView-based UI
 */

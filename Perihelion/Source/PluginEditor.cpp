@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    Perihelion - Velocity Sculptor
+    Perihelion - Timing Stabilizer
     MIDI FX Plugin Editor Implementation
 
   ==============================================================================
@@ -9,7 +9,6 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "../../_Shared/Source/OrbitalsPluginEditor.h"
 
 //==============================================================================
 PerihelionAudioProcessorEditor::PerihelionAudioProcessorEditor (PerihelionAudioProcessor& p)
@@ -17,6 +16,7 @@ PerihelionAudioProcessorEditor::PerihelionAudioProcessorEditor (PerihelionAudioP
 {
     // Make component opaque so black background shows through (like NNAudioAccess)
     setOpaque(true);
+    
     // Enable native title bar on the top-level window (for standalone builds)
     if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
         top_level->setUsingNativeTitleBar(true);
@@ -79,6 +79,7 @@ PerihelionAudioProcessorEditor::PerihelionAudioProcessorEditor (PerihelionAudioP
     };
     
     // Fallback: Show webView after 3 seconds if callback doesn't fire (like NNAudioAccess fallback)
+    // Longer delay ensures HTML/CSS is fully loaded and rendered
     juce::Timer::callAfterDelay(3000, [this]() {
         if (webView != nullptr && !webView->isVisible()) {
             webView->setVisible(true);
@@ -118,49 +119,8 @@ void PerihelionAudioProcessorEditor::resized()
 
 void PerihelionAudioProcessorEditor::loadWebUI()
 {
-    // First, load a minimal black HTML to prevent white flash (like NNAudioAccess)
-    juce::String blackHTML = R"(<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perihelion</title>
-    <style>
-        /* Set background to black immediately to prevent white flash */
-        html, body { 
-            background-color: #000000; 
-            margin: 0; 
-            padding: 0; 
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-    </style>
-</head>
-<body></body>
-</html>)";
-    
-    // Load black HTML using temporary file
-    auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
-        .getChildFile("PerihelionUI_" + juce::String(juce::Time::currentTimeMillis()));
-    tempDir.createDirectory();
-    
-    auto blackFile = tempDir.getChildFile("black.html");
-    blackFile.replaceWithText(blackHTML);
-    auto blackFilePath = blackFile.getFullPathName().replace(" ", "%20");
-    juce::String blackFileURL = "file://" + blackFilePath;
-    // Load black HTML first (while webView is still hidden)
-    webView->goToURL(blackFileURL);
-    
-    // Show webView after a brief delay to ensure black HTML has loaded
-    // This prevents white flash - parent's black background shows until webView is visible
-    juce::Timer::callAfterDelay(50, [this]()
-    {
-        webView->setVisible(true);
-        addAndMakeVisible(webView.get());
-    });
-    
-    // Then load the actual UI after a brief delay to ensure black page is rendered
+    // Navigate DIRECTLY to actual content while webView is HIDDEN (like NNAudioAccess)
+    // Content has inline black styles, so it will be black when it loads
     juce::MessageManager::callAsync([this]()
     {
         // Find UI files relative to plugin binary
@@ -179,12 +139,160 @@ void PerihelionAudioProcessorEditor::loadWebUI()
         if (htmlFile.existsAsFile())
         {
             loadHTMLFile(htmlFile);
+            // webView will be shown automatically via onPageFinishedLoading callback
         }
         else
         {
             DBG ("Could not find index.html");
         }
     });
+}
+
+void PerihelionAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
+{
+    auto htmlContent = htmlFile.loadFileAsString();
+    auto uiDir = htmlFile.getParentDirectory();
+    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+    auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
+
+    // CRITICAL: Inject inline black styles FIRST (before any CSS links)
+    // This prevents white flash - black background applies immediately when HTML loads
+    juce::String blackStyles = R"(<style>
+        /* Set background to black immediately to prevent white flash */
+        html, body { 
+            background-color: #000000 !important; 
+            margin: 0; 
+            padding: 0; 
+        }
+    </style>)";
+    
+    // Inject black styles right after <head> tag (before any CSS links)
+    if (htmlContent.contains("<head>"))
+    {
+        htmlContent = htmlContent.replace("<head>", "<head>\n    " + blackStyles);
+    }
+    else if (htmlContent.contains("<head "))
+    {
+        // Handle <head> with attributes - find the closing > of <head ...>
+        int headStart = htmlContent.indexOf("<head");
+        if (headStart >= 0)
+        {
+            // Find the closing > after <head
+            for (int i = headStart; i < htmlContent.length(); ++i)
+            {
+                if (htmlContent[i] == '>')
+                {
+                    htmlContent = htmlContent.substring(0, i + 1) + "\n    " + blackStyles + htmlContent.substring(i + 1);
+                    break;
+                }
+            }
+        }
+    }
+
+    // Inline CSS
+    auto cssFile = uiDir.getChildFile ("styles.css");
+    if (cssFile.existsAsFile())
+    {
+        auto cssContent = cssFile.loadFileAsString();
+        htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"styles.css\">",
+                                           "<style>" + cssContent + "</style>");
+    }
+
+    auto designSystemFile = sharedDir.getChildFile ("orbitals-design-system.css");
+    if (designSystemFile.existsAsFile())
+    {
+        auto designSystemContent = designSystemFile.loadFileAsString();
+        
+        // Replace logo image path with relative path for temp directory
+        // Handle both single and double quotes
+        juce::String logoPattern = "../../_Shared/Assets/logos/nnaudio-logo.png";
+        juce::String logoOldPattern1 = "url('" + logoPattern + "')";
+        juce::String logoOldPattern2 = "url(\"" + logoPattern + "\")";
+        juce::String logoNewPattern = "url('nnaudio-logo.png')";
+        designSystemContent = designSystemContent.replace (logoOldPattern1, logoNewPattern);
+        designSystemContent = designSystemContent.replace (logoOldPattern2, logoNewPattern);
+        
+        htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"../../_Shared/UI/orbitals-design-system.css\">",
+                                           "<style>" + designSystemContent + "</style>");
+    }
+
+    // Inline JavaScript
+    auto jsFile = uiDir.getChildFile ("app.js");
+    if (jsFile.existsAsFile())
+    {
+        auto jsContent = jsFile.loadFileAsString();
+        htmlContent = htmlContent.replace ("<script src=\"app.js\"></script>",
+                                           "<script>" + jsContent + "</script>");
+    }
+
+    auto animationsFile = sharedDir.getChildFile ("orbitals-animations.js");
+    if (animationsFile.existsAsFile())
+    {
+        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-animations.js\"></script>",
+                                           "<script>" + animationsFile.loadFileAsString() + "</script>");
+    }
+
+    auto particlesFile = sharedDir.getChildFile ("orbitals-particles.js");
+    if (particlesFile.existsAsFile())
+    {
+        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-particles.js\"></script>",
+                                           "<script>" + particlesFile.loadFileAsString() + "</script>");
+    }
+
+    auto componentsFile = sharedDir.getChildFile ("orbitals-components.js");
+    if (componentsFile.existsAsFile())
+    {
+        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-components.js\"></script>",
+                                           "<script>" + componentsFile.loadFileAsString() + "</script>");
+    }
+
+    // Handle background image
+    auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/perihelion-background.png");
+    if (backgroundImage.existsAsFile())
+    {
+        juce::MemoryBlock imageData;
+        if (backgroundImage.loadFileAsData(imageData))
+        {
+            juce::String base64 = juce::Base64::toBase64(imageData.getData(), imageData.getSize());
+            htmlContent = htmlContent.replace("../../_Shared/Assets/backgrounds/perihelion-background.png", 
+                                            "data:image/png;base64," + base64);
+        }
+    }
+
+    // Disable right-click context menu
+    juce::String disableRightClickScript = R"(<script>
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+        document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
+    </script>)";
+    
+    // Inject script before closing body tag
+    if (htmlContent.contains("</body>"))
+        htmlContent = htmlContent.replace("</body>", disableRightClickScript + "</body>");
+    else if (htmlContent.contains("</html>"))
+        htmlContent = htmlContent.replace("</html>", disableRightClickScript + "</html>");
+    else
+        htmlContent += disableRightClickScript;
+    
+    // Load HTML using temporary file approach (avoids data URL encoding issues)
+    auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
+        .getChildFile("PerihelionUI_" + juce::String(juce::Time::currentTimeMillis()));
+    tempDir.createDirectory();
+    
+    // Copy logo image to temp directory if it exists
+    auto logosDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("logos");
+    auto logoFile = logosDir.getChildFile ("nnaudio-logo.png");
+    if (logoFile.existsAsFile())
+    {
+        auto tempLogoFile = tempDir.getChildFile ("nnaudio-logo.png");
+        logoFile.copyFileTo (tempLogoFile);
+    }
+    
+    auto tempFile = tempDir.getChildFile("index.html");
+    tempFile.replaceWithText(htmlContent);
+    
+    auto filePath = tempFile.getFullPathName().replace(" ", "%20");
+    juce::String fileURL = "file://" + filePath;
+    webView->goToURL(fileURL);
 }
 
 void PerihelionAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
@@ -203,34 +311,18 @@ void PerihelionAudioProcessorEditor::handleJavaScriptMessage (const juce::var& m
         auto param = obj->getProperty("parameter").toString();
         auto value = obj->getProperty("value");
 
-        if (param == "gravity")
+        auto* p = audioProcessor.parameters.getParameter(param);
+        if (p != nullptr)
         {
-            auto* p = audioProcessor.parameters.getParameter(PerihelionAudioProcessor::PARAM_GRAVITY);
-            if (p != nullptr)
+            if (param == "expansion")
                 p->setValueNotifyingHost((float)value / 100.0f);
-        }
-        else if (param == "orbit")
-        {
-            auto* p = audioProcessor.parameters.getParameter(PerihelionAudioProcessor::PARAM_ORBIT);
-            if (p != nullptr)
+            else if (param == "threshold")
+                p->setValueNotifyingHost((float)value / 127.0f);
+            else if (param == "ceiling")
+                p->setValueNotifyingHost((float)value / 127.0f);
+            else if (param == "curve")
                 p->setValueNotifyingHost((float)value / 100.0f);
-        }
-        else if (param == "solarPoint")
-        {
-            auto* p = audioProcessor.parameters.getParameter(PerihelionAudioProcessor::PARAM_SOLAR_POINT);
-            if (p != nullptr)
-                p->setValueNotifyingHost(((int)value - 1) / 126.0f);
-        }
-        else if (param == "bias")
-        {
-            auto* p = audioProcessor.parameters.getParameter(PerihelionAudioProcessor::PARAM_BIAS);
-            if (p != nullptr)
-                p->setValueNotifyingHost(((float)value + 100.0f) / 200.0f);
-        }
-        else if (param == "bypass")
-        {
-            auto* p = audioProcessor.parameters.getParameter(PerihelionAudioProcessor::PARAM_BYPASS);
-            if (p != nullptr)
+            else if (param == "bypass")
                 p->setValueNotifyingHost((float)value);
         }
     }
@@ -239,59 +331,25 @@ void PerihelionAudioProcessorEditor::handleJavaScriptMessage (const juce::var& m
 //==============================================================================
 void PerihelionAudioProcessorEditor::loadAuthScreen()
 {
-    // First, load a minimal black HTML to prevent white flash (like NNAudioAccess)
-    juce::String blackHTML = R"(<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perihelion</title>
-    <style>
-        /* Set background to black immediately to prevent white flash */
-        html, body { 
-            background-color: #000000; 
-            margin: 0; 
-            padding: 0; 
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-    </style>
-</head>
-<body></body>
-</html>)";
-    
-    // Load black HTML using temporary file
-    auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
-        .getChildFile("PerihelionAuth_" + juce::String(juce::Time::currentTimeMillis()));
-    tempDir.createDirectory();
-    
-    auto blackFile = tempDir.getChildFile("black.html");
-    blackFile.replaceWithText(blackHTML);
-    auto blackFilePath = blackFile.getFullPathName().replace(" ", "%20");
-    juce::String blackFileURL = "file://" + blackFilePath;
-    // Load black HTML first (while webView is still hidden)
-    webView->goToURL(blackFileURL);
-    
-    // Show webView after a brief delay to ensure black HTML has loaded
-    // This prevents white flash - parent's black background shows until webView is visible
-    juce::Timer::callAfterDelay(50, [this]()
-    {
-        webView->setVisible(true);
-        addAndMakeVisible(webView.get());
-    });
-    
-    // Then load the actual auth screen after a brief delay
+    // Navigate DIRECTLY to auth content while webView is HIDDEN (like NNAudioAccess)
+    // Content has inline black styles, so it will be black when it loads
     juce::MessageManager::callAsync([this]()
     {
         // Create auth HTML content with background image
-        juce::String authHTML = R"(<!DOCTYPE html>// Create auth HTML content with background image
-    juce::String authHTML = R"(<!DOCTYPE html>
+        juce::String authHTML = R"(<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perihelion - Authentication Required</title>
+    <style>
+        /* Set background to black immediately to prevent white flash */
+        html, body { 
+            background-color: #000000 !important; 
+            margin: 0; 
+            padding: 0; 
+        }
+    </style>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
@@ -419,8 +477,12 @@ void PerihelionAudioProcessorEditor::loadAuthScreen()
     
     auto filePath = tempFile.getFullPathName().replace(" ", "%20");
     juce::String fileURL = "file://" + filePath;
+    
+    // Navigate to auth screen while webView is HIDDEN
     webView->goToURL(fileURL);
-}    });
+    // webView will be shown automatically via onPageFinishedLoading callback
+    });
+}
 
 //==============================================================================
 bool PerihelionAudioProcessorEditor::checkAuthorization()
@@ -511,6 +573,27 @@ juce::String PerihelionAudioProcessorEditor::loadAndDecryptLicenseFile()
 //==============================================================================
 void PerihelionAudioProcessorEditor::timerCallback()
 {
-    // Periodically check authorization status
-    checkAuthorization();
+    if (!isAuthorized)
+    {
+        bool newAuthState = checkAuthorization();
+        if (newAuthState != isAuthorized)
+        {
+            isAuthorized = newAuthState;
+            if (isAuthorized)
+            {
+                loadWebUI();
+                startTimer(1000 * 60 * 15);
+            }
+        }
+    }
+}
+
+void PerihelionAudioProcessorEditor::notifyMIDINote(int noteNumber, int velocity)
+{
+    if (webView != nullptr && isAuthorized)
+    {
+        juce::String script = "if (window.receiveMessageFromJUCE) { window.receiveMessageFromJUCE({ type: 'midiNote', note: " 
+            + juce::String(noteNumber) + ", velocity: " + juce::String(velocity) + " }); }";
+        webView->emitEventIfBrowserIsVisible("eval", script);
+    }
 }
