@@ -14,6 +14,9 @@
 //==============================================================================
 RetrogradeAudioProcessorEditor::RetrogradeAudioProcessorEditor (RetrogradeAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
+    // Make component opaque so black background shows through (like NNAudioAccess)
+    setOpaque(true);
+
 {
     // Enable native title bar on the top-level window (for standalone builds)
     if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
@@ -25,14 +28,65 @@ RetrogradeAudioProcessorEditor::RetrogradeAudioProcessorEditor (RetrogradeAudioP
     // Create WebView with native integration enabled for message passing
     auto options = juce::WebBrowserComponent::Options{}
         .withNativeIntegrationEnabled (true)
+        .withKeepPageLoadedWhenBrowserIsHidden() // Keep page loaded when hidden (like NNAudioAccess)
         .withEventListener ("message", [this](const juce::var& message) {
             handleJavaScriptMessage (message);
         });
 
-    webView = std::make_unique<juce::WebBrowserComponent> (options);
-    webView->setOpaque (false);
-    addAndMakeVisible (webView.get());
+    webView = std::make_unique<WebBrowserWithCallbacks> (options);
+    // Don't call setOpaque(false) - it causes white background flash
+    addChildComponent (webView.get()); // Add as child but keep hidden until page loads
     webView->setBounds (getLocalBounds());
+    webView->setVisible (false); // Start hidden to avoid white screen flash
+    
+    // Set up page finished loading callback - show webView only after page loads AND renders (like NNAudioAccess)
+    webView->onPageFinishedLoading = [this](const juce::String& url) {
+        juce::MessageManager::callAsync([this]() {
+            // Wait 2 seconds to ensure HTML with inline black styles has fully rendered
+            // Then verify background is black before showing
+            juce::Timer::callAfterDelay(2000, [this]() {
+                if (webView == nullptr || webView->isVisible()) return;
+                
+                // Verify background is black via JavaScript before showing
+                juce::String checkScript = R"(
+                    (function() {
+                        if (!document.body) return false;
+                        var style = window.getComputedStyle(document.body);
+                        var bg = style.backgroundColor;
+                        return bg === 'rgb(0, 0, 0)' || bg === 'black' || bg.indexOf('0, 0, 0') >= 0;
+                    })();
+                )";
+                
+                webView->evaluateJavascript(checkScript, [this](const juce::WebBrowserComponent::EvaluationResult& result) {
+                    if (webView == nullptr || webView->isVisible()) return;
+                    
+                    bool isBlack = false;
+                    if (auto* value = result.getResult()) {
+                        if (value->isBool()) {
+                            isBlack = static_cast<bool>(*value);
+                        }
+                    }
+                    
+                    // Show if black, or after additional delay if not confirmed
+                    juce::Timer::callAfterDelay(isBlack ? 0 : 500, [this]() {
+                        if (webView != nullptr && !webView->isVisible()) {
+                            webView->setVisible(true);
+                            repaint();
+                        }
+                    });
+                });
+            });
+        });
+    };
+    
+    // Fallback: Show webView after 3 seconds if callback doesn't fire (like NNAudioAccess fallback)
+    // Longer delay ensures HTML/CSS is fully loaded and rendered
+    juce::Timer::callAfterDelay(3000, [this]() {
+        if (webView != nullptr && !webView->isVisible()) {
+            webView->setVisible(true);
+            repaint();
+        }
+    });
     
     // Check authorization first, then load appropriate UI
     isAuthorized = checkAuthorization();
@@ -55,7 +109,7 @@ RetrogradeAudioProcessorEditor::~RetrogradeAudioProcessorEditor()
 
 void RetrogradeAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    g.fillAll (juce::Colour (0xff12121a));
+    g.fillAll (juce::Colours::black); // Fill with black background to prevent white flash (like NNAudioAccess)
 }
 
 void RetrogradeAudioProcessorEditor::resized()
@@ -66,31 +120,73 @@ void RetrogradeAudioProcessorEditor::resized()
 
 void RetrogradeAudioProcessorEditor::loadWebUI()
 {
-    auto htmlContent = OrbitalsEditorHelpers::loadPluginHTML("Retrograde");
-    if (htmlContent.isNotEmpty())
-    {
-            // Load HTML using temporary file approach (avoids data URL encoding issues)
+    // First, load a minimal black HTML to prevent white flash (like NNAudioAccess)
+    juce::String blackHTML = R"(<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrograde</title>
+    <style>
+        /* Set background to black immediately to prevent white flash */
+        html, body { 
+            background-color: #000000; 
+            margin: 0; 
+            padding: 0; 
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body></body>
+</html>)";
+    
+    // Load black HTML using temporary file
     auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
         .getChildFile("RetrogradeUI_" + juce::String(juce::Time::currentTimeMillis()));
     tempDir.createDirectory();
     
-    // Copy logo image to temp directory if it exists
-    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
-    auto logosDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("logos");
-    auto logoFile = logosDir.getChildFile ("nnaudio-logo.png");
-    if (logoFile.existsAsFile())
+    auto blackFile = tempDir.getChildFile("black.html");
+    blackFile.replaceWithText(blackHTML);
+    auto blackFilePath = blackFile.getFullPathName().replace(" ", "%20");
+    juce::String blackFileURL = "file://" + blackFilePath;
+    // Load black HTML first (while webView is still hidden)
+    webView->goToURL(blackFileURL);
+    
+    // Show webView after a brief delay to ensure black HTML has loaded
+    // This prevents white flash - parent's black background shows until webView is visible
+    juce::Timer::callAfterDelay(50, [this]()
     {
-        auto tempLogoFile = tempDir.getChildFile ("nnaudio-logo.png");
-        logoFile.copyFileTo (tempLogoFile);
-    }
+        webView->setVisible(true);
+        addAndMakeVisible(webView.get());
+    });
     
-    auto tempFile = tempDir.getChildFile("index.html");
-    tempFile.replaceWithText(htmlContent);
-    
-    auto filePath = tempFile.getFullPathName().replace(" ", "%20");
-    juce::String fileURL = "file://" + filePath;
-    webView->goToURL(fileURL);
-    }
+    // Then load the actual UI after a brief delay to ensure black page is rendered
+    juce::MessageManager::callAsync([this]()
+    {
+        // Find UI files relative to plugin binary
+        auto htmlFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+            .getParentDirectory()
+            .getChildFile("Resources")
+            .getChildFile("index.html");
+
+        // Fallback: try development path
+        if (!htmlFile.existsAsFile())
+        {
+            auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+            htmlFile = projectRoot.getChildFile ("Retrograde").getChildFile ("UI").getChildFile ("index.html");
+        }
+
+        if (htmlFile.existsAsFile())
+        {
+            loadHTMLFile(htmlFile);
+        }
+        else
+        {
+            DBG ("Could not find index.html");
+        }
+    });
 }
 
 void RetrogradeAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
@@ -134,7 +230,53 @@ void RetrogradeAudioProcessorEditor::handleJavaScriptMessage (const juce::var& m
 //==============================================================================
 void RetrogradeAudioProcessorEditor::loadAuthScreen()
 {
-    // Create auth HTML content with background image
+    // First, load a minimal black HTML to prevent white flash (like NNAudioAccess)
+    juce::String blackHTML = R"(<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrograde</title>
+    <style>
+        /* Set background to black immediately to prevent white flash */
+        html, body { 
+            background-color: #000000; 
+            margin: 0; 
+            padding: 0; 
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body></body>
+</html>)";
+    
+    // Load black HTML using temporary file
+    auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
+        .getChildFile("RetrogradeAuth_" + juce::String(juce::Time::currentTimeMillis()));
+    tempDir.createDirectory();
+    
+    auto blackFile = tempDir.getChildFile("black.html");
+    blackFile.replaceWithText(blackHTML);
+    auto blackFilePath = blackFile.getFullPathName().replace(" ", "%20");
+    juce::String blackFileURL = "file://" + blackFilePath;
+    // Load black HTML first (while webView is still hidden)
+    webView->goToURL(blackFileURL);
+    
+    // Show webView after a brief delay to ensure black HTML has loaded
+    // This prevents white flash - parent's black background shows until webView is visible
+    juce::Timer::callAfterDelay(50, [this]()
+    {
+        webView->setVisible(true);
+        addAndMakeVisible(webView.get());
+    });
+    
+    // Then load the actual auth screen after a brief delay
+    juce::MessageManager::callAsync([this]()
+    {
+        // Create auth HTML content with background image
+        juce::String authHTML = R"(<!DOCTYPE html>// Create auth HTML content with background image
     juce::String authHTML = R"(<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -269,7 +411,7 @@ void RetrogradeAudioProcessorEditor::loadAuthScreen()
     auto filePath = tempFile.getFullPathName().replace(" ", "%20");
     juce::String fileURL = "file://" + filePath;
     webView->goToURL(fileURL);
-}
+}    });
 
 //==============================================================================
 bool RetrogradeAudioProcessorEditor::checkAuthorization()

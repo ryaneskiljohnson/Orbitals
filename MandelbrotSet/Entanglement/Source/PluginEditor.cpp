@@ -9,11 +9,17 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#if JucePlugin_Build_Standalone
+#include <juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h>
+#endif
 #include "../../_Shared/Source/MandelbrotEditorHelpers.h"
 
 //==============================================================================
 EntanglementAudioProcessorEditor::EntanglementAudioProcessorEditor (EntanglementAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
+    // Make component opaque so black background shows through (like NNAudioAccess)
+    setOpaque(true);
+
 {
     // Enable native title bar on the top-level window (for standalone builds)
     if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
@@ -25,14 +31,65 @@ EntanglementAudioProcessorEditor::EntanglementAudioProcessorEditor (Entanglement
     // Create WebView with native integration enabled for message passing
     auto options = juce::WebBrowserComponent::Options{}
         .withNativeIntegrationEnabled (true)
+        .withKeepPageLoadedWhenBrowserIsHidden() // Keep page loaded when hidden (like NNAudioAccess)
         .withEventListener ("message", [this](const juce::var& message) {
             handleJavaScriptMessage (message);
         });
 
-    webView = std::make_unique<juce::WebBrowserComponent> (options);
-    webView->setOpaque (false);
-    addAndMakeVisible (webView.get());
+    webView = std::make_unique<WebBrowserWithCallbacks> (options);
+    // Don't call setOpaque(false) - it causes white background flash
+    addChildComponent (webView.get()); // Add as child but keep hidden until page loads
     webView->setBounds (getLocalBounds());
+    webView->setVisible (false); // Start hidden to avoid white screen flash
+    
+    // Set up page finished loading callback - show webView only after page loads AND renders (like NNAudioAccess)
+    webView->onPageFinishedLoading = [this](const juce::String& url) {
+        juce::MessageManager::callAsync([this]() {
+            // Wait 2 seconds to ensure HTML with inline black styles has fully rendered
+            // Then verify background is black before showing
+            juce::Timer::callAfterDelay(2000, [this]() {
+                if (webView == nullptr || webView->isVisible()) return;
+                
+                // Verify background is black via JavaScript before showing
+                juce::String checkScript = R"(
+                    (function() {
+                        if (!document.body) return false;
+                        var style = window.getComputedStyle(document.body);
+                        var bg = style.backgroundColor;
+                        return bg === 'rgb(0, 0, 0)' || bg === 'black' || bg.indexOf('0, 0, 0') >= 0;
+                    })();
+                )";
+                
+                webView->evaluateJavascript(checkScript, [this](const juce::WebBrowserComponent::EvaluationResult& result) {
+                    if (webView == nullptr || webView->isVisible()) return;
+                    
+                    bool isBlack = false;
+                    if (auto* value = result.getResult()) {
+                        if (value->isBool()) {
+                            isBlack = static_cast<bool>(*value);
+                        }
+                    }
+                    
+                    // Show if black, or after additional delay if not confirmed
+                    juce::Timer::callAfterDelay(isBlack ? 0 : 500, [this]() {
+                        if (webView != nullptr && !webView->isVisible()) {
+                            webView->setVisible(true);
+                            repaint();
+                        }
+                    });
+                });
+            });
+        });
+    };
+    
+    // Fallback: Show webView after 3 seconds if callback doesn't fire (like NNAudioAccess fallback)
+    // Longer delay ensures HTML/CSS is fully loaded and rendered
+    juce::Timer::callAfterDelay(3000, [this]() {
+        if (webView != nullptr && !webView->isVisible()) {
+            webView->setVisible(true);
+            repaint();
+        }
+    });
     
     // Check authorization first, then load appropriate UI
     isAuthorized = checkAuthorization();
@@ -40,6 +97,15 @@ EntanglementAudioProcessorEditor::EntanglementAudioProcessorEditor (Entanglement
     if (isAuthorized)
     {
         loadWebUI();
+        
+        // Show settings button only in standalone builds
+#if JucePlugin_Build_Standalone
+        juce::String showSettingsScript = "if (document.getElementById('settingsButton')) { document.getElementById('settingsButton').style.display = 'flex'; }";
+        webView->emitEventIfBrowserIsVisible("eval", showSettingsScript);
+#else
+        juce::String hideSettingsScript = "if (document.getElementById('settingsButton')) { document.getElementById('settingsButton').style.display = 'none'; }";
+        webView->emitEventIfBrowserIsVisible("eval", hideSettingsScript);
+#endif
         startTimer(50); // Re-check every 15 minutes
     }
     else
@@ -53,9 +119,61 @@ EntanglementAudioProcessorEditor::~EntanglementAudioProcessorEditor()
 {
 }
 
+
+//==============================================================================
+void EntanglementAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
+{
+    if (!message.isObject())
+        return;
+
+    auto obj = message.getDynamicObject();
+    if (obj == nullptr)
+        return;
+
+    auto type = obj->getProperty("type").toString();
+    
+    if (type == "parameterChange")
+    {
+        auto param = obj->getProperty("parameter").toString();
+        auto value = obj->getProperty("value");
+
+        auto* p = audioProcessor.parameters.getParameter(param);
+        if (p != nullptr)
+        {
+            if (param == "time")
+                p->setValueNotifyingHost(p->convertTo0to1(value));
+            if (param == "feedback")
+                p->setValueNotifyingHost(p->convertTo0to1(value));
+            if (param == "mix")
+                p->setValueNotifyingHost(p->convertTo0to1(value));
+            if (param == "damping")
+                p->setValueNotifyingHost(p->convertTo0to1(value));
+            else if (param == "bypass")
+                p->setValueNotifyingHost((float)value);
+        }
+    }
+    else if (type == "openSettings")
+    {
+        openAudioSettings();
+    }
+}
+
+void EntanglementAudioProcessorEditor::openAudioSettings()
+{
+#if JucePlugin_Build_Standalone
+    juce::MessageManager::callAsync([this]()
+    {
+        if (auto* standaloneWindow = dynamic_cast<juce::StandaloneFilterWindow*>(getTopLevelComponent()))
+        {
+            standaloneWindow->showAudioSettingsDialog();
+        }
+    });
+#endif
+}
+
 void EntanglementAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    g.fillAll (juce::Colour (0xff12121a));
+    g.fillAll (juce::Colours::black); // Fill with black background to prevent white flash (like NNAudioAccess)
 }
 
 void EntanglementAudioProcessorEditor::resized()
@@ -66,6 +184,7 @@ void EntanglementAudioProcessorEditor::resized()
 
 void EntanglementAudioProcessorEditor::loadWebUI()
 {
+    // Load actual HTML directly (it has black background in CSS) - like NNAudioAccess
     auto htmlContent = MandelbrotEditorHelpers::loadPluginHTML("Entanglement");
     if (htmlContent.isNotEmpty())
     {
@@ -89,40 +208,22 @@ void EntanglementAudioProcessorEditor::loadWebUI()
         
         auto filePath = tempFile.getFullPathName().replace(" ", "%20");
         juce::String fileURL = "file://" + filePath;
+        
+        // Load HTML directly (while webView is still hidden)
+        // HTML has black background in CSS, so it will be black when it loads
         webView->goToURL(fileURL);
-    }
+        
+        // Show webView after delay to ensure page has loaded (like NNAudioAccess fallback)
+        // Parent's black background shows until webView is visible with black HTML
+        {
+            webView->setVisible(true);
+            addAndMakeVisible(webView.get());
+        });
+    });
 }
-
 void EntanglementAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
 {
     // Not used - using MandelbrotEditorHelpers::loadPluginHTML instead
-}
-
-void EntanglementAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
-{
-    if (!message.isObject())
-        return;
-
-    auto obj = message.getDynamicObject();
-    if (obj == nullptr)
-        return;
-
-    auto type = obj->getProperty("type").toString();
-    
-    if (type == "parameterChange")
-    {
-        auto param = obj->getProperty("parameter").toString();
-        auto value = obj->getProperty("value");
-
-        auto* p = audioProcessor.parameters.getParameter(param);
-        if (p != nullptr)
-        {
-            if (param == "time" || param == "feedback" || param == "mix" || param == "damping")
-                p->setValueNotifyingHost(p->convertTo0to1(value));
-            else if (param == "bypass")
-                p->setValueNotifyingHost((float)value);
-        }
-    }
 }
 
 //==============================================================================
@@ -140,7 +241,7 @@ void EntanglementAudioProcessorEditor::loadAuthScreen()
         html, body {
             width: 1200px; height: 750px; overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0a0a0f; color: #e8e8f0;
+            background: #000000 !important; /* Pure black to prevent white flash */ color: #e8e8f0;
             position: relative;
         }
         body::before {
@@ -229,7 +330,6 @@ void EntanglementAudioProcessorEditor::loadAuthScreen()
     }
     else
     {
-        // Fallback if image not found
         authHTML = authHTML.replace("PLACEHOLDER_BACKGROUND", "none");
     }
     
@@ -248,26 +348,41 @@ void EntanglementAudioProcessorEditor::loadAuthScreen()
     }
     else
     {
-        // Fallback if logo not found
         authHTML = authHTML.replace("PLACEHOLDER_LOGO", "");
     }
     
-    // Load auth HTML using temporary file approach
-    auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
-        .getChildFile("EntanglementAuth_" + juce::String(juce::Time::currentTimeMillis()));
-    tempDir.createDirectory();
+            // Load auth HTML using temporary file approach
+        auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
+            .getChildFile("EntanglementAuth_" + juce::String(juce::Time::currentTimeMillis()));
+        tempDir.createDirectory();
+        
+        auto tempFile = tempDir.getChildFile("auth.html");
+        tempFile.replaceWithText(authHTML);
+        
+        auto filePath = tempFile.getFullPathName().replace(" ", "%20");
+        juce::String fileURL = "file://" + filePath;
+        webView->goToURL(fileURL);
+        
+        // Show webView after delay to ensure page has loaded (like NNAudioAccess fallback)
+        // Parent's black background shows until webView is visible with black HTML
+        {
+            webView->setVisible(true);
+            addAndMakeVisible(webView.get());
+        });
+    });
+        else
+        {
+            loadAuthScreen();
+            startTimer(5000); // Check every 5 seconds
+        }
+    }
     
-    auto tempFile = tempDir.getChildFile("auth.html");
-    tempFile.replaceWithText(authHTML);
-    
-    auto filePath = tempFile.getFullPathName().replace(" ", "%20");
-    juce::String fileURL = "file://" + filePath;
-    webView->goToURL(fileURL);
+    return isAuthorized;
 }
 
 //==============================================================================
 bool EntanglementAudioProcessorEditor::checkAuthorization()
-{
+{{
     const auto decrypted_text = loadAndDecryptLicenseFile();
     
     if (decrypted_text.isEmpty())
@@ -282,25 +397,25 @@ bool EntanglementAudioProcessorEditor::checkAuthorization()
     if (!product_list.isEmpty())
         expiration_date = juce::Time::fromISO8601(product_list[0]);
     
-    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200004"));
+    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("300001"));
     
     if (authorized != isAuthorized)
-    {
+    {{
         isAuthorized = authorized;
         if (isAuthorized)
-        {
+        {{
             loadWebUI();
-            startTimer(50); // Check every 15 minutes
-        }
+            startTimer(50); // Update metering at ~20Hz
+        }}
         else
-        {
+        {{
             loadAuthScreen();
             startTimer(5000); // Check every 5 seconds
-        }
-    }
+        }}
+    }}
     
     return isAuthorized;
-}
+}}
 
 //==============================================================================
 juce::File EntanglementAudioProcessorEditor::getAuthFile()
@@ -352,6 +467,7 @@ juce::String EntanglementAudioProcessorEditor::loadAndDecryptLicenseFile()
 }
 
 //==============================================================================
+//==============================================================================
 void EntanglementAudioProcessorEditor::timerCallback()
 {
     // Periodically check authorization status
@@ -378,3 +494,4 @@ void EntanglementAudioProcessorEditor::sendMeteringData()
     
     webView->emitEventIfBrowserIsVisible("eval", script);
 }
+

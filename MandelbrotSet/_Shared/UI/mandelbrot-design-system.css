@@ -177,7 +177,7 @@ html, body {
   height: 750px;
   overflow: hidden;
   font-family: var(--font-body);
-  background: var(--quantum-black);
+  background: #000000 !important; /* Pure black to prevent white flash (like NNAudioAccess) */
   color: var(--planck-white);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -234,8 +234,9 @@ button {
 
 .mandelbrot-header {
   display: grid;
-  grid-template-columns: 120px 1fr 120px;
+  grid-template-columns: 120px 1fr auto auto;
   align-items: center;
+  gap: var(--spacing-sm);
   padding: var(--spacing-md) var(--spacing-lg);
   min-height: 64px;
   background: var(--glass-bg);
@@ -281,6 +282,49 @@ button {
   opacity: 1;
 }
 
+.settings-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--glass-bg-light);
+  border: 2px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+
+.settings-toggle svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--planck-white);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: all var(--transition-medium);
+}
+
+.settings-toggle:hover {
+  border-color: var(--plugin-primary);
+  box-shadow: 0 0 15px var(--plugin-glow), 0 0 30px var(--plugin-glow);
+  transform: scale(1.1) rotate(90deg);
+  background: var(--glass-bg);
+}
+
+.settings-toggle:hover svg {
+  stroke: var(--plugin-primary);
+  filter: drop-shadow(0 0 4px var(--plugin-glow));
+}
+
+.settings-toggle:active {
+  transform: scale(0.95) rotate(90deg);
+}
+
 .help-toggle {
   width: 40px;
   height: 40px;
@@ -292,7 +336,6 @@ button {
   justify-content: center;
   cursor: pointer;
   transition: all var(--transition-medium);
-  justify-self: end;
   position: relative;
   overflow: hidden;
 }

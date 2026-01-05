@@ -11,10 +11,16 @@
 #include "PluginEditor.h"
 #include "../../_Shared/Source/MandelbrotEditorHelpers.h"
 
+#if JucePlugin_Build_Standalone
+#include <juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h>
+#endif
+
 //==============================================================================
 SingularityAudioProcessorEditor::SingularityAudioProcessorEditor (SingularityAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
+    // Make component opaque so black background shows through (like NNAudioAccess)
+    setOpaque(true);
     // Enable native title bar on the top-level window (for standalone builds)
     if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
         top_level->setUsingNativeTitleBar(true);
@@ -25,14 +31,65 @@ SingularityAudioProcessorEditor::SingularityAudioProcessorEditor (SingularityAud
     // Create WebView with native integration enabled for message passing
     auto options = juce::WebBrowserComponent::Options{}
         .withNativeIntegrationEnabled (true)
+        .withKeepPageLoadedWhenBrowserIsHidden() // Keep page loaded when hidden (like NNAudioAccess)
         .withEventListener ("message", [this](const juce::var& message) {
             handleJavaScriptMessage (message);
         });
 
-    webView = std::make_unique<juce::WebBrowserComponent> (options);
-    webView->setOpaque (false);
-    addAndMakeVisible (webView.get());
+    webView = std::make_unique<WebBrowserWithCallbacks> (options);
+    // Don't call setOpaque(false) - it causes white background flash
+    addChildComponent (webView.get()); // Add as child but keep hidden until page loads
     webView->setBounds (getLocalBounds());
+    webView->setVisible (false); // Start hidden to avoid white screen flash
+    
+    // Set up page finished loading callback - show webView only after page loads AND renders (like NNAudioAccess)
+    webView->onPageFinishedLoading = [this](const juce::String& url) {
+        juce::MessageManager::callAsync([this]() {
+            // Wait 2 seconds to ensure HTML with inline black styles has fully rendered
+            // Then verify background is black before showing
+            juce::Timer::callAfterDelay(2000, [this]() {
+                if (webView == nullptr || webView->isVisible()) return;
+                
+                // Verify background is black via JavaScript before showing
+                juce::String checkScript = R"(
+                    (function() {
+                        if (!document.body) return false;
+                        var style = window.getComputedStyle(document.body);
+                        var bg = style.backgroundColor;
+                        return bg === 'rgb(0, 0, 0)' || bg === 'black' || bg.indexOf('0, 0, 0') >= 0;
+                    })();
+                )";
+                
+                webView->evaluateJavascript(checkScript, [this](const juce::WebBrowserComponent::EvaluationResult& result) {
+                    if (webView == nullptr || webView->isVisible()) return;
+                    
+                    bool isBlack = false;
+                    if (auto* value = result.getResult()) {
+                        if (value->isBool()) {
+                            isBlack = static_cast<bool>(*value);
+                        }
+                    }
+                    
+                    // Show if black, or after additional delay if not confirmed
+                    juce::Timer::callAfterDelay(isBlack ? 0 : 500, [this]() {
+                        if (webView != nullptr && !webView->isVisible()) {
+                            webView->setVisible(true);
+                            repaint();
+                        }
+                    });
+                });
+            });
+        });
+    };
+    
+    // Fallback: Show webView after 3 seconds if callback doesn't fire (like NNAudioAccess fallback)
+    // Longer delay ensures HTML/CSS is fully loaded and rendered
+    juce::Timer::callAfterDelay(3000, [this]() {
+        if (webView != nullptr && !webView->isVisible()) {
+            webView->setVisible(true);
+            repaint();
+        }
+    });
     
     // Check authorization first, then load appropriate UI
     isAuthorized = checkAuthorization();
@@ -41,6 +98,15 @@ SingularityAudioProcessorEditor::SingularityAudioProcessorEditor (SingularityAud
     {
         loadWebUI();
         startTimer(50); // Update metering at ~20Hz for smooth animations
+        
+        // Show settings button only in standalone builds
+#if JucePlugin_Build_Standalone
+        juce::String showSettingsScript = "if (document.getElementById('settingsButton')) { document.getElementById('settingsButton').style.display = 'flex'; }";
+        webView->emitEventIfBrowserIsVisible("eval", showSettingsScript);
+#else
+        juce::String hideSettingsScript = "if (document.getElementById('settingsButton')) { document.getElementById('settingsButton').style.display = 'none'; }";
+        webView->emitEventIfBrowserIsVisible("eval", hideSettingsScript);
+#endif
     }
     else
     {
@@ -56,7 +122,8 @@ SingularityAudioProcessorEditor::~SingularityAudioProcessorEditor()
 //==============================================================================
 void SingularityAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    g.fillAll (juce::Colour (0xff12121a)); // Deep space background
+    // Fill with black background to prevent white flash (like NNAudioAccess)
+    g.fillAll (juce::Colours::black);
 }
 
 void SingularityAudioProcessorEditor::resized()
@@ -67,6 +134,7 @@ void SingularityAudioProcessorEditor::resized()
 
 void SingularityAudioProcessorEditor::loadWebUI()
 {
+    // Load actual HTML directly (it has black background in CSS) - like NNAudioAccess
     auto htmlContent = MandelbrotEditorHelpers::loadPluginHTML("Singularity");
     if (htmlContent.isNotEmpty())
     {
@@ -90,8 +158,19 @@ void SingularityAudioProcessorEditor::loadWebUI()
         
         auto filePath = tempFile.getFullPathName().replace(" ", "%20");
         juce::String fileURL = "file://" + filePath;
+        
+        // Load HTML directly (while webView is still hidden)
+        // HTML has black background in CSS, so it will be black when it loads
         webView->goToURL(fileURL);
-    }
+        
+        // Show webView after delay to ensure page has loaded (like NNAudioAccess fallback)
+        // Parent's black background shows until webView is visible with black HTML
+        juce::Timer::callAfterDelay(200, [this]()
+        {
+            webView->setVisible(true);
+            addAndMakeVisible(webView.get());
+        });
+    });
 }
 
 void SingularityAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
@@ -102,7 +181,7 @@ void SingularityAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
 //==============================================================================
 void SingularityAudioProcessorEditor::loadAuthScreen()
 {
-    // Create auth HTML content with background image
+    // Create auth HTML content with background image (has black background in CSS)
     juce::String authHTML = R"(<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -114,7 +193,7 @@ void SingularityAudioProcessorEditor::loadAuthScreen()
         html, body {
             width: 1200px; height: 750px; overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0a0a0f; color: #e8e8f0;
+            background: #000000 !important; color: #e8e8f0; /* Pure black to prevent white flash */
             position: relative;
         }
         body::before {
@@ -236,7 +315,18 @@ void SingularityAudioProcessorEditor::loadAuthScreen()
     
     auto filePath = tempFile.getFullPathName().replace(" ", "%20");
     juce::String fileURL = "file://" + filePath;
+    
+    // Load auth HTML directly (while webView is still hidden)
+    // HTML has black background in CSS, so it will be black when it loads
     webView->goToURL(fileURL);
+    
+    // Show webView after delay to ensure page has loaded (like NNAudioAccess fallback)
+    // Parent's black background shows until webView is visible with black HTML
+    juce::Timer::callAfterDelay(200, [this]()
+    {
+        webView->setVisible(true);
+        addAndMakeVisible(webView.get());
+    });
 }
 
 //==============================================================================
@@ -256,7 +346,7 @@ bool SingularityAudioProcessorEditor::checkAuthorization()
     if (!product_list.isEmpty())
         expiration_date = juce::Time::fromISO8601(product_list[0]);
     
-    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200001"));
+    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("300009"));
     
     if (authorized != isAuthorized)
     {
@@ -355,6 +445,21 @@ void SingularityAudioProcessorEditor::sendMeteringData()
     webView->emitEventIfBrowserIsVisible("eval", script);
 }
 
+void SingularityAudioProcessorEditor::openAudioSettings()
+{
+    // Only available in standalone builds
+#if JucePlugin_Build_Standalone
+    juce::MessageManager::callAsync([this]()
+    {
+        // Access the standalone window and show audio settings dialog
+        if (auto* standaloneWindow = dynamic_cast<juce::StandaloneFilterWindow*>(getTopLevelComponent()))
+        {
+            standaloneWindow->showAudioSettingsDialog();
+        }
+    });
+#endif
+}
+
 //==============================================================================
 void SingularityAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
 {
@@ -380,5 +485,10 @@ void SingularityAudioProcessorEditor::handleJavaScriptMessage (const juce::var& 
             else if (param == "bypass")
                 p->setValueNotifyingHost((float)value);
         }
+    }
+    else if (type == "openSettings")
+    {
+        // Open audio/MIDI settings window (standalone only)
+        openAudioSettings();
     }
 }

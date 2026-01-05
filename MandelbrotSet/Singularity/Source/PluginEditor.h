@@ -13,6 +13,25 @@
 #include "PluginProcessor.h"
 
 //==============================================================================
+// Helper class to handle WebBrowserComponent callbacks (like NNAudioAccess)
+class WebBrowserWithCallbacks : public juce::WebBrowserComponent
+{
+public:
+    WebBrowserWithCallbacks(const juce::WebBrowserComponent::Options& options)
+        : juce::WebBrowserComponent(options) {}
+    
+    std::function<void(const juce::String&)> onPageFinishedLoading;
+    
+    void pageFinishedLoading(const juce::String& url) override
+    {
+        juce::WebBrowserComponent::pageFinishedLoading(url);
+        if (onPageFinishedLoading) {
+            onPageFinishedLoading(url);
+        }
+    }
+};
+
+//==============================================================================
 /**
     Singularity Plugin Editor - WebView-based UI
 */
@@ -32,7 +51,7 @@ private:
     SingularityAudioProcessor& audioProcessor;
     
     // WebView for CSS-based UI
-    std::unique_ptr<juce::WebBrowserComponent> webView;
+    std::unique_ptr<WebBrowserWithCallbacks> webView;
     
     // Authentication state
     bool isAuthorized = false;
@@ -45,6 +64,7 @@ private:
     bool checkAuthorization();
     static juce::File getAuthFile();
     static juce::String loadAndDecryptLicenseFile();
+    void openAudioSettings();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SingularityAudioProcessorEditor)
 };

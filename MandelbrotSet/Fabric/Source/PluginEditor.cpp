@@ -9,12 +9,18 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#if JucePlugin_Build_Standalone
+#include <juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h>
+#endif
 #include "../../_Shared/Source/MandelbrotEditorHelpers.h"
 
 //==============================================================================
 FabricAudioProcessorEditor::FabricAudioProcessorEditor (FabricAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
+    // Make component opaque so black background shows through (like NNAudioAccess)
+    setOpaque(true);
+    
     // Enable native title bar on the top-level window (for standalone builds)
     if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
         top_level->setUsingNativeTitleBar(true);
@@ -25,13 +31,65 @@ FabricAudioProcessorEditor::FabricAudioProcessorEditor (FabricAudioProcessor& p)
     // Create WebView with native integration enabled for message passing
     auto options = juce::WebBrowserComponent::Options{}
         .withNativeIntegrationEnabled (true)
+        .withKeepPageLoadedWhenBrowserIsHidden() // Keep page loaded when hidden (like NNAudioAccess)
         .withEventListener ("message", [this](const juce::var& message) {
             handleJavaScriptMessage (message);
         });
 
-    webView = std::make_unique<juce::WebBrowserComponent> (options);
-    webView->setOpaque (false);
-    addAndMakeVisible (webView.get());
+    webView = std::make_unique<WebBrowserWithCallbacks> (options);
+    // Don't call setOpaque(false) - it causes white background flash
+    addChildComponent (webView.get()); // Add as child but keep hidden until page loads
+    webView->setBounds (getLocalBounds());
+    webView->setVisible (false); // Start hidden to avoid white screen flash
+    
+    // Set up page finished loading callback - show webView only after page loads AND renders (like NNAudioAccess)
+    webView->onPageFinishedLoading = [this](const juce::String& url) {
+        juce::MessageManager::callAsync([this]() {
+            // Wait 2 seconds to ensure HTML with inline black styles has fully rendered
+            // Then verify background is black before showing
+            juce::Timer::callAfterDelay(2000, [this]() {
+                if (webView == nullptr || webView->isVisible()) return;
+                
+                // Verify background is black via JavaScript before showing
+                juce::String checkScript = R"(
+                    (function() {
+                        if (!document.body) return false;
+                        var style = window.getComputedStyle(document.body);
+                        var bg = style.backgroundColor;
+                        return bg === 'rgb(0, 0, 0)' || bg === 'black' || bg.indexOf('0, 0, 0') >= 0;
+                    })();
+                )";
+                
+                webView->evaluateJavascript(checkScript, [this](const juce::WebBrowserComponent::EvaluationResult& result) {
+                    if (webView == nullptr || webView->isVisible()) return;
+                    
+                    bool isBlack = false;
+                    if (auto* value = result.getResult()) {
+                        if (value->isBool()) {
+                            isBlack = static_cast<bool>(*value);
+                        }
+                    }
+                    
+                    // Show if black, or after additional delay if not confirmed
+                    juce::Timer::callAfterDelay(isBlack ? 0 : 500, [this]() {
+                        if (webView != nullptr && !webView->isVisible()) {
+                            webView->setVisible(true);
+                            repaint();
+                        }
+                    });
+                });
+            });
+        });
+    };
+    
+    // Fallback: Show webView after 3 seconds if callback doesn't fire (like NNAudioAccess fallback)
+    // Longer delay ensures HTML/CSS is fully loaded and rendered
+    juce::Timer::callAfterDelay(3000, [this]() {
+        if (webView != nullptr && !webView->isVisible()) {
+            webView->setVisible(true);
+            repaint();
+        }
+    });
     webView->setBounds (getLocalBounds());
     
     // Check authorization first, then load appropriate UI
@@ -40,6 +98,15 @@ FabricAudioProcessorEditor::FabricAudioProcessorEditor (FabricAudioProcessor& p)
     if (isAuthorized)
     {
         loadWebUI();
+        
+        // Show settings button only in standalone builds
+#if JucePlugin_Build_Standalone
+        juce::String showSettingsScript = "if (document.getElementById('settingsButton')) { document.getElementById('settingsButton').style.display = 'flex'; }";
+        webView->emitEventIfBrowserIsVisible("eval", showSettingsScript);
+#else
+        juce::String hideSettingsScript = "if (document.getElementById('settingsButton')) { document.getElementById('settingsButton').style.display = 'none'; }";
+        webView->emitEventIfBrowserIsVisible("eval", hideSettingsScript);
+#endif
         startTimer(50); // Re-check every 15 minutes
     }
     else
@@ -54,51 +121,8 @@ FabricAudioProcessorEditor::~FabricAudioProcessorEditor()
 }
 
 //==============================================================================
-void FabricAudioProcessorEditor::paint (juce::Graphics& g)
-{
-    g.fillAll (juce::Colour (0xff12121a));
-}
 
-void FabricAudioProcessorEditor::resized()
-{
-    if (webView != nullptr)
-        webView->setBounds (getLocalBounds());
-}
-
-void FabricAudioProcessorEditor::loadWebUI()
-{
-    auto htmlContent = MandelbrotEditorHelpers::loadPluginHTML("Fabric");
-    if (htmlContent.isNotEmpty())
-    {
-        // Load HTML using temporary file approach (avoids data URL encoding issues)
-        auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
-            .getChildFile("FabricUI_" + juce::String(juce::Time::currentTimeMillis()));
-        tempDir.createDirectory();
-        
-        // Copy logo image to temp directory if it exists
-        auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals/MandelbrotSet");
-        auto logosDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("logos");
-        auto logoFile = logosDir.getChildFile ("nnaudio-logo.png");
-        if (logoFile.existsAsFile())
-        {
-            auto tempLogoFile = tempDir.getChildFile ("nnaudio-logo.png");
-            logoFile.copyFileTo (tempLogoFile);
-        }
-        
-        auto tempFile = tempDir.getChildFile("index.html");
-        tempFile.replaceWithText(htmlContent);
-        
-        auto filePath = tempFile.getFullPathName().replace(" ", "%20");
-        juce::String fileURL = "file://" + filePath;
-        webView->goToURL(fileURL);
-    }
-}
-
-void FabricAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
-{
-    // Not used - using MandelbrotEditorHelpers::loadPluginHTML instead
-}
-
+//==============================================================================
 void FabricAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
 {
     if (!message.isObject())
@@ -118,19 +142,181 @@ void FabricAudioProcessorEditor::handleJavaScriptMessage (const juce::var& messa
         auto* p = audioProcessor.parameters.getParameter(param);
         if (p != nullptr)
         {
-            if (param == "size" || param == "diffusion" || param == "damping" || param == "predelay" || param == "mix")
+            if (param == "size")
+                p->setValueNotifyingHost(p->convertTo0to1(value));
+            if (param == "diffusion")
+                p->setValueNotifyingHost(p->convertTo0to1(value));
+            if (param == "damping")
+                p->setValueNotifyingHost(p->convertTo0to1(value));
+            if (param == "predelay")
+                p->setValueNotifyingHost(p->convertTo0to1(value));
+            if (param == "mix")
                 p->setValueNotifyingHost(p->convertTo0to1(value));
             else if (param == "bypass")
                 p->setValueNotifyingHost((float)value);
         }
     }
+    else if (type == "openSettings")
+    {
+        openAudioSettings();
+    }
+}
+
+void FabricAudioProcessorEditor::openAudioSettings()
+{
+    // Only available in standalone builds
+#if JucePlugin_Build_Standalone
+    juce::MessageManager::callAsync([this]()
+    {
+        // showAudioSettingsDialog() is a method of StandalonePluginHolder
+        // Access it via the static getInstance() method
+        if (auto* pluginHolder = juce::StandalonePluginHolder::getInstance())
+        {
+            pluginHolder->showAudioSettingsDialog();
+        }
+    });
+#endif
+}
+
+void FabricAudioProcessorEditor::paint (juce::Graphics& g)
+{
+    g.fillAll (juce::Colours::black); // Fill with black background to prevent white flash (like NNAudioAccess)
+}
+
+void FabricAudioProcessorEditor::resized()
+{
+    if (webView != nullptr)
+        webView->setBounds (getLocalBounds());
+}
+
+void FabricAudioProcessorEditor::loadWebUI()
+{
+    // STEP 1: Load a minimal black HTML FIRST to prevent white flash
+    juce::String blackHTML = R"(<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        html, body { 
+            background-color: #000000; 
+            margin: 0; 
+            padding: 0; 
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body></body>
+</html>)";
+    
+    auto tempDirBlack = juce::File::getSpecialLocation(juce::File::tempDirectory)
+        .getChildFile("FabricUIBlack_" + juce::String(juce::Time::currentTimeMillis()));
+    tempDirBlack.createDirectory();
+    
+    auto blackFile = tempDirBlack.getChildFile("black.html");
+    blackFile.replaceWithText(blackHTML);
+    auto blackFilePath = blackFile.getFullPathName().replace(" ", "%20");
+    
+    // Load black HTML WHILE HIDDEN
+    webView->goToURL("file://" + blackFilePath);
+    
+    // STEP 2: Show webView after black page loads (50ms)
+    juce::Timer::callAfterDelay(50, [this]()
+    {
+        if (webView != nullptr)
+        {
+            webView->setVisible(true);
+            addAndMakeVisible(webView.get());
+        }
+    });
+    
+    // STEP 3: Load actual UI after a delay (webView now shows black page)
+    juce::Timer::callAfterDelay(100, [this]()
+    {
+        // Load actual HTML directly (it has black background in CSS) - like NNAudioAccess
+        auto htmlContent = MandelbrotEditorHelpers::loadPluginHTML("Fabric");
+        if (htmlContent.isNotEmpty())
+        {
+            // Load HTML using temporary file approach (avoids data URL encoding issues)
+            auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
+                .getChildFile("FabricUI_" + juce::String(juce::Time::currentTimeMillis()));
+            tempDir.createDirectory();
+            
+            // Copy logo image to temp directory if it exists
+            auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals/MandelbrotSet");
+            auto logosDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("logos");
+            auto logoFile = logosDir.getChildFile ("nnaudio-logo.png");
+            if (logoFile.existsAsFile())
+            {
+                auto tempLogoFile = tempDir.getChildFile ("nnaudio-logo.png");
+                logoFile.copyFileTo (tempLogoFile);
+            }
+            
+            auto tempFile = tempDir.getChildFile("index.html");
+            tempFile.replaceWithText(htmlContent);
+            
+            auto filePath = tempFile.getFullPathName().replace(" ", "%20");
+            juce::String fileURL = "file://" + filePath;
+            
+            // Navigate to actual UI (webView already visible showing black page)
+            // The transition from black page to actual UI will be seamless
+            webView->goToURL(fileURL);
+        }
+    });
+}
+
+void FabricAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
+{
+    // Not used - using MandelbrotEditorHelpers::loadPluginHTML instead
 }
 
 //==============================================================================
 void FabricAudioProcessorEditor::loadAuthScreen()
 {
-    // Create auth HTML content with background image
-    juce::String authHTML = R"(<!DOCTYPE html>
+    // STEP 1: Load a minimal black HTML FIRST to prevent white flash
+    juce::String blackHTML = R"(<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        html, body { 
+            background-color: #000000; 
+            margin: 0; 
+            padding: 0; 
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body></body>
+</html>)";
+    
+    auto tempDirBlack = juce::File::getSpecialLocation(juce::File::tempDirectory)
+        .getChildFile("FabricAuthBlack_" + juce::String(juce::Time::currentTimeMillis()));
+    tempDirBlack.createDirectory();
+    
+    auto blackFile = tempDirBlack.getChildFile("black.html");
+    blackFile.replaceWithText(blackHTML);
+    auto blackFilePath = blackFile.getFullPathName().replace(" ", "%20");
+    
+    // Load black HTML WHILE HIDDEN
+    webView->goToURL("file://" + blackFilePath);
+    
+    // STEP 2: Show webView after black page loads (50ms)
+    juce::Timer::callAfterDelay(50, [this]()
+    {
+        if (webView != nullptr)
+        {
+            webView->setVisible(true);
+            addAndMakeVisible(webView.get());
+        }
+    });
+    
+    // STEP 3: Load actual auth screen after a delay (webView now shows black page)
+    juce::Timer::callAfterDelay(100, [this]()
+    {
+        // Create auth HTML content with background image
+        juce::String authHTML = R"(<!DOCTYPE html)
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -141,7 +327,7 @@ void FabricAudioProcessorEditor::loadAuthScreen()
         html, body {
             width: 1200px; height: 750px; overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0a0a0f; color: #e8e8f0;
+            background: #000000 !important; /* Pure black to prevent white flash */ color: #e8e8f0;
             position: relative;
         }
         body::before {
@@ -230,7 +416,6 @@ void FabricAudioProcessorEditor::loadAuthScreen()
     }
     else
     {
-        // Fallback if image not found
         authHTML = authHTML.replace("PLACEHOLDER_BACKGROUND", "none");
     }
     
@@ -249,7 +434,6 @@ void FabricAudioProcessorEditor::loadAuthScreen()
     }
     else
     {
-        // Fallback if logo not found
         authHTML = authHTML.replace("PLACEHOLDER_LOGO", "");
     }
     
@@ -263,7 +447,11 @@ void FabricAudioProcessorEditor::loadAuthScreen()
     
     auto filePath = tempFile.getFullPathName().replace(" ", "%20");
     juce::String fileURL = "file://" + filePath;
+    
+    // Navigate to auth screen (webView already visible showing black page)
+    // The transition from black page to auth screen will be seamless
     webView->goToURL(fileURL);
+    });
 }
 
 //==============================================================================
@@ -283,7 +471,7 @@ bool FabricAudioProcessorEditor::checkAuthorization()
     if (!product_list.isEmpty())
         expiration_date = juce::Time::fromISO8601(product_list[0]);
     
-    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200002"));
+    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("300002"));
     
     if (authorized != isAuthorized)
     {
@@ -291,7 +479,7 @@ bool FabricAudioProcessorEditor::checkAuthorization()
         if (isAuthorized)
         {
             loadWebUI();
-            startTimer(50); // Check every 15 minutes
+            startTimer(50); // Update metering at ~20Hz
         }
         else
         {
@@ -353,6 +541,7 @@ juce::String FabricAudioProcessorEditor::loadAndDecryptLicenseFile()
 }
 
 //==============================================================================
+//==============================================================================
 void FabricAudioProcessorEditor::timerCallback()
 {
     // Periodically check authorization status
@@ -379,3 +568,4 @@ void FabricAudioProcessorEditor::sendMeteringData()
     
     webView->emitEventIfBrowserIsVisible("eval", script);
 }
+

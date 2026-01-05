@@ -27,8 +27,23 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeControls();
     initializeBlackHoleAnimation();
     initializeBypassToggle();
+    initializeSettingsButton();
     startMetering();
 });
+
+function initializeSettingsButton() {
+    const settingsButton = document.getElementById('settingsButton');
+    if (settingsButton) {
+        settingsButton.addEventListener('click', () => {
+            // Send message to C++ to open audio/MIDI settings
+            sendToPlugin('openSettings', 1);
+        });
+        
+        // Show button only in standalone builds (C++ will control visibility)
+        // For now, show it - C++ can hide it if not standalone
+        settingsButton.style.display = 'flex';
+    }
+}
 
 function initializeControls() {
     // Threshold knob (-60 to 0 dB)
@@ -244,7 +259,7 @@ function startMetering() {
 function sendToPlugin(parameter, value) {
     if (window.juce) {
         window.juce.postMessage({
-            type: 'parameterChange',
+            type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
             parameter: parameter,
             value: value
         });
@@ -259,11 +274,15 @@ window.receiveAudioData = function(data) {
     state.outputLevel = data.outputLevel || -100;
     state.gainReduction = data.gainReduction || 0;
     
+    // Update VU meters
+    updateVUMeter('input', state.inputLevel);
+    updateVUMeter('output', state.outputLevel);
+    
     // Update level displays
     document.getElementById('inputLevel').textContent = 
-        state.inputLevel > -100 ? `Input: ${state.inputLevel.toFixed(1)} dB` : 'Input: -∞ dB';
+        state.inputLevel > -100 ? `${state.inputLevel.toFixed(1)} dB` : '-∞ dB';
     document.getElementById('outputLevel').textContent = 
-        state.outputLevel > -100 ? `Output: ${state.outputLevel.toFixed(1)} dB` : 'Output: -∞ dB';
+        state.outputLevel > -100 ? `${state.outputLevel.toFixed(1)} dB` : '-∞ dB';
     
     // Update gain reduction meter
     const grValue = Math.abs(state.gainReduction);
@@ -271,3 +290,33 @@ window.receiveAudioData = function(data) {
     document.getElementById('gainReductionBar').style.width = `${grPercent}%`;
     document.getElementById('grValue').textContent = `${grValue.toFixed(1)} dB`;
 };
+
+// Update VU meter bar and peak
+function updateVUMeter(type, levelDb) {
+    const meterFill = document.getElementById(`${type}MeterFill`);
+    const meterPeak = document.getElementById(`${type}MeterPeak`);
+    
+    if (!meterFill || !meterPeak) return;
+    
+    // Convert dB to percentage (0 dB = 100%, -60 dB = 0%)
+    const minDb = -60;
+    const maxDb = 0;
+    const normalized = Math.max(0, Math.min(1, (levelDb - minDb) / (maxDb - minDb)));
+    const heightPercent = normalized * 100;
+    
+    meterFill.style.height = `${heightPercent}%`;
+    
+    // Update peak hold
+    if (levelDb > -60) {
+        meterPeak.style.top = `${100 - heightPercent}%`;
+        meterPeak.classList.add('visible');
+        
+        // Reset peak after 1 second
+        clearTimeout(meterPeak._peakTimeout);
+        meterPeak._peakTimeout = setTimeout(() => {
+            meterPeak.classList.remove('visible');
+        }, 1000);
+    } else {
+        meterPeak.classList.remove('visible');
+    }
+}

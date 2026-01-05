@@ -15,6 +15,7 @@ const state = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    initializeSettingsButton();
     initializeControls();
     initializeFabricAnimation();
     initializeBypassToggle();
@@ -208,10 +209,20 @@ function initializeFabricAnimation() {
     updateSpaceInfo();
 }
 
+function initializeSettingsButton() {
+    const settingsButton = document.getElementById('settingsButton');
+    if (settingsButton) {
+        settingsButton.addEventListener('click', () => {
+            sendToPlugin('openSettings', 1);
+        });
+        settingsButton.style.display = 'flex';
+    }
+}
+
 function sendToPlugin(parameter, value) {
     if (window.juce) {
         window.juce.postMessage({
-            type: 'parameterChange',
+            type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
             parameter: parameter,
             value: value
         });
@@ -225,6 +236,39 @@ window.receiveAudioData = function(data) {
     state.inputLevel = data.inputLevel || -100;
     state.outputLevel = data.outputLevel || -100;
     
-    // Audio levels are now available for animations
-    // The canvas animation will use these values
+    // Update VU meters
+    updateVUMeter('input', state.inputLevel);
+    updateVUMeter('output', state.outputLevel);
 };
+
+// Update VU meter bar and peak
+function updateVUMeter(type, levelDb) {
+    const meterFill = document.getElementById(`${type}MeterFill`);
+    const meterPeak = document.getElementById(`${type}MeterPeak`);
+    const meterLabel = document.getElementById(`${type}Level`);
+    
+    if (!meterFill || !meterPeak || !meterLabel) return;
+    
+    // Convert dB to percentage (0 dB = 100%, -60 dB = 0%)
+    const minDb = -60;
+    const maxDb = 0;
+    const normalized = Math.max(0, Math.min(1, (levelDb - minDb) / (maxDb - minDb)));
+    const heightPercent = normalized * 100;
+    
+    meterFill.style.height = `${heightPercent}%`;
+    meterLabel.textContent = levelDb > -100 ? `${levelDb.toFixed(1)} dB` : '-∞ dB';
+    
+    // Update peak hold
+    if (levelDb > -60) {
+        meterPeak.style.top = `${100 - heightPercent}%`;
+        meterPeak.classList.add('visible');
+        
+        // Reset peak after 1 second
+        clearTimeout(meterPeak._peakTimeout);
+        meterPeak._peakTimeout = setTimeout(() => {
+            meterPeak.classList.remove('visible');
+        }, 1000);
+    } else {
+        meterPeak.classList.remove('visible');
+    }
+}

@@ -6,5 +6,13 @@
 .bypass-toggle.active { background: var(--plugin-primary); }
 .power-icon { width: 20px; height: 20px; }
 .power-icon svg { width: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
-.info-display { display: flex; justify-content: flex-end; font-family: var(--font-mono); font-size: var(--font-size-sm); opacity: 0.8; }
+.info-display { display: flex; align-items: center; justify-content: flex-end; gap: var(--spacing-xl); font-family: var(--font-mono); font-size: var(--font-size-xs); }
+.meter-container { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs); }
+.meter-container label { font-family: var(--font-header); font-size: var(--font-size-xs); letter-spacing: 1px; color: var(--planck-white); opacity: 0.7; }
+.vu-meter { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs); }
+.vu-meter-bar { width: 8px; height: 120px; background: var(--glass-bg-dark); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); position: relative; overflow: hidden; box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); }
+.vu-meter-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to top, #00ff00 0%, #88ff00 20%, #ffff00 50%, #ff8800 80%, #ff0000 100%); transition: height 50ms linear; box-shadow: 0 0 8px currentColor; border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+.vu-meter-peak { position: absolute; left: 0; width: 100%; height: 2px; background: white; box-shadow: 0 0 6px white; transition: top 100ms linear; opacity: 0; }
+.vu-meter-peak.visible { opacity: 1; }
+.meter-label { font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--planck-white); opacity: 0.8; min-width: 60px; text-align: center; }
 .control-group { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-sm); }
