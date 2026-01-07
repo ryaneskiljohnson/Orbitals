@@ -173,14 +173,14 @@ FabricAudioProcessorEditor::FabricAudioProcessorEditor (FabricAudioProcessor& p)
         std::cout << "Loading Web UI..." << std::endl;
         DBG("Loading Web UI...");
         loadWebUI();
-        startTimer(1000 * 60 * 15); // Re-check every 15 minutes
+        startTimer(50); // Fast timer for audio-reactive animation (20 FPS data updates)
     }
     else
     {
         std::cout << "Loading Auth Screen..." << std::endl;
         DBG("Loading Auth Screen...");
         loadAuthScreen();
-        startTimer(5000); // Re-check every 5 seconds
+        startTimer(5000); // Re-check auth every 5 seconds
     }
     
     std::cout << "=== CONSTRUCTOR COMPLETE ===" << std::endl;
@@ -870,7 +870,7 @@ bool FabricAudioProcessorEditor::checkAuthorization()
         if (isAuthorized)
         {
             loadWebUI();
-            startTimer(1000 * 60 * 15); // Check every 15 minutes
+            startTimer(50); // Fast timer for audio-reactive animation
         }
         else
         {
@@ -943,17 +943,14 @@ void FabricAudioProcessorEditor::timerCallback()
             if (isAuthorized)
             {
                 loadWebUI();
-                startTimer(1000 * 60 * 15);
             }
         }
     }
-    else
+    
+    // Always send metering data when authorized and visible (fast update for animation)
+    if (isAuthorized && webView != nullptr && webView->isVisible())
     {
-        // Send metering data to UI when authorized
-        if (webView != nullptr)
-        {
-            sendMeteringData();
-        }
+        sendMeteringData();
     }
 }
 

@@ -177,18 +177,29 @@ function updateSpaceInfo() {
 }
 
 function initializeFabricAnimation() {
+    console.log('🎨 Initializing Fabric animation...');
     const canvas = document.getElementById('fabricCanvas');
-    if (!canvas) return;
+    if (!canvas) {
+        console.error('❌ fabricCanvas element not found!');
+        return;
+    }
+    console.log('✅ Canvas found:', canvas);
     
     const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error('❌ Could not get 2D context!');
+        return;
+    }
     canvas.width = 700;
     canvas.height = 700;
+    console.log('✅ Canvas configured: 700x700');
     
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const gridSize = 40;
     const points = [];
     
+    console.log('📐 Creating grid points...');
     // Create grid points
     for (let x = 0; x < canvas.width; x += gridSize) {
         for (let y = 0; y < canvas.height; y += gridSize) {
@@ -197,43 +208,154 @@ function initializeFabricAnimation() {
                 y: y,
                 baseX: x,
                 baseY: y,
-                phase: Math.random() * Math.PI * 2
+                phase: Math.random() * Math.PI * 2,
+                velocity: 0
             });
         }
     }
+    console.log(`✅ Created ${points.length} grid points`);
     
     let time = 0;
+    let ripples = [];
+    let lastAudioLevel = 0;
+    let peakTriggerThreshold = 0.3;
+    
+    console.log('🎬 Setting up animation variables...');
     
     function animate() {
-        time += 0.02;
+        try {
+            time += 0.02;
+            
+            // Debug: Log first few frames
+            if (window.frameCount === undefined) window.frameCount = 0;
+            if (window.frameCount < 5) {
+                console.log(`🎬 Frame ${window.frameCount}: time=${time.toFixed(2)}, inputLevel=${state.inputLevel}`);
+            }
+            window.frameCount++;
         
         // Calculate audio reactivity
         const audioLevel = state.inputLevel > -100 ? state.inputLevel : -60;
         const normalizedLevel = Math.max(0, Math.min(1, (audioLevel + 60) / 60)); // -60 to 0 dB mapped to 0-1
         
-        // Fade effect intensity responds to audio
-        const fadeIntensity = 0.1 + normalizedLevel * 0.05;
-        ctx.fillStyle = `rgba(13, 13, 21, ${fadeIntensity})`;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Parameter influence on animation (calculate early so available everywhere)
+        const sizeInfluence = state.size / 100; // 0 to 1
+        const diffusionInfluence = state.diffusion / 100; // 0 to 1
+        const dampingInfluence = state.damping / 100; // 0 to 1
+        const mixInfluence = state.mix / 100; // 0 to 1
+        const wetdryInfluence = state.wetdry / 100; // 0 to 1
+        const timeDilation = 1.0 + (state.predelay / 200.0) * 0.5; // Slower animation with more predelay
         
-        // Warp amount responds to audio
-        const warpMultiplier = 1 + normalizedLevel * 1.5;
+        // Debug: Log animation state periodically
+        if (window.animDebugCounter === undefined) window.animDebugCounter = 0;
+        if (++window.animDebugCounter % 120 === 0) {
+            console.log(`🎨 Animation: audioLevel=${audioLevel.toFixed(1)}dB, normalized=${normalizedLevel.toFixed(3)}, ripples=${ripples.length}`);
+        }
         
-        // Update and draw grid with warping
-        points.forEach(point => {
-            const dx = point.baseX - centerX;
-            const dy = point.baseY - centerY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const waveOffset = Math.sin(dist * 0.02 + time + point.phase) * 15 * warpMultiplier;
+        // Detect audio peaks for ripple triggers
+        const levelDiff = normalizedLevel - lastAudioLevel;
+        if (levelDiff > 0.15 && normalizedLevel > peakTriggerThreshold) {
+            // Audio peak detected - create ripple
+            console.log(`🌊 RIPPLE TRIGGERED! Level=${normalizedLevel.toFixed(2)}, Diff=${levelDiff.toFixed(2)}`);
+            ripples.push({
+                x: centerX + (Math.random() - 0.5) * 100,
+                y: centerY + (Math.random() - 0.5) * 100,
+                radius: 0,
+                maxRadius: 300 + normalizedLevel * 200,
+                strength: normalizedLevel * 2,
+                age: 0
+            });
+        }
+        lastAudioLevel = normalizedLevel;
+        
+        // Fade effect intensity responds to audio and damping
+        // Higher damping = more fade (more trails)
+        const fadeIntensity = 0.05 + dampingInfluence * 0.05 + normalizedLevel * 0.03;
+        try {
+            ctx.fillStyle = `rgba(13, 13, 21, ${fadeIntensity})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        } catch (e) {
+            console.error('❌ Error in fillRect:', e);
+            return;
+        }
+        
+        // Base warp amount combines audio + size parameter
+        const baseWarp = (normalizedLevel * 25 + sizeInfluence * 15) * mixInfluence;
+        
+        // Wave frequency affected by diffusion
+        const waveFrequency = 0.02 + diffusionInfluence * 0.03; // More diffusion = higher frequency
+        
+        // Update ripples
+        try {
+            ripples = ripples.filter(ripple => {
+                ripple.radius += 4;
+                ripple.age += 1;
+                return ripple.radius < ripple.maxRadius;
+            });
+        } catch (e) {
+            console.error('❌ Error updating ripples:', e);
+        }
+        
+        // Update grid points with spacetime warping
+        try {
+            points.forEach(point => {
+                const dx = point.baseX - centerX;
+                const dy = point.baseY - centerY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                // Base wave motion (affected by diffusion parameter)
+                let waveOffset = Math.sin(dist * waveFrequency + time / timeDilation + point.phase) * (8 + baseWarp);
+                
+                // Add ripple effects (spacetime bending)
+                let rippleX = 0;
+                let rippleY = 0;
+                ripples.forEach(ripple => {
+                    const rippleDx = point.baseX - ripple.x;
+                    const rippleDy = point.baseY - ripple.y;
+                    const rippleDist = Math.sqrt(rippleDx * rippleDx + rippleDy * rippleDy);
+                    
+                    const rippleWave = Math.sin((rippleDist - ripple.radius) * 0.1);
+                    const rippleFalloff = Math.exp(-ripple.age * 0.02);
+                    const rippleStrength = rippleWave * ripple.strength * 20 * rippleFalloff;
+                    
+                    if (rippleDist > 0) {
+                        rippleX += (rippleDx / rippleDist) * rippleStrength;
+                        rippleY += (rippleDy / rippleDist) * rippleStrength;
+                    }
+                });
+                
+                // Combine base wave with ripples
+                const angle = Math.atan2(dy, dx);
+                point.x = point.baseX + Math.cos(angle) * waveOffset + rippleX;
+                point.y = point.baseY + Math.sin(angle) * waveOffset + rippleY;
+            });
+        } catch (e) {
+            console.error('❌ Error updating grid points:', e);
+            return;
+        }
+        
+        // Draw ripple waves (visibility affected by wet/dry and predelay)
+        ripples.forEach(ripple => {
+            const rippleOpacity = (1 - ripple.radius / ripple.maxRadius) * ripple.strength * 0.3 * wetdryInfluence;
+            const rippleWidth = 2 + sizeInfluence * 1;
+            ctx.strokeStyle = `rgba(0, 229, 255, ${rippleOpacity})`;
+            ctx.lineWidth = rippleWidth;
+            ctx.beginPath();
+            ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
+            ctx.stroke();
             
-            point.x = point.baseX + Math.cos(Math.atan2(dy, dx)) * waveOffset;
-            point.y = point.baseY + Math.sin(Math.atan2(dy, dx)) * waveOffset;
+            // Inner glow (more visible with higher diffusion)
+            const glowOpacity = rippleOpacity * 0.5 * (0.5 + diffusionInfluence * 0.5);
+            ctx.strokeStyle = `rgba(102, 255, 255, ${glowOpacity})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(ripple.x, ripple.y, ripple.radius - 5, 0, Math.PI * 2);
+            ctx.stroke();
         });
         
-        // Draw grid lines - brightness responds to audio
-        const lineOpacity = 0.3 + normalizedLevel * 0.4;
+        // Draw grid lines - brightness responds to audio and wet/dry
+        const lineOpacity = 0.2 + normalizedLevel * 0.4 + wetdryInfluence * 0.2;
         ctx.strokeStyle = `rgba(0, 229, 255, ${lineOpacity})`;
-        ctx.lineWidth = 1 + normalizedLevel * 0.5;
+        ctx.lineWidth = 1 + normalizedLevel * 1 + mixInfluence * 0.5;
         
         // Horizontal lines
         for (let y = 0; y < canvas.height; y += gridSize) {
@@ -259,9 +381,9 @@ function initializeFabricAnimation() {
             ctx.stroke();
         }
         
-        // Draw intersection points - size and brightness respond to audio
-        const pointOpacity = 0.6 + normalizedLevel * 0.3;
-        const pointSize = 2 + normalizedLevel * 2;
+        // Draw intersection points - size and brightness respond to audio and diffusion
+        const pointOpacity = 0.5 + normalizedLevel * 0.3 + diffusionInfluence * 0.2;
+        const pointSize = 1.5 + normalizedLevel * 3 + diffusionInfluence * 1.5;
         ctx.fillStyle = `rgba(102, 255, 255, ${pointOpacity})`;
         points.forEach(point => {
             ctx.beginPath();
@@ -269,11 +391,34 @@ function initializeFabricAnimation() {
             ctx.fill();
         });
         
+        // Draw center energy burst during high audio (scaled by wet/dry)
+        if (normalizedLevel > 0.4 && wetdryInfluence > 0.3) {
+            const burstSize = (normalizedLevel - 0.4) * 80 * wetdryInfluence;
+            const burstOpacity = normalizedLevel * wetdryInfluence * 0.5;
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, burstSize);
+            gradient.addColorStop(0, `rgba(0, 229, 255, ${burstOpacity})`);
+            gradient.addColorStop(0.5, `rgba(102, 255, 255, ${burstOpacity * 0.5})`);
+            gradient.addColorStop(1, 'rgba(0, 229, 255, 0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, burstSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
         requestAnimationFrame(animate);
+        } catch (error) {
+            console.error('❌ FATAL ERROR in animation loop:', error);
+            console.error('Stack:', error.stack);
+            // Try to continue anyway
+            requestAnimationFrame(animate);
+        }
     }
     
+    console.log('✅ Starting animation loop...');
     animate();
+    console.log('✅ Animation started, calling updateSpaceInfo...');
     updateSpaceInfo();
+    console.log('✅ Fabric animation fully initialized');
 }
 
 function initializeSettingsButton() {
@@ -401,8 +546,15 @@ function testBridge() {
 window.receiveAudioData = function(data) {
     if (!data) return;
     
+    const oldInputLevel = state.inputLevel;
     state.inputLevel = data.inputLevel || -100;
     state.outputLevel = data.outputLevel || -100;
+    
+    // Debug: Log audio levels periodically
+    if (window.audioDebugCounter === undefined) window.audioDebugCounter = 0;
+    if (++window.audioDebugCounter % 30 === 0) {
+        console.log(`🎵 Audio levels: Input=${state.inputLevel.toFixed(1)}dB, Output=${state.outputLevel.toFixed(1)}dB`);
+    }
     
     // Update VU meters
     updateVUMeter('input', state.inputLevel);

@@ -22,7 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     new MandelbrotKnob(document.getElementById('mixKnob'), { min: 0, max: 100, value: 100, onChange: (v, p) => { state.mix = v; document.getElementById('mixValue').textContent = `${v.toFixed(0)}%`; sendToPlugin(p, v); } });
     new MandelbrotKnob(document.getElementById('outputKnob'), { min: -12, max: 12, value: 0, onChange: (v, p) => { state.output = v; document.getElementById('outputValue').textContent = `${v >= 0 ? '+' : ''}${v.toFixed(1)} dB`; sendToPlugin(p, v); } });
     document.getElementById('bypassToggle').addEventListener('click', (e) => { state.bypass = !state.bypass; e.currentTarget.classList.toggle('active'); e.currentTarget.querySelector('.bypass-text').textContent = e.currentTarget.classList.contains('active') ? 'ON' : 'OFF'; sendToPlugin('bypass', e.currentTarget.classList.contains('active') ? 0 : 1); });
-    
+    initializeHadronAnimation();
+
     // Particle collision animation - responds to audio
     const canvas = document.getElementById('hadronCanvas');
     if (canvas) {
@@ -109,6 +110,256 @@ function sendToPlugin(parameter, value) {
             value: value
         });
     }
+}
+
+// Initialize Hadron particle collision animation
+function initializeHadronAnimation() {
+    const canvas = document.getElementById('hadronCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    canvas.width = 600;
+    canvas.height = 600;
+    
+    const centerX = 300;
+    const centerY = 300;
+    let particles = [];
+    let collisionBursts = [];
+    
+    // Create orbiting particles
+    for (let i = 0; i < 12; i++) {
+        particles.push({
+            angle: (Math.PI * 2 * i) / 12,
+            speed: 0.02 + Math.random() * 0.01,
+            radius: 150 + Math.random() * 50,
+            size: 3 + Math.random() * 2
+        });
+    }
+    
+    let time = 0;
+    
+    function animate() {
+        const audioLevel = state.inputLevel > -100 ? state.inputLevel : -60;
+        const normalizedLevel = Math.max(0, Math.min(1, (audioLevel + 60) / 60));
+        
+        // Parameter influence
+        const driveInfluence = state.drive / 100; // Controls speed
+        const toneInfluence = state.tone / 100; // Controls color
+        const biasInfluence = state.bias / 100; // Controls orbit shape
+        const mixInfluence = state.mix / 100; // Controls visibility
+        
+        // Fade with trails
+        ctx.fillStyle = 'rgba(13, 13, 21, 0.1)';
+        ctx.fillRect(0, 0, 600, 600);
+        
+        time += 0.02;
+        
+        // Create collision bursts on audio peaks
+        if (normalizedLevel > 0.6) {
+            collisionBursts.push({
+                x: centerX,
+                y: centerY,
+                radius: 0,
+                maxRadius: 150 * normalizedLevel,
+                opacity: 1
+            });
+        }
+        
+        // Update and draw collision bursts
+        collisionBursts = collisionBursts.filter(burst => {
+            burst.radius += 5;
+            burst.opacity -= 0.02;
+            
+            if (burst.opacity > 0) {
+                ctx.strokeStyle = `rgba(255, 128, 0, ${burst.opacity * mixInfluence})`;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(burst.x, burst.y, burst.radius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            return burst.opacity > 0 && burst.radius < burst.maxRadius;
+        });
+        
+        // Update and draw particles
+        particles.forEach(particle => {
+            // DRIVE affects particle speed
+            particle.angle += particle.speed * (1 + driveInfluence * 2) * (1 + normalizedLevel * 0.5);
+            
+            // BIAS affects orbit shape (circular to elliptical)
+            const radiusX = particle.radius * (1 + biasInfluence * 0.5);
+            const radiusY = particle.radius * (1 - biasInfluence * 0.5);
+            
+            const x = centerX + Math.cos(particle.angle) * radiusX;
+            const y = centerY + Math.sin(particle.angle) * radiusY;
+            
+            // TONE affects color (bright orange to dark red)
+            const r = 255;
+            const g = Math.floor(128 * (1 - toneInfluence));
+            const b = 0;
+            
+            // Size responds to audio and drive
+            const size = particle.size * (1 + driveInfluence * 0.5) * (1 + normalizedLevel * 0.8);
+            const opacity = (0.7 + normalizedLevel * 0.3) * mixInfluence;
+            
+            // Draw particle with glow
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, size * 3);
+            gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${opacity})`);
+            gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${opacity * 0.5})`);
+            gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, size * 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw core
+            ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        
+        // Draw center collision zone
+        const centerGlow = normalizedLevel * driveInfluence * mixInfluence;
+        if (centerGlow > 0.1) {
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 50 * centerGlow);
+            gradient.addColorStop(0, `rgba(255, 200, 0, ${centerGlow * 0.6})`);
+            gradient.addColorStop(1, 'rgba(255, 128, 0, 0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 50 * centerGlow, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        requestAnimationFrame(animate);
+    }
+    
+    animate();
+}
+
+// Initialize Hadron particle collision animation
+function initializeHadronAnimation() {
+    const canvas = document.getElementById('hadronCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    canvas.width = 600;
+    canvas.height = 600;
+    
+    const centerX = 300;
+    const centerY = 300;
+    let particles = [];
+    let collisionBursts = [];
+    
+    // Create orbiting particles
+    for (let i = 0; i < 12; i++) {
+        particles.push({
+            angle: (Math.PI * 2 * i) / 12,
+            speed: 0.02 + Math.random() * 0.01,
+            radius: 150 + Math.random() * 50,
+            size: 3 + Math.random() * 2
+        });
+    }
+    
+    let time = 0;
+    
+    function animate() {
+        const audioLevel = state.inputLevel > -100 ? state.inputLevel : -60;
+        const normalizedLevel = Math.max(0, Math.min(1, (audioLevel + 60) / 60));
+        
+        // Parameter influence
+        const driveInfluence = state.drive / 100;
+        const toneInfluence = state.tone / 100;
+        const biasInfluence = state.bias / 100;
+        const mixInfluence = state.mix / 100;
+        
+        // Fade with trails
+        ctx.fillStyle = 'rgba(13, 13, 21, 0.1)';
+        ctx.fillRect(0, 0, 600, 600);
+        
+        time += 0.02;
+        
+        // Create collision bursts on audio peaks
+        if (normalizedLevel > 0.6) {
+            collisionBursts.push({
+                x: centerX,
+                y: centerY,
+                radius: 0,
+                maxRadius: 150 * normalizedLevel,
+                opacity: 1
+            });
+        }
+        
+        // Update and draw collision bursts
+        collisionBursts = collisionBursts.filter(burst => {
+            burst.radius += 5;
+            burst.opacity -= 0.02;
+            
+            if (burst.opacity > 0) {
+                ctx.strokeStyle = `rgba(255, 128, 0, ${burst.opacity * mixInfluence})`;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(burst.x, burst.y, burst.radius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            return burst.opacity > 0 && burst.radius < burst.maxRadius;
+        });
+        
+        // Update and draw particles
+        particles.forEach(particle => {
+            // DRIVE affects particle speed
+            particle.angle += particle.speed * (1 + driveInfluence * 2) * (1 + normalizedLevel * 0.5);
+            
+            // BIAS affects orbit shape
+            const radiusX = particle.radius * (1 + biasInfluence * 0.5);
+            const radiusY = particle.radius * (1 - biasInfluence * 0.5);
+            
+            const x = centerX + Math.cos(particle.angle) * radiusX;
+            const y = centerY + Math.sin(particle.angle) * radiusY;
+            
+            // TONE affects color
+            const r = 255;
+            const g = Math.floor(128 * (1 - toneInfluence));
+            const b = 0;
+            
+            // Size responds to audio and drive
+            const size = particle.size * (1 + driveInfluence * 0.5) * (1 + normalizedLevel * 0.8);
+            const opacity = (0.7 + normalizedLevel * 0.3) * mixInfluence;
+            
+            // Draw particle with glow
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, size * 3);
+            gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${opacity})`);
+            gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${opacity * 0.5})`);
+            gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, size * 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw core
+            ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        
+        // Draw center collision zone
+        const centerGlow = normalizedLevel * driveInfluence * mixInfluence;
+        if (centerGlow > 0.1) {
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 50 * centerGlow);
+            gradient.addColorStop(0, `rgba(255, 200, 0, ${centerGlow * 0.6})`);
+            gradient.addColorStop(1, 'rgba(255, 128, 0, 0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 50 * centerGlow, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        requestAnimationFrame(animate);
+    }
+    
+    animate();
 }
 
 // Receive audio data from C++ for reactive animations

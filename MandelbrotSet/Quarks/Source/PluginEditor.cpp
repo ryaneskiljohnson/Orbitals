@@ -93,7 +93,7 @@ QuarksAudioProcessorEditor::QuarksAudioProcessorEditor (QuarksAudioProcessor& p)
     if (isAuthorized)
     {
         loadWebUI();
-        startTimer(1000 * 60 * 15); // Re-check every 15 minutes
+        startTimer(50); // Re-check every 15 minutes
     }
     else
     {
@@ -516,7 +516,7 @@ bool QuarksAudioProcessorEditor::checkAuthorization()
         if (isAuthorized)
         {
             loadWebUI();
-            startTimer(1000 * 60 * 15); // Check every 15 minutes
+            startTimer(50); // Check every 15 minutes
         }
         else
         {
@@ -589,9 +589,35 @@ void QuarksAudioProcessorEditor::timerCallback()
             if (isAuthorized)
             {
                 loadWebUI();
-                startTimer(1000 * 60 * 15);
+                startTimer(50);
             }
         }
+    }
+    
+            
+    
+    // Send metering data for audio-reactive animation
+    if (isAuthorized && webView != nullptr && webView->isVisible())
+    {
+        sendMeteringData();
+    }
+}
+
+void QuarksAudioProcessorEditor::sendMeteringData()
+{
+    // Get audio levels from processor
+    float inputLevelDb = audioProcessor.inputLevel.load();
+    float outputLevelDb = audioProcessor.outputLevel.load();
+    
+    // Send to JavaScript
+    juce::String script = juce::String::formatted(
+        "if (window.receiveAudioData) { window.receiveAudioData({ inputLevel: %.2f, outputLevel: %.2f }); }",
+        inputLevelDb, outputLevelDb
+    );
+    
+    if (webView != nullptr && webView->isVisible())
+    {
+        webView->evaluateJavascript(script);
     }
 }
 

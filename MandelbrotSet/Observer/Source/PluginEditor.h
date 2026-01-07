@@ -41,6 +41,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void timerCallback() override;
+    void sendMeteringData();
     
     // MIDI note notification
     void notifyMIDINote(int noteNumber, int velocity);

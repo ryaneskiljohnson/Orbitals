@@ -105,76 +105,113 @@ function initializeEntanglementAnimation() {
     canvas.height = 600;
     
     let time = 0;
+    let particlePairs = [];
+    
+    // Create initial particle pairs
+    for (let i = 0; i < 5; i++) {
+        particlePairs.push({
+            angle: (Math.PI * 2 * i) / 5,
+            speed: 0.02 + Math.random() * 0.01,
+            phase: Math.random() * Math.PI * 2
+        });
+    }
     
     function animate() {
         // Calculate audio reactivity
         const audioLevel = state.inputLevel > -100 ? state.inputLevel : -60;
         const normalizedLevel = Math.max(0, Math.min(1, (audioLevel + 60) / 60)); // -60 to 0 dB mapped to 0-1
         
-        // Clear with fade effect
-        ctx.fillStyle = 'rgba(13, 13, 21, 0.15)';
+        // Parameter influence
+        const timeInfluence = state.time / 2000; // 0 to 1 (delay time)
+        const feedbackInfluence = state.feedback / 100; // 0 to 1
+        const mixInfluence = state.mix / 100; // 0 to 1
+        const dampingInfluence = state.damping / 100; // 0 to 1
+        
+        // Clear with fade effect (damping controls trails)
+        const fadeAmount = 0.1 + dampingInfluence * 0.1;
+        ctx.fillStyle = `rgba(13, 13, 21, ${fadeAmount})`;
         ctx.fillRect(0, 0, 600, 600);
         
-        time += 0.03 * (1 + normalizedLevel * 0.5);
+        // Time controls animation speed
+        time += 0.02 * (1 + timeInfluence * 0.5) * (1 + normalizedLevel * 0.5);
         
-        // Particle movement amplitude responds to audio
-        const movementScale = 80 + normalizedLevel * 40;
+        // Particle movement amplitude responds to audio and mix
+        const movementScale = (60 + normalizedLevel * 30) * (0.5 + mixInfluence * 0.5);
         
-        // Two entangled particles moving in synchronized patterns
-        const x1 = 200 + Math.sin(time) * movementScale;
-        const y1 = 300 + Math.cos(time * 1.5) * movementScale;
-        const x2 = 400 - Math.sin(time) * movementScale;
-        const y2 = 300 - Math.cos(time * 1.5) * movementScale;
+        const centerX = 300;
+        const centerY = 300;
         
-        // Draw connection line (quantum entanglement) - responds to audio
-        const lineOpacity = 0.4 + normalizedLevel * 0.4;
-        const lineWidth = 2 + normalizedLevel * 2;
-        ctx.strokeStyle = `rgba(255, 0, 128, ${lineOpacity})`;
-        ctx.lineWidth = lineWidth;
-        ctx.setLineDash([5, 5]);
-        ctx.lineDashOffset = -time * 10;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        
-        // Particle size responds to audio
-        const particleSize = 30 + normalizedLevel * 20;
-        const particleIntensity = 0.8 + normalizedLevel * 0.2;
-        
-        // Draw particle 1 (pink) - responds to audio
-        const grad1 = ctx.createRadialGradient(x1, y1, 0, x1, y1, particleSize);
-        grad1.addColorStop(0, `rgba(255, 0, 128, ${particleIntensity})`);
-        grad1.addColorStop(0.5, `rgba(255, 0, 128, ${particleIntensity * 0.5})`);
-        grad1.addColorStop(1, 'rgba(255, 0, 128, 0)');
-        ctx.fillStyle = grad1;
-        ctx.beginPath();
-        ctx.arc(x1, y1, particleSize, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Draw particle 2 (cyan) - responds to audio
-        const grad2 = ctx.createRadialGradient(x2, y2, 0, x2, y2, particleSize);
-        grad2.addColorStop(0, `rgba(0, 229, 255, ${particleIntensity})`);
-        grad2.addColorStop(0.5, `rgba(0, 229, 255, ${particleIntensity * 0.5})`);
-        grad2.addColorStop(1, 'rgba(0, 229, 255, 0)');
-        ctx.fillStyle = grad2;
-        ctx.beginPath();
-        ctx.arc(x2, y2, particleSize, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Draw cores
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.beginPath();
-        ctx.arc(x1, y1, 3, 0, Math.PI * 2);
-        ctx.arc(x2, y2, 3, 0, Math.PI * 2);
-        ctx.fill();
+        // Draw all entangled particle pairs
+        particlePairs.forEach((pair, index) => {
+            pair.angle += pair.speed;
+            
+            // Distance between pairs controlled by TIME parameter
+            const separationDist = 100 + timeInfluence * 150;
+            
+            // Calculate positions (mirror particles)
+            const x1 = centerX + Math.cos(pair.angle + time) * movementScale;
+            const y1 = centerY + Math.sin(pair.angle + time) * movementScale;
+            const x2 = centerX - Math.cos(pair.angle + time) * movementScale;
+            const y2 = centerY - Math.sin(pair.angle + time) * movementScale;
+            
+            // Draw connection line (quantum entanglement) - FEEDBACK controls brightness
+            const lineOpacity = (0.3 + feedbackInfluence * 0.4 + normalizedLevel * 0.3) * mixInfluence;
+            const lineWidth = 1 + feedbackInfluence * 2 + normalizedLevel * 1;
+            ctx.strokeStyle = `rgba(255, 0, 128, ${lineOpacity})`;
+            ctx.lineWidth = lineWidth;
+            ctx.setLineDash([5, 5]);
+            ctx.lineDashOffset = -time * 10;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Particle size responds to audio and mix
+            const particleSize = (20 + normalizedLevel * 15) * (0.7 + mixInfluence * 0.3);
+            const particleIntensity = (0.6 + normalizedLevel * 0.3) * mixInfluence;
+            
+            // Draw particle 1 (pink)
+            const grad1 = ctx.createRadialGradient(x1, y1, 0, x1, y1, particleSize);
+            grad1.addColorStop(0, `rgba(255, 0, 128, ${particleIntensity})`);
+            grad1.addColorStop(0.5, `rgba(255, 0, 128, ${particleIntensity * 0.5})`);
+            grad1.addColorStop(1, 'rgba(255, 0, 128, 0)');
+            ctx.fillStyle = grad1;
+            ctx.beginPath();
+            ctx.arc(x1, y1, particleSize, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw particle 2 (cyan)
+            const grad2 = ctx.createRadialGradient(x2, y2, 0, x2, y2, particleSize);
+            grad2.addColorStop(0, `rgba(0, 229, 255, ${particleIntensity})`);
+            grad2.addColorStop(0.5, `rgba(0, 229, 255, ${particleIntensity * 0.5})`);
+            grad2.addColorStop(1, 'rgba(0, 229, 255, 0)');
+            ctx.fillStyle = grad2;
+            ctx.beginPath();
+            ctx.arc(x2, y2, particleSize, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw cores (brighter with audio)
+            const coreOpacity = 0.8 + normalizedLevel * 0.2;
+            ctx.fillStyle = `rgba(255, 255, 255, ${coreOpacity})`;
+            ctx.beginPath();
+            ctx.arc(x1, y1, 3, 0, Math.PI * 2);
+            ctx.arc(x2, y2, 3, 0, Math.PI * 2);
+            ctx.fill();
+        });
         
         requestAnimationFrame(animate);
     }
     
     animate();
 }
+
+// Receive audio data from C++
+window.receiveAudioData = function(data) {
+    if (!data) return;
+    state.inputLevel = data.inputLevel || -100;
+    state.outputLevel = data.outputLevel || -100;
+};
 
 // ===================================================================
 // COMMUNICATION WITH C++
