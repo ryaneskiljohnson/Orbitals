@@ -9,16 +9,59 @@ const state = {
     damping: 50,
     predelay: 0,
     mix: 50,
+    wetdry: 50,
     bypass: false,
     inputLevel: -100,
     outputLevel: -100
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+let juceReady = false;
+
+// Wait for JUCE backend to be available (window.__JUCE__ or window.juce)
+function waitForJuce() {
+    return new Promise((resolve) => {
+        const juceBackend = window.__JUCE__ || window.juce;
+        if (juceBackend) {
+            juceReady = true;
+            console.log('✅ JUCE backend available immediately:', window.__JUCE__ ? 'window.__JUCE__' : 'window.juce');
+            resolve();
+        } else {
+            console.log('⏳ Waiting for JUCE backend (window.__JUCE__ or window.juce)...');
+            let attempts = 0;
+            const check = setInterval(() => {
+                const backend = window.__JUCE__ || window.juce;
+                if (backend) {
+                    clearInterval(check);
+                    juceReady = true;
+                    console.log('✅ JUCE backend became available after ' + (attempts * 100) + 'ms');
+                    console.log('✅ Using:', window.__JUCE__ ? 'window.__JUCE__' : 'window.juce');
+                    resolve();
+                } else if (++attempts >= 50) {
+                    clearInterval(check);
+                    console.error('❌ JUCE backend never became available after 5 seconds');
+                    console.error('This means the WebView bridge is not working!');
+                    resolve(); // Resolve anyway to not block execution
+                }
+            }, 100);
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🔵 DOMContentLoaded fired');
+    
+    // AUTOMATIC BRIDGE TEST - Runs immediately after page loads
+    console.log('🧪 Starting automatic bridge test...');
+    setTimeout(() => {
+        testBridge();
+    }, 1000); // Wait 1 second for everything to initialize
+    await waitForJuce();
+    console.log('🔵 Initializing controls...');
     initializeSettingsButton();
     initializeControls();
     initializeFabricAnimation();
     initializeBypassToggle();
+    console.log('🔵 All controls initialized');
 });
 
 function initializeControls() {
@@ -80,6 +123,30 @@ function initializeControls() {
         onChange: (value, param) => {
             state.mix = value;
             document.getElementById('mixValue').textContent = `${value.toFixed(0)}%`;
+            sendToPlugin(param, value);
+        }
+    });
+
+    // Wet/Dry slider
+    new MandelbrotSlider(document.getElementById('wetdrySlider'), {
+        min: 0,
+        max: 100,
+        value: 50,
+        orientation: 'horizontal',
+        onChange: (value, param) => {
+            state.wetdry = value;
+            // Format display: 0% = 100% Dry, 50% = 50/50, 100% = 100% Wet
+            let displayText;
+            if (value === 0) {
+                displayText = '100% Dry';
+            } else if (value === 100) {
+                displayText = '100% Wet';
+            } else if (value === 50) {
+                displayText = '50/50';
+            } else {
+                displayText = `${value.toFixed(0)}% Wet`;
+            }
+            document.getElementById('wetdryValue').textContent = displayText;
             sendToPlugin(param, value);
         }
     });
@@ -212,21 +279,122 @@ function initializeFabricAnimation() {
 function initializeSettingsButton() {
     const settingsButton = document.getElementById('settingsButton');
     if (settingsButton) {
-        settingsButton.addEventListener('click', () => {
-            sendToPlugin('openSettings', 1);
-        });
-        settingsButton.style.display = 'flex';
+        // Only show settings button in standalone mode
+        const isStandalone = window.isStandaloneMode === true;
+        
+        if (isStandalone) {
+            settingsButton.addEventListener('click', () => {
+                console.log('Settings button clicked!');
+                sendToPlugin('openSettings', 1);
+            });
+            settingsButton.style.display = 'flex';
+            console.log('Settings button initialized and visible');
+        } else {
+            // Hide the button in plugin mode (VST3/AU)
+            settingsButton.style.display = 'none';
+        }
     }
 }
 
 function sendToPlugin(parameter, value) {
-    if (window.juce) {
-        window.juce.postMessage({
+    console.log('📤 sendToPlugin called:', parameter, value);
+    
+    // JUCE 8 uses window.__JUCE__.backend.emitEvent() for event listeners
+    const juceBackend = window.__JUCE__;
+    
+    if (juceBackend && juceBackend.backend) {
+        console.log('✅ JUCE backend found: window.__JUCE__.backend');
+        const message = {
             type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
             parameter: parameter,
             value: value
-        });
+        };
+        console.log('📤 Sending message via emitEvent:', JSON.stringify(message));
+        // Use emitEvent instead of postMessage for withEventListener
+        juceBackend.backend.emitEvent('message', message);
+    } else if (window.__JUCE__) {
+        // Fallback: try postMessage (old API)
+        console.log('⚠️ Using fallback postMessage API');
+        const message = {
+            type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
+            parameter: parameter,
+            value: value
+        };
+        const messageString = JSON.stringify(message);
+        window.__JUCE__.postMessage(messageString);
+    } else {
+        console.error('❌ window.__JUCE__ is not available!');
+        console.error('Available window properties:', Object.keys(window).filter(k => k.includes('JUCE') || k.includes('juce') || k.includes('webkit')));
     }
+}
+
+// Test function to verify bridge is working
+function testBridge() {
+    console.log('🧪 ========================================');
+    console.log('🧪 BRIDGE TEST STARTING');
+    console.log('🧪 ========================================');
+    
+    // Test 1: Check if JUCE backend exists
+    const juceBackend = window.__JUCE__;
+    if (juceBackend && juceBackend.backend) {
+        console.log('✅ TEST 1 PASSED: JUCE backend found');
+        console.log('   window.__JUCE__:', juceBackend);
+        console.log('   window.__JUCE__.backend:', juceBackend.backend);
+        console.log('   Available methods:', Object.keys(juceBackend.backend));
+    } else {
+        console.error('❌ TEST 1 FAILED: No JUCE backend found!');
+        console.error('   window.__JUCE__:', window.__JUCE__);
+        console.error('   window.__JUCE__.backend:', window.__JUCE__?.backend);
+        console.error('   Available properties:', Object.keys(window).filter(k => k.includes('JUCE') || k.includes('juce') || k.includes('webkit')));
+        return;
+    }
+    
+    // Test 2: Send a test message using emitEvent
+    console.log('🧪 TEST 2: Sending test message to C++ via emitEvent...');
+    const testMessage = {
+        type: 'test',
+        parameter: 'bridgeTest',
+        value: 'Hello from JavaScript! Bridge test successful!'
+    };
+    console.log('   Sending:', JSON.stringify(testMessage));
+    
+    try {
+        if (juceBackend.backend) {
+            juceBackend.backend.emitEvent('message', testMessage);
+            console.log('✅ TEST 2 PASSED: emitEvent() called without error');
+        } else {
+            console.error('❌ TEST 2 FAILED: juceBackend.backend is not available');
+            return;
+        }
+    } catch (error) {
+        console.error('❌ TEST 2 FAILED: emitEvent() threw error:', error);
+        return;
+    }
+    
+    // Test 3: Send a parameter change message
+    console.log('🧪 TEST 3: Sending parameter change message...');
+    const paramMessage = {
+        type: 'parameterChange',
+        parameter: 'size',
+        value: 75
+    };
+    console.log('   Sending:', JSON.stringify(paramMessage));
+    
+    try {
+        if (juceBackend.backend) {
+            juceBackend.backend.emitEvent('message', paramMessage);
+            console.log('✅ TEST 3 PASSED: Parameter change message sent');
+        } else {
+            console.error('❌ TEST 3 FAILED: juceBackend.backend is not available');
+        }
+    } catch (error) {
+        console.error('❌ TEST 3 FAILED: Parameter change message error:', error);
+    }
+    
+    console.log('🧪 ========================================');
+    console.log('🧪 BRIDGE TEST COMPLETE');
+    console.log('🧪 Check C++ console for "RECEIVED MESSAGE" logs');
+    console.log('🧪 ========================================');
 }
 
 // Receive audio data from C++ for reactive animations

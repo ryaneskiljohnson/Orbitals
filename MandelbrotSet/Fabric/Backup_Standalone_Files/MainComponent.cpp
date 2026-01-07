@@ -8,13 +8,20 @@
 
 #include "MainComponent.h"
 #include <cstring>
+#include <iostream>
 
 //==============================================================================
 MainComponent::MainComponent()
 {
+    std::cout << "=== MAIN COMPONENT CONSTRUCTOR (STANDALONE APP) ===" << std::endl;
+    DBG("=== MAIN COMPONENT CONSTRUCTOR (STANDALONE APP) ===");
+    
     setSize (1200, 750);
     setVisible (true);
     setOpaque (true);
+    
+    std::cout << "MainComponent initialized" << std::endl;
+    DBG("MainComponent initialized");
     
     // Initialize audio device manager
     audioDeviceManager.initialiseWithDefaultDevices (0, 2);
@@ -31,12 +38,17 @@ MainComponent::MainComponent()
         });
     
     webView = std::make_unique<juce::WebBrowserComponent> (options);
+    std::cout << "MainComponent: WebView created" << std::endl;
+    DBG("MainComponent: WebView created");
     
     // Set WebView to be non-opaque so dark background shows through
     webView->setOpaque (false);
     
     addAndMakeVisible (webView.get());
     webView->setBounds (getLocalBounds());
+    
+    std::cout << "MainComponent: WebView configured and visible" << std::endl;
+    DBG("MainComponent: WebView configured and visible");
     
     // Load a minimal dark HTML page immediately to prevent white flash
     const char* blackHTML = 
@@ -286,6 +298,11 @@ void MainComponent::showFallbackUI()
 
 void MainComponent::handleJavaScriptMessage (const juce::var& message)
 {
+    std::cout << "=== MAINCOMPONENT: RECEIVED MESSAGE FROM JAVASCRIPT ===" << std::endl;
+    DBG("=== MAINCOMPONENT: RECEIVED MESSAGE FROM JAVASCRIPT ===");
+    std::cout << "Message: " << message.toString() << std::endl;
+    DBG("Message: " + message.toString());
+    
     // Handle messages from JavaScript
     // Message can be a JSON string or already parsed var
     juce::var parsedMessage = message;
@@ -305,9 +322,19 @@ void MainComponent::handleJavaScriptMessage (const juce::var& message)
     if (auto* obj = parsedMessage.getDynamicObject())
     {
         auto type = obj->getProperty ("type").toString();
+        
         auto value = obj->getProperty ("value");
         
-        if (type == "volume")
+        if (type == "openSettings")
+        {
+            DBG("MainComponent: Received openSettings message");
+            // Show audio device settings dialog
+            juce::MessageManager::callAsync([this]()
+            {
+                audioDeviceManager.showAudioDeviceSettingsDialog();
+            });
+        }
+        else if (type == "volume")
         {
             auto volumeValue = (float) value;
             DBG ("Volume changed: " + juce::String (volumeValue));

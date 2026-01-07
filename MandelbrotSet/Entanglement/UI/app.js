@@ -183,10 +183,18 @@ function initializeEntanglementAnimation() {
 function initializeSettingsButton() {
     const settingsButton = document.getElementById('settingsButton');
     if (settingsButton) {
-        settingsButton.addEventListener('click', () => {
-            sendToPlugin('openSettings', 1);
-        });
-        settingsButton.style.display = 'flex';
+        // Only show settings button in standalone mode
+        const isStandalone = window.isStandaloneMode === true;
+        
+        if (isStandalone) {
+            settingsButton.addEventListener('click', () => {
+                sendToPlugin('openSettings', 1);
+            });
+            settingsButton.style.display = 'flex';
+        } else {
+            // Hide the button in plugin mode (VST3/AU)
+            settingsButton.style.display = 'none';
+        }
     }
 }
 

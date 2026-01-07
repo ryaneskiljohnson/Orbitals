@@ -8,13 +8,16 @@
 
 #include <JuceHeader.h>
 #include "MainComponent.h"
+#include <iostream>
 
 //==============================================================================
 class SynthApplication  : public juce::JUCEApplication
 {
 public:
     //==============================================================================
-    SynthApplication() {}
+    SynthApplication() {
+        std::cout << "=== FABRIC APPLICATION STARTING ===" << std::endl;
+    }
 
     const juce::String getApplicationName() override       { return ProjectInfo::projectName; }
     const juce::String getApplicationVersion() override    { return ProjectInfo::versionString; }
@@ -23,8 +26,13 @@ public:
     //==============================================================================
     void initialise (const juce::String& commandLine) override
     {
+        std::cout << "=== APPLICATION INITIALISE ===" << std::endl;
+        std::cout << "Creating main window..." << std::endl;
+        
         // This method is where you should put your application's initialisation code..
         mainWindow.reset (new MainWindow (getApplicationName()));
+        
+        std::cout << "Main window created" << std::endl;
     }
 
     void shutdown() override
@@ -62,10 +70,19 @@ public:
                                                           .findColour (juce::ResizableWindow::backgroundColourId),
                               DocumentWindow::allButtons)
         {
+            std::cout << "=== MAIN WINDOW CONSTRUCTOR ===" << std::endl;
+            std::cout << "Window name: " << name << std::endl;
+            
             setUsingNativeTitleBar (true);
+            
+            std::cout << "Creating MainComponent..." << std::endl;
             auto* content = new MainComponent();
+            std::cout << "MainComponent created, setting as content..." << std::endl;
+            
             setContentOwned (content, true);
             content->setVisible (true);
+            
+            std::cout << "MainComponent set as content" << std::endl;
 
            #if JUCE_ANDROID || JUCE_IOS
             setFullScreen (true);

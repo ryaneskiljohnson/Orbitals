@@ -194,6 +194,22 @@ void HadronAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
     if (cssFile.existsAsFile())
     {
         auto cssContent = cssFile.loadFileAsString();
+        
+        // Replace background image path in CSS with base64 data URL
+        auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/hadron.png");
+        if (backgroundImage.existsAsFile())
+        {
+            juce::MemoryBlock imageData;
+            if (backgroundImage.loadFileAsData(imageData))
+            {
+                juce::String base64 = juce::Base64::toBase64(imageData.getData(), imageData.getSize());
+                juce::String dataURL = "data:image/png;base64," + base64;
+                // Replace both single and double quote versions
+                cssContent = cssContent.replace("url('../../_Shared/Assets/backgrounds/hadron.png')", "url('" + dataURL + "')");
+                cssContent = cssContent.replace("url(\"../../_Shared/Assets/backgrounds/hadron.png\")", "url(\"" + dataURL + "\")");
+            }
+        }
+        
         htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"styles.css\">",
                                            "<style>" + cssContent + "</style>");
     }
@@ -246,23 +262,22 @@ void HadronAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
                                            "<script>" + componentsFile.loadFileAsString() + "</script>");
     }
 
-    // Handle background image
-    auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/hadron-background.png");
-    if (backgroundImage.existsAsFile())
-    {
-        juce::MemoryBlock imageData;
-        if (backgroundImage.loadFileAsData(imageData))
-        {
-            juce::String base64 = juce::Base64::toBase64(imageData.getData(), imageData.getSize());
-            htmlContent = htmlContent.replace("../../_Shared/Assets/backgrounds/hadron-background.png", 
-                                            "data:image/png;base64," + base64);
-        }
-    }
+    // Background image is now handled in CSS inlining above
 
-    // Disable right-click context menu
+    // Disable right-click context menu and set standalone mode flag
     juce::String disableRightClickScript = R"(<script>
         document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
         document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
+        // Set standalone mode flag (only true in standalone builds)
+        window.isStandaloneMode = )";
+    
+#if JucePlugin_Build_Standalone
+    disableRightClickScript += "true";
+#else
+    disableRightClickScript += "false";
+#endif
+    
+    disableRightClickScript += R"(;
     </script>)";
     
     // Inject script before closing body tag
@@ -429,8 +444,8 @@ void HadronAudioProcessorEditor::loadAuthScreen()
 </html>)";
     
     // Load and inline background image as base64
-    auto projectRoot = juce::File("/Users/rjmacbookpro/Development/Orbitals");
-    auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/hadron-background.png");
+    auto projectRoot = juce::File("/Users/rjmacbookpro/Development/Orbitals/MandelbrotSet");
+    auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/hadron.png");
     
     if (backgroundImage.existsAsFile())
     {
@@ -501,7 +516,9 @@ bool HadronAudioProcessorEditor::checkAuthorization()
     if (!product_list.isEmpty())
         expiration_date = juce::Time::fromISO8601(product_list[0]);
     
-    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200007"));
+    // Read product ID from BinaryData resource (product_id.txt)
+    juce::String product_id = juce::String::fromUTF8(BinaryData::product_id_txt, BinaryData::product_id_txtSize).trim();
+    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains(product_id));
     
     if (authorized != isAuthorized)
     {

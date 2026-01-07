@@ -34,14 +34,19 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeSettingsButton() {
     const settingsButton = document.getElementById('settingsButton');
     if (settingsButton) {
-        settingsButton.addEventListener('click', () => {
-            // Send message to C++ to open audio/MIDI settings
-            sendToPlugin('openSettings', 1);
-        });
+        // Only show settings button in standalone mode
+        const isStandalone = window.isStandaloneMode === true;
         
-        // Show button only in standalone builds (C++ will control visibility)
-        // For now, show it - C++ can hide it if not standalone
-        settingsButton.style.display = 'flex';
+        if (isStandalone) {
+            settingsButton.addEventListener('click', () => {
+                // Send message to C++ to open audio/MIDI settings
+                sendToPlugin('openSettings', 1);
+            });
+            settingsButton.style.display = 'flex';
+        } else {
+            // Hide the button in plugin mode (VST3/AU)
+            settingsButton.style.display = 'none';
+        }
     }
 }
 

@@ -9,6 +9,9 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <iostream>
+#include <cmath>
+#include <string>
 #if JucePlugin_Build_Standalone
 #include <juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h>
 #endif
@@ -17,6 +20,35 @@
 FabricAudioProcessorEditor::FabricAudioProcessorEditor (FabricAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
+    std::cout << "=== FABRIC PLUGIN EDITOR CONSTRUCTOR ===" << std::endl;
+    DBG("=== FABRIC PLUGIN EDITOR CONSTRUCTOR ===");
+    
+    // Check audio device configuration in standalone mode
+    #if JucePlugin_Build_Standalone
+    if (auto* pluginHolder = juce::StandalonePluginHolder::getInstance())
+    {
+        auto& deviceManager = pluginHolder->deviceManager;
+        std::cerr << "=== AUDIO DEVICE MANAGER STATUS ===" << std::endl;
+        std::cerr << "   Current audio device: " << (deviceManager.getCurrentAudioDevice() != nullptr ? deviceManager.getCurrentAudioDevice()->getName() : "NONE").toStdString() << std::endl;
+        if (auto* device = deviceManager.getCurrentAudioDevice())
+        {
+            std::cerr << "   Sample rate: " << device->getCurrentSampleRate() << " Hz" << std::endl;
+            std::cerr << "   Buffer size: " << device->getCurrentBufferSizeSamples() << " samples" << std::endl;
+            std::cerr << "   Input channels: " << device->getActiveInputChannels().countNumberOfSetBits() << std::endl;
+            std::cerr << "   Output channels: " << device->getActiveOutputChannels().countNumberOfSetBits() << std::endl;
+            std::cerr << "   Device is playing: " << (device->isPlaying() ? "YES" : "NO") << std::endl;
+        }
+        else
+        {
+            std::cerr << "   ❌ NO AUDIO DEVICE CONFIGURED!" << std::endl;
+        }
+    }
+    else
+    {
+        std::cerr << "   ⚠️ Not in standalone mode or plugin holder not available" << std::endl;
+    }
+    #endif
+    
     // Make component opaque so black background shows through (like NNAudioAccess)
     setOpaque(true);
     
@@ -27,31 +59,66 @@ FabricAudioProcessorEditor::FabricAudioProcessorEditor (FabricAudioProcessor& p)
     setSize (1200, 750);
     setResizable (false, false);
     
+    std::cout << "Creating WebView..." << std::endl;
+    DBG("Creating WebView...");
+    
     // Create WebView with native integration enabled for message passing
+    std::cout << "Setting up WebView options with native integration..." << std::endl;
+    DBG("Setting up WebView options with native integration...");
+    
     auto options = juce::WebBrowserComponent::Options{}
         .withNativeIntegrationEnabled (true)
         .withKeepPageLoadedWhenBrowserIsHidden() // Keep page loaded when hidden (like Zenith)
         .withEventListener ("message", [this](const juce::var& message) {
+            std::cout << "=== EVENT LISTENER TRIGGERED ===" << std::endl;
+            DBG("=== EVENT LISTENER TRIGGERED ===");
+            std::cout << "Message received: " << message.toString() << std::endl;
+            DBG("Message received: " + message.toString());
             handleJavaScriptMessage (message);
         });
+    
+    std::cout << "WebView options configured" << std::endl;
+    DBG("WebView options configured");
 
     webView = std::make_unique<WebBrowserWithCallbacks> (options);
+    std::cout << "WebView created" << std::endl;
+    DBG("WebView created");
+    
     // Don't call setOpaque(false) - it causes white background flash
     addChildComponent (webView.get()); // Add as child but keep hidden until page loads
     webView->setBounds (getLocalBounds());
     webView->setVisible (false); // Start hidden to avoid white screen flash
     
+    std::cout << "WebView configured, bounds set" << std::endl;
+    DBG("WebView configured, bounds set");
+    
     // Set up page finished loading callback - show webView only after page loads AND renders (like NNAudioAccess)
     webView->onPageFinishedLoading = [this](const juce::String& url) {
+        std::cout << "WebView page finished loading: " << url << std::endl;
+        std::cout << "onPageFinishedLoading callback triggered" << std::endl;
+        DBG("WebView page finished loading: " + url);
+        DBG("onPageFinishedLoading callback triggered");
+        
+        std::cout << "Scheduling 2-second delay before checking background..." << std::endl;
+        DBG("Scheduling 2-second delay before checking background...");
+        
         juce::MessageManager::callAsync([this]() {
+            std::cout << "In MessageManager::callAsync" << std::endl;
+            DBG("In MessageManager::callAsync");
+            
             // Wait 2 seconds to ensure HTML with inline black styles has fully rendered
             // Then verify background is black before showing
             juce::Timer::callAfterDelay(2000, [this]() {
+                std::cout << "2-second delay complete, checking background..." << std::endl;
+                DBG("2-second delay complete, checking background...");
                 if (webView == nullptr || webView->isVisible()) return;
                 
-                // Verify background is black via JavaScript before showing
+                // Verify background is black AND initialize bridge via JavaScript
                 juce::String checkScript = R"(
                     (function() {
+                        console.log('🔵 C++ initialization script running');
+                        console.log('window.juce exists:', typeof window.juce !== 'undefined');
+                        
                         if (!document.body) return false;
                         var style = window.getComputedStyle(document.body);
                         var bg = style.backgroundColor;
@@ -74,6 +141,37 @@ FabricAudioProcessorEditor::FabricAudioProcessorEditor (FabricAudioProcessor& p)
                         if (webView != nullptr && !webView->isVisible()) {
                             webView->setVisible(true);
                             repaint();
+                            
+                            // After showing, test the bridge and send ready signal to JavaScript
+                            juce::Timer::callAfterDelay(500, [this]() {
+                                if (webView != nullptr) {
+                                    std::cout << "Testing WebView bridge..." << std::endl;
+                                    DBG("Testing WebView bridge...");
+                                    
+                                    // Test script that verifies window.juce and logs status
+                                    juce::String testScript = R"(
+                                        alert('WebView is visible and JavaScript is running!');
+                                        console.log('🔵 C++ has shown the WebView');
+                                        console.log('🔵 Testing bridge...');
+                                        console.log('🔵 window.juce exists:', typeof window.juce !== 'undefined');
+                                        console.log('🔵 window.juce.postMessage exists:', typeof window.juce?.postMessage === 'function');
+                                        
+                                        // Test sending a message back to C++
+                                        if (window.juce && window.juce.postMessage) {
+                                            console.log('🔵 Sending test message to C++...');
+                                            window.juce.postMessage({type: 'test', value: 'Bridge test from JavaScript'});
+                                            alert('Sent test message to C++ via window.juce.postMessage');
+                                        } else {
+                                            alert('ERROR: window.juce is NOT available! Bridge is broken!');
+                                        }
+                                    )";
+                                    
+                                    webView->evaluateJavascript(testScript);
+                                    
+                                    std::cout << "Bridge test script sent to JavaScript" << std::endl;
+                                    DBG("Bridge test script sent to JavaScript");
+                                }
+                            });
                         }
                     });
                 });
@@ -91,18 +189,31 @@ FabricAudioProcessorEditor::FabricAudioProcessorEditor (FabricAudioProcessor& p)
     });
     
     // Check authorization first, then load appropriate UI
+    std::cout << "Checking authorization..." << std::endl;
+    DBG("Checking authorization...");
+    
     isAuthorized = checkAuthorization();
+    
+    std::cout << "Authorization status: " << (isAuthorized ? "AUTHORIZED" : "NOT AUTHORIZED") << std::endl;
+    DBG(juce::String("Authorization status: ") + (isAuthorized ? "AUTHORIZED" : "NOT AUTHORIZED"));
     
     if (isAuthorized)
     {
+        std::cout << "Loading Web UI..." << std::endl;
+        DBG("Loading Web UI...");
         loadWebUI();
         startTimer(1000 * 60 * 15); // Re-check every 15 minutes
     }
     else
     {
+        std::cout << "Loading Auth Screen..." << std::endl;
+        DBG("Loading Auth Screen...");
         loadAuthScreen();
         startTimer(5000); // Re-check every 5 seconds
     }
+    
+    std::cout << "=== CONSTRUCTOR COMPLETE ===" << std::endl;
+    DBG("=== CONSTRUCTOR COMPLETE ===");
 }
 
 FabricAudioProcessorEditor::~FabricAudioProcessorEditor()
@@ -114,55 +225,231 @@ FabricAudioProcessorEditor::~FabricAudioProcessorEditor()
 //==============================================================================
 void FabricAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
 {
+    std::cout << "=== RECEIVED MESSAGE FROM JAVASCRIPT ===" << std::endl;
+    DBG("=== RECEIVED MESSAGE FROM JAVASCRIPT ===");
+    std::cout << "Message type check: " << (message.isObject() ? "Object" : message.isString() ? "String" : "Other") << std::endl;
+    DBG("Message type check: " + juce::String(message.isObject() ? "Object" : message.isString() ? "String" : "Other"));
+    std::cout << "Message content: " << message.toString() << std::endl;
+    DBG("Message content: " + message.toString());
+    
+    // JUCE sends the message as an already-parsed object from JSON::fromString()
+    // So it should already be an object, not a string
     if (!message.isObject())
+    {
+        std::cout << "Message is not an object, returning" << std::endl;
+        DBG("Message is not an object, returning");
         return;
+    }
 
     auto obj = message.getDynamicObject();
     if (obj == nullptr)
+    {
+        DBG("Could not get dynamic object");
         return;
+    }
 
     auto type = obj->getProperty("type").toString();
+    std::cout << "Message type: " << type.toStdString() << std::endl;
+    DBG("Message type: " + type);
+    
+    // Handle test messages
+    if (type == "test")
+    {
+        auto testValue = obj->getProperty("value").toString();
+        std::cout << "✅✅✅ BRIDGE TEST SUCCESSFUL! ✅✅✅" << std::endl;
+        std::cout << "   Received test message: " << testValue.toStdString() << std::endl;
+        DBG("✅✅✅ BRIDGE TEST SUCCESSFUL! ✅✅✅");
+        DBG("   Received test message: " + testValue);
+        return; // Don't process as parameter change
+    }
     
     if (type == "parameterChange")
     {
         auto param = obj->getProperty("parameter").toString();
         auto value = obj->getProperty("value");
+        
+        std::cout << "Parameter change request: " << param.toStdString() << " = " << value.toString().toStdString() << std::endl;
+        DBG("Parameter change request: " + param + " = " + value.toString());
 
         auto* p = audioProcessor.parameters.getParameter(param);
         if (p != nullptr)
         {
-            if (param == "size")
-                p->setValueNotifyingHost(p->convertTo0to1(value));
-            if (param == "diffusion")
-                p->setValueNotifyingHost(p->convertTo0to1(value));
-            if (param == "damping")
-                p->setValueNotifyingHost(p->convertTo0to1(value));
-            if (param == "predelay")
-                p->setValueNotifyingHost(p->convertTo0to1(value));
-            if (param == "mix")
-                p->setValueNotifyingHost(p->convertTo0to1(value));
-            else if (param == "bypass")
-                p->setValueNotifyingHost((float)value);
+            // Get the parameter's range
+            if (auto* rangedParam = dynamic_cast<juce::RangedAudioParameter*>(p))
+            {
+                float rawValue = static_cast<float>(value);
+                auto range = rangedParam->getNormalisableRange();
+                
+                std::cout << "  Parameter range: " << range.start << " to " << range.end << std::endl;
+                std::cout << "  Raw value from JS: " << rawValue << std::endl;
+                
+                // Clamp value to parameter range
+                rawValue = juce::jlimit(range.start, range.end, rawValue);
+                
+                // Convert raw value (in parameter's native range) to normalized 0-1
+                float normalizedValue = range.convertTo0to1(rawValue);
+                
+                std::cout << "  Normalized value: " << normalizedValue << std::endl;
+                std::cout << "  Setting parameter..." << std::endl;
+                
+                // Set the parameter value (this will notify the host and update the DSP)
+                p->setValueNotifyingHost(normalizedValue);
+                
+                // Verify it was set
+                float currentValue = p->getValue();
+                float currentRawValue = range.convertFrom0to1(currentValue);
+                
+                // Also check the raw parameter value directly
+                std::atomic<float>* rawParamValue = audioProcessor.parameters.getRawParameterValue(param);
+                if (rawParamValue != nullptr)
+                {
+                    std::cout << "  Raw parameter value (direct): " << rawParamValue->load() << std::endl;
+                }
+                
+                std::cout << "  ✅ Parameter set! Current normalized: " << currentValue << ", Current raw: " << currentRawValue << std::endl;
+                
+                // Use std::cout for logging instead of DBG to avoid JUCE String assertion issues
+                // DBG calls with float-to-string conversions can cause assertions in JUCE
+                if (!std::isnan(currentValue) && !std::isinf(currentValue) && 
+                    !std::isnan(currentRawValue) && !std::isinf(currentRawValue))
+                {
+                    std::cout << "  ✅ Parameter updated: " << param.toStdString() 
+                              << " -> normalized: " << currentValue 
+                              << ", raw: " << currentRawValue << std::endl;
+                }
+                else
+                {
+                    std::cout << "  ⚠️ Parameter has invalid values (NaN/Inf)" << std::endl;
+                }
+            }
+            else
+            {
+                // For non-ranged parameters (like bypass bool)
+                float normalizedValue = static_cast<float>(value);
+                p->setValueNotifyingHost(normalizedValue);
+                std::cout << "  ✅ Non-ranged parameter set: " << normalizedValue << std::endl;
+                
+                // Use std::cout for logging instead of DBG to avoid JUCE String assertion issues
+                if (!std::isnan(normalizedValue) && !std::isinf(normalizedValue))
+                {
+                    std::cout << "  ✅ Non-ranged parameter updated: " << param.toStdString() 
+                              << " -> " << normalizedValue << std::endl;
+                }
+                else
+                {
+                    std::cout << "  ⚠️ Non-ranged parameter has invalid value (NaN/Inf)" << std::endl;
+                }
+            }
+        }
+        else
+        {
+            std::cout << "  ❌ Parameter not found: " << param.toStdString() << std::endl;
+            DBG("❌ Parameter not found: " + param);
+            DBG("Available parameters:");
+            for (auto* availParam : audioProcessor.parameters.processor.getParameters())
+            {
+                if (auto* rangedParam = dynamic_cast<juce::RangedAudioParameter*>(availParam))
+                {
+                    DBG("  - " + rangedParam->getParameterID());
+                }
+            }
         }
     }
     else if (type == "openSettings")
     {
+        DBG("Received openSettings message from JavaScript");
         openAudioSettings();
+    }
+    else if (type == "test")
+    {
+        auto testValue = obj->getProperty("value").toString();
+        DBG("✅ BRIDGE TEST SUCCESSFUL! Received: " + testValue);
+    }
+    else
+    {
+        DBG("Unknown message type: " + type);
     }
 }
 
 void FabricAudioProcessorEditor::openAudioSettings()
 {
-    // Only available in standalone builds
 #if JucePlugin_Build_Standalone
+    // In standalone mode, show the audio/MIDI settings dialog
     juce::MessageManager::callAsync([this]()
     {
-        // showAudioSettingsDialog() is a method of StandalonePluginHolder
-        // Access it via the static getInstance() method
+        DBG("Opening audio settings...");
+        
+        // Try multiple approaches to access the settings dialog
+        
+        // Approach 1: Get through StandalonePluginHolder singleton
         if (auto* pluginHolder = juce::StandalonePluginHolder::getInstance())
         {
+            DBG("Found StandalonePluginHolder via getInstance()");
             pluginHolder->showAudioSettingsDialog();
+            return;
         }
+        
+        DBG("StandalonePluginHolder::getInstance() returned nullptr");
+        
+        // Approach 2: Try to find StandaloneFilterWindow in the component hierarchy
+        juce::Component* comp = this;
+        while (comp != nullptr)
+        {
+            if (auto* window = dynamic_cast<juce::StandaloneFilterWindow*>(comp))
+            {
+                DBG("Found StandaloneFilterWindow in component hierarchy");
+                if (auto* holder = window->getPluginHolder())
+                {
+                    holder->showAudioSettingsDialog();
+                    return;
+                }
+            }
+            comp = comp->getParentComponent();
+        }
+        
+        DBG("Could not find StandaloneFilterWindow in component hierarchy");
+        
+        // Approach 3: Try top-level window
+        if (auto* topLevelWindow = juce::TopLevelWindow::getTopLevelWindow(0))
+        {
+            DBG("Found top-level window");
+            if (auto* standaloneWindow = dynamic_cast<juce::StandaloneFilterWindow*>(topLevelWindow))
+            {
+                DBG("Top-level window is StandaloneFilterWindow");
+                if (auto* pluginHolder = standaloneWindow->getPluginHolder())
+                {
+                    pluginHolder->showAudioSettingsDialog();
+                    return;
+                }
+            }
+            else
+            {
+                DBG("Top-level window is NOT StandaloneFilterWindow");
+            }
+        }
+        
+        DBG("Failed to open audio settings - no method worked");
+        
+        // Show error message
+        juce::AlertWindow::showMessageBoxAsync(
+            juce::AlertWindow::WarningIcon,
+            "Settings Unavailable",
+            "Unable to access audio/MIDI settings.\n\nThis feature is only available in standalone mode.",
+            "OK"
+        );
+    });
+#else
+    // In plugin mode (VST3/AU), show a message explaining that audio settings
+    // are managed by the host DAW
+    juce::MessageManager::callAsync([this]()
+    {
+        juce::AlertWindow::showMessageBoxAsync(
+            juce::AlertWindow::InfoIcon,
+            "Audio/MIDI Settings",
+            "Audio and MIDI device settings are managed by your DAW.\n\n"
+            "Please use your DAW's audio/MIDI preferences to configure devices.",
+            "OK"
+        );
     });
 #endif
 }
@@ -180,30 +467,48 @@ void FabricAudioProcessorEditor::resized()
 
 void FabricAudioProcessorEditor::loadWebUI()
 {
+    std::cout << "=== LOAD WEB UI CALLED ===" << std::endl;
+    DBG("=== LOAD WEB UI CALLED ===");
+    
     // Navigate DIRECTLY to actual content while webView is HIDDEN (like NNAudioAccess)
     // Content has inline black styles, so it will be black when it loads
     juce::MessageManager::callAsync([this]()
     {
+        std::cout << "In loadWebUI async callback" << std::endl;
+        DBG("In loadWebUI async callback");
+        
         // Find UI files relative to plugin binary
         auto htmlFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
             .getParentDirectory()
             .getChildFile("Resources")
             .getChildFile("index.html");
 
+        std::cout << "Checking for HTML at: " << htmlFile.getFullPathName() << std::endl;
+        DBG("Checking for HTML at: " + htmlFile.getFullPathName());
+
         // Fallback: try development path
         if (!htmlFile.existsAsFile())
         {
+            std::cout << "Not found in Resources, trying development path..." << std::endl;
+            DBG("Not found in Resources, trying development path...");
+            
             auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals/MandelbrotSet");
             htmlFile = projectRoot.getChildFile ("Fabric").getChildFile ("UI").getChildFile ("index.html");
+            
+            std::cout << "Development path: " << htmlFile.getFullPathName() << std::endl;
+            DBG("Development path: " + htmlFile.getFullPathName());
         }
 
         if (htmlFile.existsAsFile())
         {
+            std::cout << "✅ Found HTML file, loading..." << std::endl;
+            DBG("✅ Found HTML file, loading...");
             loadHTMLFile(htmlFile);
             // webView will be shown automatically via onPageFinishedLoading callback
         }
         else
         {
+            std::cout << "❌ Could not find index.html" << std::endl;
             DBG ("Could not find index.html");
         }
     });
@@ -211,7 +516,15 @@ void FabricAudioProcessorEditor::loadWebUI()
 
 void FabricAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
 {
+    std::cout << "=== LOAD HTML FILE ===" << std::endl;
+    std::cout << "HTML file: " << htmlFile.getFullPathName() << std::endl;
+    DBG("=== LOAD HTML FILE ===");
+    DBG("HTML file: " + htmlFile.getFullPathName());
+    
     auto htmlContent = htmlFile.loadFileAsString();
+    std::cout << "HTML content length: " << htmlContent.length() << " characters" << std::endl;
+    DBG("HTML content length: " + juce::String(htmlContent.length()) + " characters");
+    
     auto uiDir = htmlFile.getParentDirectory();
     auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals/MandelbrotSet");
     auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
@@ -320,10 +633,20 @@ void FabricAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
         }
     }
 
-    // Disable right-click context menu
+    // Disable right-click context menu and set standalone mode flag
     juce::String disableRightClickScript = R"(<script>
         document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
         document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
+        // Set standalone mode flag (only true in standalone builds)
+        window.isStandaloneMode = )";
+    
+#if JucePlugin_Build_Standalone
+    disableRightClickScript += "true";
+#else
+    disableRightClickScript += "false";
+#endif
+    
+    disableRightClickScript += R"(;
     </script>)";
     
     // Inject script before closing body tag
@@ -353,7 +676,44 @@ void FabricAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
     
     auto filePath = tempFile.getFullPathName().replace(" ", "%20");
     juce::String fileURL = "file://" + filePath;
+    
+    std::cout << "Loading URL: " << fileURL << std::endl;
+    std::cout << "Temp file size: " << tempFile.getSize() << " bytes" << std::endl;
+    DBG("Loading URL: " + fileURL);
+    DBG("Temp file size: " + juce::String(tempFile.getSize()) + " bytes");
+    
     webView->goToURL(fileURL);
+    
+    std::cout << "goToURL() called, waiting for page to load..." << std::endl;
+    DBG("goToURL() called, waiting for page to load...");
+    
+    // Immediately try to run JavaScript (will fail if page not loaded yet, but worth testing)
+    juce::Timer::callAfterDelay(3000, [this, fileURL]() {
+        std::cout << "=== TESTING JAVASCRIPT EXECUTION (3 seconds after goToURL) ===" << std::endl;
+        DBG("=== TESTING JAVASCRIPT EXECUTION (3 seconds after goToURL) ===");
+        
+        if (webView != nullptr) {
+            std::cout << "WebView exists, trying to execute JavaScript..." << std::endl;
+            std::cout << "WebView visible: " << (webView->isVisible() ? "YES" : "NO") << std::endl;
+            DBG("WebView exists, trying to execute JavaScript...");
+            DBG(juce::String("WebView visible: ") + (webView->isVisible() ? "YES" : "NO"));
+            
+            // Try BOTH methods to execute JavaScript
+            juce::String simpleAlert = "alert('DIRECT TEST: JavaScript is working!');";
+            
+            std::cout << "Trying evaluateJavascript()..." << std::endl;
+            webView->evaluateJavascript(simpleAlert);
+            
+            std::cout << "Trying emitEventIfBrowserIsVisible()..." << std::endl;
+            webView->emitEventIfBrowserIsVisible("eval", simpleAlert);
+            
+            std::cout << "Both methods called" << std::endl;
+            DBG("Both JavaScript execution methods called");
+        } else {
+            std::cout << "ERROR: webView is nullptr!" << std::endl;
+            DBG("ERROR: webView is nullptr!");
+        }
+    });
 }
 
 //==============================================================================
@@ -529,7 +889,9 @@ bool FabricAudioProcessorEditor::checkAuthorization()
     if (!product_list.isEmpty())
         expiration_date = juce::Time::fromISO8601(product_list[0]);
     
-    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200002"));
+    // Read product ID from BinaryData resource (product_id.txt)
+    juce::String product_id = juce::String::fromUTF8(BinaryData::product_id_txt, BinaryData::product_id_txtSize).trim();
+    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains(product_id));
     
     if (authorized != isAuthorized)
     {
@@ -636,6 +998,9 @@ void FabricAudioProcessorEditor::sendMeteringData()
         inputLevelDb, outputLevelDb
     );
     
-    webView->emitEventIfBrowserIsVisible("eval", script);
+    if (webView != nullptr && webView->isVisible())
+    {
+        webView->evaluateJavascript(script);
+    }
 }
 

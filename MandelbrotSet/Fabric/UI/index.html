@@ -86,7 +86,7 @@
                     </div>
                 </div>
 
-                <!-- Bottom Row: Mix -->
+                <!-- Bottom Row: Mix Controls -->
                 <div class="control-row-bottom">
                     <!-- Warp (Mix) -->
                     <div class="control-group">
@@ -94,12 +94,26 @@
                         <div class="slider-container">
                             <div class="slider horizontal-slider" id="mixSlider" data-param="mix"
                                  data-help-title="WARP"
-                                 data-help-description="How much you bend into the reverb space. Dry/wet mix.">
+                                 data-help-description="Additional mix control for creative effects.">
                                 <div class="slider-track"></div>
                                 <div class="slider-handle"></div>
                             </div>
                         </div>
                         <div class="value-display" id="mixValue">50%</div>
+                    </div>
+
+                    <!-- Wet/Dry -->
+                    <div class="control-group">
+                        <label class="control-label">WET/DRY</label>
+                        <div class="slider-container">
+                            <div class="slider horizontal-slider" id="wetdrySlider" data-param="wetdry"
+                                 data-help-title="WET/DRY"
+                                 data-help-description="Balance between dry signal and reverb. Left = dry, right = wet.">
+                                <div class="slider-track"></div>
+                                <div class="slider-handle"></div>
+                            </div>
+                        </div>
+                        <div class="value-display" id="wetdryValue">50/50</div>
                     </div>
                 </div>
             </div>

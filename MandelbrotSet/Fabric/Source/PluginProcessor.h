@@ -58,12 +58,13 @@ public:
 
     //==============================================================================
     // Parameter IDs
-    static const juce::String PARAM_SIZE;
-    static const juce::String PARAM_DIFFUSION;
-    static const juce::String PARAM_DAMPING;
-    static const juce::String PARAM_PREDELAY;
-    static const juce::String PARAM_MIX;
-    static const juce::String PARAM_BYPASS;
+        static const juce::String PARAM_SIZE;
+        static const juce::String PARAM_DIFFUSION;
+        static const juce::String PARAM_DAMPING;
+        static const juce::String PARAM_PREDELAY;
+        static const juce::String PARAM_MIX;
+        static const juce::String PARAM_WETDRY;
+        static const juce::String PARAM_BYPASS;
 
     // Get parameters
     juce::AudioProcessorValueTreeState parameters;
@@ -81,6 +82,25 @@ private:
     
     // Apply curve to velocity
     float applyCurve(float normalizedInput, int curveType);
+    
+    // Reverb DSP
+    juce::dsp::Reverb reverb;
+    juce::dsp::Reverb::Parameters reverbParams;
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> predelayLineL;
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> predelayLineR;
+    double currentSampleRate = 44100.0;
+    
+    // Parameter smoothing to avoid zipper noise
+    juce::SmoothedValue<float> smoothedSize;
+    juce::SmoothedValue<float> smoothedDiffusion;
+    juce::SmoothedValue<float> smoothedDamping;
+    juce::SmoothedValue<float> smoothedPredelay;
+    juce::SmoothedValue<float> smoothedMix;
+    juce::SmoothedValue<float> smoothedWetDry;
+    
+    // Test tone generator (for debugging)
+    double testTonePhase = 0.0;
+    bool generateTestTone = false; // Set to true to generate a test tone
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FabricAudioProcessor)
 };
