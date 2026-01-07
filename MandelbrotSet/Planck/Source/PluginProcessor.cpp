@@ -140,6 +140,34 @@ void PlanckAudioProcessor::changeProgramName (int, const juce::String&) {}
 //==============================================================================
 void PlanckAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    this->sampleRate = sampleRate;
+    
+    // Prepare 3-band EQ filters
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
+    spec.numChannels = 1;
+    
+    lowCoeffsL = juce::dsp::IIR::Coefficients<float>::makeLowShelf(sampleRate, 200.0f, qValue, 1.0f);
+    lowCoeffsR = juce::dsp::IIR::Coefficients<float>::makeLowShelf(sampleRate, 200.0f, qValue, 1.0f);
+    midCoeffsL = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, 1000.0f, qValue, 1.0f);
+    midCoeffsR = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, 1000.0f, qValue, 1.0f);
+    highCoeffsL = juce::dsp::IIR::Coefficients<float>::makeHighShelf(sampleRate, 5000.0f, qValue, 1.0f);
+    highCoeffsR = juce::dsp::IIR::Coefficients<float>::makeHighShelf(sampleRate, 5000.0f, qValue, 1.0f);
+    
+    lowFilterL.prepare(spec);
+    lowFilterR.prepare(spec);
+    midFilterL.prepare(spec);
+    midFilterR.prepare(spec);
+    highFilterL.prepare(spec);
+    highFilterR.prepare(spec);
+    
+    lowFilterL.coefficients = lowCoeffsL;
+    lowFilterR.coefficients = lowCoeffsR;
+    midFilterL.coefficients = midCoeffsL;
+    midFilterR.coefficients = midCoeffsR;
+    highFilterL.coefficients = highCoeffsL;
+    highFilterR.coefficients = highCoeffsR;
 }
 
 void PlanckAudioProcessor::releaseResources()
@@ -153,8 +181,15 @@ bool PlanckAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) c
     juce::ignoreUnused (layouts);
     return true;
   #else
+    // Accept mono or stereo input
+    if (layouts.getMainInputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+    
+    // Output must be stereo
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
+    
     return true;
   #endif
 }
@@ -192,17 +227,55 @@ void PlanckAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     float highGain = *parameters.getRawParameterValue(PARAM_HIGHGAIN);
     float q = *parameters.getRawParameterValue(PARAM_Q);
 
-    // TODO: Implement EQ DSP algorithm
-    // Process audio buffer with 3-band parametric EQ
-    // - lowFreq: low band frequency (20-500 Hz)
-    // - lowGain: low band gain (-12 to +12 dB)
-    // - midFreq: mid band frequency (200-5000 Hz)
-    // - midGain: mid band gain (-12 to +12 dB)
-    // - highFreq: high band frequency (2000-20000 Hz)
-    // - highGain: high band gain (-12 to +12 dB)
-    // - q: filter Q/resonance (0.1-10)
+    // Convert gains from dB to linear
+    float lowGainLinear = juce::Decibels::decibelsToGain(lowGain);
+    float midGainLinear = juce::Decibels::decibelsToGain(midGain);
+    float highGainLinear = juce::Decibels::decibelsToGain(highGain);
     
-    juce::ignoreUnused(lowFreq, lowGain, midFreq, midGain, highFreq, highGain, q);
+    // Clamp frequencies
+    lowFreq = juce::jlimit(20.0f, 500.0f, lowFreq);
+    midFreq = juce::jlimit(200.0f, 5000.0f, midFreq);
+    highFreq = juce::jlimit(2000.0f, 20000.0f, highFreq);
+    q = juce::jlimit(0.1f, 10.0f, q);
+    
+    // Update filter coefficients
+    lowCoeffsL = juce::dsp::IIR::Coefficients<float>::makeLowShelf(sampleRate, lowFreq, q, lowGainLinear);
+    lowCoeffsR = juce::dsp::IIR::Coefficients<float>::makeLowShelf(sampleRate, lowFreq, q, lowGainLinear);
+    midCoeffsL = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, midFreq, q, midGainLinear);
+    midCoeffsR = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, midFreq, q, midGainLinear);
+    highCoeffsL = juce::dsp::IIR::Coefficients<float>::makeHighShelf(sampleRate, highFreq, q, highGainLinear);
+    highCoeffsR = juce::dsp::IIR::Coefficients<float>::makeHighShelf(sampleRate, highFreq, q, highGainLinear);
+    
+    lowFilterL.coefficients = lowCoeffsL;
+    lowFilterR.coefficients = lowCoeffsR;
+    midFilterL.coefficients = midCoeffsL;
+    midFilterR.coefficients = midCoeffsR;
+    highFilterL.coefficients = highCoeffsL;
+    highFilterR.coefficients = highCoeffsR;
+    
+    // Process each channel
+    for (int channel = 0; channel < numChannels; ++channel)
+    {
+        auto* channelData = buffer.getWritePointer(channel);
+        auto& lowFilter = (channel == 0) ? lowFilterL : lowFilterR;
+        auto& midFilter = (channel == 0) ? midFilterL : midFilterR;
+        auto& highFilter = (channel == 0) ? highFilterL : highFilterR;
+        
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            float input = channelData[sample];
+            
+            // Process through 3-band EQ
+            float output = lowFilter.processSample(input);
+            output = midFilter.processSample(output);
+            output = highFilter.processSample(output);
+            
+            // Soft clip
+            output = juce::jlimit(-1.0f, 1.0f, output);
+            
+            channelData[sample] = output;
+        }
+    }
     
     // Calculate output level for UI - with bounds checking
     float outLevel = 0.0f;

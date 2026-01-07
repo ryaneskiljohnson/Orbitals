@@ -20,35 +20,6 @@
 FabricAudioProcessorEditor::FabricAudioProcessorEditor (FabricAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    std::cout << "=== FABRIC PLUGIN EDITOR CONSTRUCTOR ===" << std::endl;
-    DBG("=== FABRIC PLUGIN EDITOR CONSTRUCTOR ===");
-    
-    // Check audio device configuration in standalone mode
-    #if JucePlugin_Build_Standalone
-    if (auto* pluginHolder = juce::StandalonePluginHolder::getInstance())
-    {
-        auto& deviceManager = pluginHolder->deviceManager;
-        std::cerr << "=== AUDIO DEVICE MANAGER STATUS ===" << std::endl;
-        std::cerr << "   Current audio device: " << (deviceManager.getCurrentAudioDevice() != nullptr ? deviceManager.getCurrentAudioDevice()->getName() : "NONE").toStdString() << std::endl;
-        if (auto* device = deviceManager.getCurrentAudioDevice())
-        {
-            std::cerr << "   Sample rate: " << device->getCurrentSampleRate() << " Hz" << std::endl;
-            std::cerr << "   Buffer size: " << device->getCurrentBufferSizeSamples() << " samples" << std::endl;
-            std::cerr << "   Input channels: " << device->getActiveInputChannels().countNumberOfSetBits() << std::endl;
-            std::cerr << "   Output channels: " << device->getActiveOutputChannels().countNumberOfSetBits() << std::endl;
-            std::cerr << "   Device is playing: " << (device->isPlaying() ? "YES" : "NO") << std::endl;
-        }
-        else
-        {
-            std::cerr << "   ❌ NO AUDIO DEVICE CONFIGURED!" << std::endl;
-        }
-    }
-    else
-    {
-        std::cerr << "   ⚠️ Not in standalone mode or plugin holder not available" << std::endl;
-    }
-    #endif
-    
     // Make component opaque so black background shows through (like NNAudioAccess)
     setOpaque(true);
     

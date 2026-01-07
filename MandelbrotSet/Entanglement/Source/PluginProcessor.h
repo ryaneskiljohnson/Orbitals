@@ -78,6 +78,16 @@ private:
     
     double sampleRate = 44100.0;
     juce::Random random;
+    
+    // Delay DSP
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> delayLineL;
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> delayLineR;
+    juce::dsp::IIR::Filter<float> dampingFilterL;
+    juce::dsp::IIR::Filter<float> dampingFilterR;
+    juce::dsp::IIR::Coefficients<float>::Ptr dampingCoeffsL;
+    juce::dsp::IIR::Coefficients<float>::Ptr dampingCoeffsR;
+    float lastDelayTimeL = 0.0f;
+    float lastDelayTimeR = 0.0f;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EntanglementAudioProcessor)
 };

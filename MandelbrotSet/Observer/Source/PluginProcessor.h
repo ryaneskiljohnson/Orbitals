@@ -77,15 +77,15 @@ private:
     //==============================================================================
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     
-    // Get scale notes relative to root
-    std::vector<int> getScaleNotes(int root, int scaleIndex);
-    
-    // Find nearest scale note
-    int findNearestScaleNote(int inputNote, const std::vector<int>& scaleNotes);
-    
-    // State tracking
-    std::array<float, 128> notePositions; // For PULL mode gradual attraction
-    std::map<int, int> noteTargets; // Maps original note to target note for note-off
-    
+    // Dynamic EQ DSP
+    juce::dsp::IIR::Filter<float> bandFilterL;
+    juce::dsp::IIR::Filter<float> bandFilterR;
+    juce::dsp::IIR::Coefficients<float>::Ptr bandCoeffsL;
+    juce::dsp::IIR::Coefficients<float>::Ptr bandCoeffsR;
+    double sampleRate = 44100.0;
+    float envelope = 0.0f;
+    float currentGain = 0.0f;
+    static constexpr float qValue = 2.0f; // Bandwidth
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ObserverAudioProcessor)
 };

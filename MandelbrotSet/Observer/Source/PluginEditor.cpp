@@ -316,24 +316,19 @@ void ObserverAudioProcessorEditor::handleJavaScriptMessage (const juce::var& mes
 
     auto type = obj->getProperty("type").toString();
     
-    if (type == "parameterChange")
+        if (type == "parameterChange")
     {
         auto param = obj->getProperty("parameter").toString();
         auto value = obj->getProperty("value");
-
+        
         auto* p = audioProcessor.parameters.getParameter(param);
         if (p != nullptr)
         {
-            if (param == "expansion")
-                p->setValueNotifyingHost((float)value / 100.0f);
-            else if (param == "threshold")
-                p->setValueNotifyingHost((float)value / 127.0f);
-            else if (param == "ceiling")
-                p->setValueNotifyingHost((float)value / 127.0f);
-            else if (param == "curve")
-                p->setValueNotifyingHost((float)value / 100.0f);
-            else if (param == "bypass")
-                p->setValueNotifyingHost((float)value);
+            auto& range = p->getNormalisableRange();
+            float rawValue = static_cast<float>(value);
+            rawValue = juce::jlimit(range.start, range.end, rawValue);
+            float normalizedValue = range.convertTo0to1(rawValue);
+            p->setValueNotifyingHost(normalizedValue);
         }
     }
 }
@@ -439,7 +434,7 @@ void ObserverAudioProcessorEditor::loadAuthScreen()
 </html>)";
     
     // Load and inline background image as base64
-    auto projectRoot = juce::File("/Users/rjmacbookpro/Development/Orbitals");
+    auto projectRoot = juce::File("/Users/rjmacbookpro/Development/Orbitals/MandelbrotSet");
     auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/observer.png");
     
     if (backgroundImage.existsAsFile())

@@ -60,6 +60,13 @@ public:
 
 private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+    
+    // Saturation DSP
+    juce::dsp::IIR::Filter<float> toneFilterL;
+    juce::dsp::IIR::Filter<float> toneFilterR;
+    juce::dsp::IIR::Coefficients<float>::Ptr toneCoeffsL;
+    juce::dsp::IIR::Coefficients<float>::Ptr toneCoeffsR;
+    double sampleRate = 44100.0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HadronAudioProcessor)
 };

@@ -105,9 +105,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout HadronAudioProcessor::create
 
 //==============================================================================
 const juce::String HadronAudioProcessor::getName() const { return JucePlugin_Name; }
-bool HadronAudioProcessor::acceptsMidi() const { return true; }
-bool HadronAudioProcessor::producesMidi() const { return true; }
-bool HadronAudioProcessor::isMidiEffect() const { return true; }
+bool HadronAudioProcessor::acceptsMidi() const { return false; }
+bool HadronAudioProcessor::producesMidi() const { return false; }
+bool HadronAudioProcessor::isMidiEffect() const { return false; }
 double HadronAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int HadronAudioProcessor::getNumPrograms() { return 1; }
 int HadronAudioProcessor::getCurrentProgram() { return 0; }
@@ -118,6 +118,20 @@ void HadronAudioProcessor::changeProgramName (int, const juce::String&) {}
 //==============================================================================
 void HadronAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    this->sampleRate = sampleRate;
+    
+    // Prepare tone filters
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
+    spec.numChannels = 1;
+    
+    toneCoeffsL = juce::dsp::IIR::Coefficients<float>::makeLowPass(sampleRate, 10000.0f);
+    toneCoeffsR = juce::dsp::IIR::Coefficients<float>::makeLowPass(sampleRate, 10000.0f);
+    toneFilterL.prepare(spec);
+    toneFilterR.prepare(spec);
+    toneFilterL.coefficients = toneCoeffsL;
+    toneFilterR.coefficients = toneCoeffsR;
 }
 
 void HadronAudioProcessor::releaseResources()
@@ -131,8 +145,15 @@ bool HadronAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) c
     juce::ignoreUnused (layouts);
     return true;
   #else
+    // Accept mono or stereo input
+    if (layouts.getMainInputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+    
+    // Output must be stereo
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
+    
     return true;
   #endif
 }
@@ -162,41 +183,68 @@ void HadronAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         return;
     }
 
-    // TODO: Implement saturation DSP algorithm
-    // Parameters available:
-    // - PARAM_DRIVE (collision energy)
-    // - PARAM_TONE (particle mass)
-    // - PARAM_BIAS (acceleration)
-    // - PARAM_MIX (luminosity)
-    // - PARAM_OUTPUT (beam focus)
+    // Get parameters
+    float drive = *parameters.getRawParameterValue(PARAM_DRIVE) / 100.0f; // 0-1
+    float toneAmount = *parameters.getRawParameterValue(PARAM_TONE) / 100.0f; // 0-1
+    float bias = *parameters.getRawParameterValue(PARAM_BIAS) / 100.0f; // -1 to 1
+    float mix = *parameters.getRawParameterValue(PARAM_MIX) / 100.0f; // 0-1
+    float outputGain = *parameters.getRawParameterValue(PARAM_OUTPUT); // dB
     
-    float drive = *parameters.getRawParameterValue(PARAM_DRIVE) / 100.0f;
-    float tone = *parameters.getRawParameterValue(PARAM_TONE) / 100.0f;
-    float bias = *parameters.getRawParameterValue(PARAM_BIAS) / 100.0f;
-    float mix = *parameters.getRawParameterValue(PARAM_MIX) / 100.0f;
-    float output = *parameters.getRawParameterValue(PARAM_OUTPUT);
-
-    // TODO: Implement saturation DSP algorithm
-    // Process audio buffer with saturation/distortion
-    // - drive: amount of saturation (0-100%)
-    // - tone: tone control (0-100%)
-    // - bias: DC bias for asymmetric distortion (-100% to +100%)
-    // - mix: wet/dry mix (0-100%)
-    // - output: output gain in dB (-12 to +12 dB)
+    // Convert output gain from dB to linear
+    float outputGainLinear = juce::Decibels::decibelsToGain(outputGain);
     
-    juce::ignoreUnused(drive, tone, bias, mix, output);
+    // Update tone filter (toneAmount: 0% = bright, 100% = dark)
+    float toneCutoff = 2000.0f + (toneAmount * 18000.0f); // 2kHz to 20kHz
+    toneCoeffsL = juce::dsp::IIR::Coefficients<float>::makeLowPass(sampleRate, toneCutoff);
+    toneCoeffsR = juce::dsp::IIR::Coefficients<float>::makeLowPass(sampleRate, toneCutoff);
+    toneFilterL.coefficients = toneCoeffsL;
+    toneFilterR.coefficients = toneCoeffsR;
     
-    // Calculate output level for UI - with bounds checking
+    // Process each channel
+    for (int channel = 0; channel < numChannels; ++channel)
+    {
+        auto* channelData = buffer.getWritePointer(channel);
+        auto& toneFilter = (channel == 0) ? toneFilterL : toneFilterR;
+        
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            float input = channelData[sample];
+            float dry = input;
+            
+            // Apply DC bias for asymmetric distortion
+            float biased = input + bias * 0.1f;
+            
+            // Apply drive (gain before saturation)
+            float driven = biased * (1.0f + drive * 9.0f); // 1x to 10x gain
+            
+            // Soft saturation using tanh
+            float saturated = std::tanh(driven);
+            
+            // Apply tone filter
+            saturated = toneFilter.processSample(saturated);
+            
+            // Mix wet/dry
+            float output = dry * (1.0f - mix) + saturated * mix;
+            
+            // Apply output gain
+            output *= outputGainLinear;
+            
+            // Soft clip to prevent overs
+            output = juce::jlimit(-1.0f, 1.0f, output);
+            
+            channelData[sample] = output;
+        }
+    }
+    
+    // Calculate output level for UI
     float outLevel = 0.0f;
     if (numSamples > 0 && numChannels > 0) {
-        for (int channel = 0; channel < totalNumInputChannels && channel < numChannels; ++channel) {
+        for (int channel = 0; channel < numChannels; ++channel) {
             float channelLevel = buffer.getRMSLevel(channel, 0, numSamples);
             outLevel = std::max(outLevel, channelLevel);
         }
     }
     outputLevel.store(juce::Decibels::gainToDecibels(outLevel, -100.0f));
-    
-    // For now, pass audio through unchanged
     // MIDI processing removed - this is an Audio FX plugin
 }
 

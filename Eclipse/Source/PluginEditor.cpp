@@ -310,37 +310,15 @@ void EclipseAudioProcessorEditor::handleJavaScriptMessage (const juce::var& mess
     {
         auto param = obj->getProperty("parameter").toString();
         auto value = obj->getProperty("value");
-
-        if (param == "lift")
+        
+        auto* p = audioProcessor.parameters.getParameter(param);
+        if (p != nullptr)
         {
-            auto* p = audioProcessor.parameters.getParameter(EclipseAudioProcessor::PARAM_LIFT);
-            if (p != nullptr)
-                p->setValueNotifyingHost((float)value / 100.0f);
-        }
-        else if (param == "curve")
-        {
-            juce::String curveStr = value.toString();
-            int curveIndex = 0;
-            if (curveStr == "linear") curveIndex = 0;
-            else if (curveStr == "exp") curveIndex = 1;
-            else if (curveStr == "s") curveIndex = 2;
-            else if (curveStr == "log") curveIndex = 3;
-            
-            auto* p = audioProcessor.parameters.getParameter(EclipseAudioProcessor::PARAM_CURVE);
-            if (p != nullptr)
-                p->setValueNotifyingHost(curveIndex / 3.0f);
-        }
-        else if (param == "ceiling")
-        {
-            auto* p = audioProcessor.parameters.getParameter(EclipseAudioProcessor::PARAM_CEILING);
-            if (p != nullptr)
-                p->setValueNotifyingHost(((int)value - 1) / 126.0f);
-        }
-        else if (param == "momentum")
-        {
-            auto* p = audioProcessor.parameters.getParameter(EclipseAudioProcessor::PARAM_MOMENTUM);
-            if (p != nullptr)
-                p->setValueNotifyingHost((float)value / 100.0f);
+            auto& range = p->getNormalisableRange();
+            float rawValue = static_cast<float>(value);
+            rawValue = juce::jlimit(range.start, range.end, rawValue);
+            float normalizedValue = range.convertTo0to1(rawValue);
+            p->setValueNotifyingHost(normalizedValue);
         }
     }
 }

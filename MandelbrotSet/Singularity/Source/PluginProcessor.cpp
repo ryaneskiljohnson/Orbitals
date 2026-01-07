@@ -190,9 +190,15 @@ bool SingularityAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
     juce::ignoreUnused (layouts);
     return true;
   #else
-    // Standard stereo only
+    // Accept mono or stereo input
+    if (layouts.getMainInputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+    
+    // Output must be stereo
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
+    
     return true;
   #endif
 }
@@ -227,42 +233,77 @@ void SingularityAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
         return;
     }
 
-    // TODO: Implement compressor DSP algorithm
-    // Parameters available:
-    // - PARAM_THRESHOLD (event horizon)
-    // - PARAM_RATIO (gravity)
-    // - PARAM_ATTACK (collapse)
-    // - PARAM_RELEASE (hawking radiation)
-    // - PARAM_MAKEUP (mass)
-    
-    float threshold = *parameters.getRawParameterValue(PARAM_THRESHOLD);
+    // Get parameters
+    float thresholdDb = *parameters.getRawParameterValue(PARAM_THRESHOLD);
     float ratio = *parameters.getRawParameterValue(PARAM_RATIO);
-    float attack = *parameters.getRawParameterValue(PARAM_ATTACK);
-    float release = *parameters.getRawParameterValue(PARAM_RELEASE);
-    float makeup = *parameters.getRawParameterValue(PARAM_MAKEUP);
-
-    // TODO: Implement compressor DSP algorithm
-    // Process audio buffer with compression
-    // - threshold: compression threshold in dB (-60 to 0 dB)
-    // - ratio: compression ratio (1:1 to 20:1)
-    // - attack: attack time in ms (0.1-100 ms)
-    // - release: release time in ms (10-1000 ms)
-    // - makeup: makeup gain in dB (-12 to +24 dB)
+    float attackMs = *parameters.getRawParameterValue(PARAM_ATTACK);
+    float releaseMs = *parameters.getRawParameterValue(PARAM_RELEASE);
+    float makeupDb = *parameters.getRawParameterValue(PARAM_MAKEUP);
     
-    juce::ignoreUnused(threshold, ratio, attack, release, makeup);
+    // Convert threshold to linear
+    float thresholdLinear = juce::Decibels::decibelsToGain(thresholdDb);
     
-    // Calculate output level for UI - with bounds checking
+    // Calculate attack and release coefficients
+    float attackCoeff = std::exp(-1.0f / (attackMs * 0.001f * sampleRate));
+    float releaseCoeff = std::exp(-1.0f / (releaseMs * 0.001f * sampleRate));
+    
+    // Convert makeup gain from dB to linear
+    float makeupGain = juce::Decibels::decibelsToGain(makeupDb);
+    
+    // Process each channel
+    for (int channel = 0; channel < numChannels; ++channel)
+    {
+        auto* channelData = buffer.getWritePointer(channel);
+        
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            float input = channelData[sample];
+            
+            // Calculate input level (RMS-like, using absolute value)
+            float inputLevel = std::abs(input);
+            
+            // Envelope follower (attack/release)
+            if (inputLevel > envelope)
+                envelope = inputLevel + (envelope - inputLevel) * attackCoeff;
+            else
+                envelope = inputLevel + (envelope - inputLevel) * releaseCoeff;
+            
+            // Calculate gain reduction
+            if (envelope > thresholdLinear)
+            {
+                float overThreshold = envelope - thresholdLinear;
+                float overThresholdDb = juce::Decibels::gainToDecibels(envelope / thresholdLinear);
+                float compressedDb = overThresholdDb / ratio;
+                gainReduction = overThresholdDb - compressedDb;
+            }
+            else
+            {
+                gainReduction = 0.0f;
+            }
+            
+            // Apply gain reduction
+            float gainReductionLinear = juce::Decibels::decibelsToGain(-gainReduction);
+            float output = input * gainReductionLinear * makeupGain;
+            
+            // Soft clip
+            output = juce::jlimit(-1.0f, 1.0f, output);
+            
+            channelData[sample] = output;
+        }
+    }
+    
+    // Store gain reduction for UI
+    currentGainReduction.store(gainReduction);
+    
+    // Calculate output level for UI
     float outLevel = 0.0f;
     if (numSamples > 0 && numChannels > 0) {
-        for (int channel = 0; channel < totalNumInputChannels && channel < numChannels; ++channel) {
+        for (int channel = 0; channel < numChannels; ++channel) {
             float channelLevel = buffer.getRMSLevel(channel, 0, numSamples);
             outLevel = std::max(outLevel, channelLevel);
         }
     }
     outputLevel.store(juce::Decibels::gainToDecibels(outLevel, -100.0f));
-    
-    // Store gain reduction (placeholder - will be calculated by actual DSP)
-    currentGainReduction.store(0.0f);
     
     // For now, pass audio through unchanged
     // MIDI processing removed - this is an Audio FX plugin

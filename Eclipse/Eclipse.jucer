@@ -34,7 +34,7 @@
   </MODULES>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0" />
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX">
+    <XCODE_MAC targetFolder="Builds/MacOSX" microphonePermissionNeeded="1" microphonePermissionsText="This plugin needs microphone access to process audio input.">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="Eclipse" osxSDK="default" osxCompatibility="10.15 osxLatest" osxArchitectures="arm64;x86_64" cppLanguageStandard="17" cppLibType="0" optimisation="0" targetFolder="Builds/MacOSX/build/Debug" headerPath="" preprocessorDefs="DEBUG=1 JUCE_DEBUG=1 JUCE_DISPLAY_SPLASH_SCREEN=1 JUCE_USE_DARK_SPLASH_SCREEN=0 JUCE_PROJUCER_VERSION=0x70005" xcodeResourceType="default" xcodeResourceFlags="0" xcodeResourcePhase="0" xcodeResourcePhaseFlags="0" xcodeResourcePhaseFileTypes="" />
         <CONFIGURATION isDebug="0" name="Release" targetName="Eclipse" osxSDK="default" osxCompatibility="10.15 osxLatest" osxArchitectures="arm64;x86_64" cppLanguageStandard="17" cppLibType="0" optimisation="3" targetFolder="Builds/MacOSX/build/Release" headerPath="" preprocessorDefs="NDEBUG=1 JUCE_DISPLAY_SPLASH_SCREEN=1 JUCE_USE_DARK_SPLASH_SCREEN=0 JUCE_PROJUCER_VERSION=0x70005" xcodeResourceType="default" xcodeResourceFlags="0" xcodeResourcePhase="0" xcodeResourcePhaseFlags="0" xcodeResourcePhaseFileTypes="" />

@@ -114,7 +114,26 @@ void MandelbrotAudioProcessor::changeProgramName (int, const juce::String&) {}
 //==============================================================================
 void MandelbrotAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    noteBuffer.clear();
+    this->sampleRate = sampleRate;
+    
+    // Prepare all-pass filters
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
+    spec.numChannels = 1;
+    
+    for (int i = 0; i < maxStages; ++i)
+    {
+        allPassCoeffsL[i] = juce::dsp::IIR::Coefficients<float>::makeAllPass(sampleRate, 1000.0f);
+        allPassCoeffsR[i] = juce::dsp::IIR::Coefficients<float>::makeAllPass(sampleRate, 1000.0f);
+        allPassFiltersL[i].prepare(spec);
+        allPassFiltersR[i].prepare(spec);
+        allPassFiltersL[i].coefficients = allPassCoeffsL[i];
+        allPassFiltersR[i].coefficients = allPassCoeffsR[i];
+    }
+    
+    lfoPhaseL = 0.0;
+    lfoPhaseR = 0.0;
 }
 
 void MandelbrotAudioProcessor::releaseResources()
@@ -128,8 +147,15 @@ bool MandelbrotAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
     juce::ignoreUnused (layouts);
     return true;
   #else
+    // Accept mono or stereo input
+    if (layouts.getMainInputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+    
+    // Output must be stereo
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
+    
     return true;
   #endif
 }
@@ -159,33 +185,81 @@ void MandelbrotAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         return;
     }
 
-    float rate = *parameters.getRawParameterValue(PARAM_RATE);
+    // Get parameters
+    float rateHz = *parameters.getRawParameterValue(PARAM_RATE);
     float depth = *parameters.getRawParameterValue(PARAM_DEPTH) / 100.0f;
     float feedback = *parameters.getRawParameterValue(PARAM_FEEDBACK) / 100.0f;
     int stages = (int)*parameters.getRawParameterValue(PARAM_STAGES);
+    stages = juce::jlimit(2, maxStages, stages);
     float mix = *parameters.getRawParameterValue(PARAM_MIX) / 100.0f;
-
-    // TODO: Implement phaser DSP algorithm
-    // Process audio buffer with phaser effect
-    // - rate: LFO rate in Hz
-    // - depth: modulation depth (0-100%)
-    // - feedback: feedback amount (0-100%)
-    // - stages: number of allpass stages (2-12)
-    // - mix: wet/dry mix (0-100%)
     
-    juce::ignoreUnused(rate, depth, feedback, stages, mix);
+    // Calculate LFO increment
+    double lfoIncrement = (rateHz * 2.0 * juce::MathConstants<double>::pi) / sampleRate;
     
-    // Calculate output level for UI - with bounds checking
+    // Base frequency for all-pass filters (modulated by LFO)
+    float baseFreq = 440.0f;
+    float freqRange = 2000.0f; // Modulation range
+    
+    // Process each channel
+    for (int channel = 0; channel < numChannels; ++channel)
+    {
+        auto* channelData = buffer.getWritePointer(channel);
+        auto& allPassFilters = (channel == 0) ? allPassFiltersL : allPassFiltersR;
+        auto& allPassCoeffs = (channel == 0) ? allPassCoeffsL : allPassCoeffsR;
+        double& lfoPhase = (channel == 0) ? lfoPhaseL : lfoPhaseR;
+        
+        // Stereo offset
+        double phaseOffset = (channel == 1) ? juce::MathConstants<double>::pi : 0.0;
+        
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            float input = channelData[sample];
+            
+            // Calculate LFO value
+            double lfoValue = std::sin(lfoPhase + phaseOffset);
+            lfoPhase += lfoIncrement;
+            if (lfoPhase > 2.0 * juce::MathConstants<double>::pi)
+                lfoPhase -= 2.0 * juce::MathConstants<double>::pi;
+            
+            // Calculate modulated frequency
+            float modFreq = baseFreq + (lfoValue * 0.5f + 0.5f) * freqRange * depth;
+            modFreq = juce::jlimit(100.0f, 10000.0f, modFreq);
+            
+            // Update all-pass filter coefficients
+            for (int i = 0; i < stages; ++i)
+            {
+                // Stagger frequencies for richer sound
+                float stageFreq = modFreq * (1.0f + i * 0.1f);
+                allPassCoeffs[i] = juce::dsp::IIR::Coefficients<float>::makeAllPass(sampleRate, stageFreq);
+                allPassFilters[i].coefficients = allPassCoeffs[i];
+            }
+            
+            // Process through all-pass filter chain
+            float processed = input;
+            for (int i = 0; i < stages; ++i)
+            {
+                processed = allPassFilters[i].processSample(processed);
+            }
+            
+            // Add feedback
+            processed = input + processed * feedback;
+            
+            // Mix wet/dry
+            float output = input * (1.0f - mix) + processed * mix;
+            
+            channelData[sample] = output;
+        }
+    }
+    
+    // Calculate output level for UI
     float outLevel = 0.0f;
     if (numSamples > 0 && numChannels > 0) {
-        for (int channel = 0; channel < totalNumInputChannels && channel < numChannels; ++channel) {
+        for (int channel = 0; channel < numChannels; ++channel) {
             float channelLevel = buffer.getRMSLevel(channel, 0, numSamples);
             outLevel = std::max(outLevel, channelLevel);
         }
     }
     outputLevel.store(juce::Decibels::gainToDecibels(outLevel, -100.0f));
-    
-    // For now, pass audio through unchanged
     // MIDI processing removed - this is an Audio FX plugin
 }
 

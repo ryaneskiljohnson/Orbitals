@@ -139,7 +139,7 @@ bool QuarksAudioProcessor::isMidiEffect() const
 
 double QuarksAudioProcessor::getTailLengthSeconds() const
 {
-    return 0.0;
+    return 0.0; // Gate has no tail
 }
 
 int QuarksAudioProcessor::getNumPrograms()
@@ -183,8 +183,15 @@ bool QuarksAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) c
     juce::ignoreUnused (layouts);
     return true;
   #else
+    // Accept mono or stereo input
+    if (layouts.getMainInputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+    
+    // Output must be stereo
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
+    
     return true;
   #endif
 }
@@ -215,29 +222,65 @@ void QuarksAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         return;
     }
 
-    // TODO: Implement gate/expander DSP algorithm
-    // Parameters available:
-    // - PARAM_THRESHOLD (strong force)
-    // - PARAM_RATIO (color charge)
-    // - PARAM_ATTACK (binding)
-    // - PARAM_RELEASE (decay)
-    // - PARAM_RANGE (confinement)
-    
-    float threshold = *parameters.getRawParameterValue(PARAM_THRESHOLD);
+    // Get parameters
+    float thresholdDb = *parameters.getRawParameterValue(PARAM_THRESHOLD);
     float ratio = *parameters.getRawParameterValue(PARAM_RATIO);
-    float attack = *parameters.getRawParameterValue(PARAM_ATTACK);
-    float release = *parameters.getRawParameterValue(PARAM_RELEASE);
-    float range = *parameters.getRawParameterValue(PARAM_RANGE);
+    float attackMs = *parameters.getRawParameterValue(PARAM_ATTACK);
+    float releaseMs = *parameters.getRawParameterValue(PARAM_RELEASE);
+    float rangeDb = *parameters.getRawParameterValue(PARAM_RANGE);
     
-    // TODO: Implement gate/expander DSP algorithm
-    // Process audio buffer with gate/expander effect
-    // - threshold: gate threshold in dB (-80 to 0 dB)
-    // - ratio: expansion ratio (1:1 to 20:1)
-    // - attack: attack time in ms (0.1-50 ms)
-    // - release: release time in ms (10-500 ms)
-    // - range: maximum gain reduction in dB (0-80 dB)
+    // Convert threshold to linear
+    float thresholdLinear = juce::Decibels::decibelsToGain(thresholdDb);
     
-    juce::ignoreUnused(threshold, ratio, attack, release, range);
+    // Calculate attack and release coefficients
+    float attackCoeff = std::exp(-1.0f / (attackMs * 0.001f * sampleRate));
+    float releaseCoeff = std::exp(-1.0f / (releaseMs * 0.001f * sampleRate));
+    
+    // Process each channel
+    for (int channel = 0; channel < numChannels; ++channel)
+    {
+        auto* channelData = buffer.getWritePointer(channel);
+        
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            float input = channelData[sample];
+            
+            // Calculate input level
+            float inputLevel = std::abs(input);
+            
+            // Envelope follower (attack/release)
+            if (inputLevel > envelope)
+                envelope = inputLevel + (envelope - inputLevel) * attackCoeff;
+            else
+                envelope = inputLevel + (envelope - inputLevel) * releaseCoeff;
+            
+            // Calculate gain reduction (gate/expander logic)
+            if (envelope < thresholdLinear)
+            {
+                // Signal is below threshold - apply expansion
+                float belowThresholdDb = juce::Decibels::gainToDecibels(envelope / thresholdLinear);
+                float expandedDb = belowThresholdDb * ratio;
+                gainReduction = belowThresholdDb - expandedDb;
+                
+                // Limit gain reduction to range
+                gainReduction = juce::jlimit(-rangeDb, 0.0f, gainReduction);
+            }
+            else
+            {
+                // Signal is above threshold - no reduction
+                gainReduction = 0.0f;
+            }
+            
+            // Apply gain reduction
+            float gainReductionLinear = juce::Decibels::decibelsToGain(-gainReduction);
+            float output = input * gainReductionLinear;
+            
+            // Soft clip
+            output = juce::jlimit(-1.0f, 1.0f, output);
+            
+            channelData[sample] = output;
+        }
+    }
     
     // Calculate output level for UI - with bounds checking
     float outLevel = 0.0f;

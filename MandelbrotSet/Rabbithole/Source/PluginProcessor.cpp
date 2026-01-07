@@ -119,6 +119,20 @@ void RabbitholeAudioProcessor::changeProgramName (int, const juce::String&) {}
 void RabbitholeAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     this->sampleRate = sampleRate;
+    
+    // Prepare delay lines for flanger (max 20ms)
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
+    spec.numChannels = 1;
+    
+    delayLineL.prepare(spec);
+    delayLineR.prepare(spec);
+    delayLineL.setMaximumDelayInSamples(static_cast<int>(sampleRate * maxDelayMs / 1000.0));
+    delayLineR.setMaximumDelayInSamples(static_cast<int>(sampleRate * maxDelayMs / 1000.0));
+    
+    lfoPhaseL = 0.0;
+    lfoPhaseR = 0.0;
 }
 
 void RabbitholeAudioProcessor::releaseResources()
@@ -132,8 +146,15 @@ bool RabbitholeAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
     juce::ignoreUnused (layouts);
     return true;
   #else
+    // Accept mono or stereo input
+    if (layouts.getMainInputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+    
+    // Output must be stereo
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
+    
     return true;
   #endif
 }
@@ -163,34 +184,63 @@ void RabbitholeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         return;
     }
 
-    // TODO: Implement flanger DSP algorithm
-    // Parameters available:
-    // - PARAM_RATE (descent rate)
-    // - PARAM_DEPTH (tunnel depth)
-    // - PARAM_FEEDBACK (gravity well)
-    // - PARAM_STEREO (duality)
-    // - PARAM_MIX (wonderland)
-    
-    float rate = *parameters.getRawParameterValue(PARAM_RATE);
+    // Get parameters
+    float rateHz = *parameters.getRawParameterValue(PARAM_RATE);
     float depth = *parameters.getRawParameterValue(PARAM_DEPTH) / 100.0f;
     float feedback = *parameters.getRawParameterValue(PARAM_FEEDBACK) / 100.0f;
-    float stereo = *parameters.getRawParameterValue(PARAM_STEREO) / 100.0f;
+    float stereoWidth = *parameters.getRawParameterValue(PARAM_STEREO) / 100.0f;
     float mix = *parameters.getRawParameterValue(PARAM_MIX) / 100.0f;
-
-    // TODO: Implement flanger DSP algorithm
-    // Process audio buffer with flanger effect
-    // - rate: LFO rate in Hz (0.1-10 Hz)
-    // - depth: modulation depth (0-100%)
-    // - feedback: feedback amount (0-100%)
-    // - stereo: stereo width (0-100%)
-    // - mix: wet/dry mix (0-100%)
     
-    juce::ignoreUnused(rate, depth, feedback, stereo, mix);
+    // Calculate LFO increment
+    double lfoIncrement = (rateHz * 2.0 * juce::MathConstants<double>::pi) / sampleRate;
     
-    // Calculate output level for UI (with bounds checking)
+    // Base delay time (1-5ms typical for flanger)
+    float baseDelayMs = 1.0f + depth * 4.0f;
+    float baseDelaySamples = (baseDelayMs / 1000.0f) * static_cast<float>(sampleRate);
+    
+    // Process each channel
+    for (int channel = 0; channel < numChannels; ++channel)
+    {
+        auto* channelData = buffer.getWritePointer(channel);
+        auto& delayLine = (channel == 0) ? delayLineL : delayLineR;
+        double& lfoPhase = (channel == 0) ? lfoPhaseL : lfoPhaseR;
+        
+        // Stereo offset for width
+        double phaseOffset = (channel == 1) ? (stereoWidth * juce::MathConstants<double>::pi) : 0.0;
+        
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            float input = channelData[sample];
+            
+            // Calculate LFO value (sine wave)
+            double lfoValue = std::sin(lfoPhase + phaseOffset);
+            lfoPhase += lfoIncrement;
+            if (lfoPhase > 2.0 * juce::MathConstants<double>::pi)
+                lfoPhase -= 2.0 * juce::MathConstants<double>::pi;
+            
+            // Calculate modulated delay time
+            float delayModulation = (lfoValue * 0.5f + 0.5f) * depth; // 0 to depth
+            float delayTimeSamples = baseDelaySamples + (delayModulation * baseDelaySamples);
+            delayTimeSamples = juce::jlimit(0.0f, static_cast<float>(delayLine.getMaximumDelayInSamples() - 1), delayTimeSamples);
+            delayLine.setDelay(delayTimeSamples);
+            
+            // Read delayed signal
+            float delayed = delayLine.popSample(0);
+            
+            // Mix input with delayed signal
+            float output = input * (1.0f - mix) + delayed * mix;
+            
+            // Write to delay line with feedback
+            delayLine.pushSample(0, input + delayed * feedback);
+            
+            channelData[sample] = output;
+        }
+    }
+    
+    // Calculate output level for UI
     float outLevel = 0.0f;
     if (numSamples > 0 && numChannels > 0) {
-        for (int channel = 0; channel < totalNumInputChannels && channel < numChannels; ++channel) {
+        for (int channel = 0; channel < numChannels; ++channel) {
             float channelLevel = buffer.getRMSLevel(channel, 0, numSamples);
             outLevel = std::max(outLevel, channelLevel);
         }

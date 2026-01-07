@@ -33,7 +33,6 @@ ObserverAudioProcessor::ObserverAudioProcessor()
 #endif
       parameters (*this, nullptr, juce::Identifier ("Observer"), createParameterLayout())
 {
-    notePositions.fill(0.0f);
 }
 
 ObserverAudioProcessor::~ObserverAudioProcessor()
@@ -105,59 +104,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout ObserverAudioProcessor::crea
 }
 
 //==============================================================================
-std::vector<int> ObserverAudioProcessor::getScaleNotes(int root, int scaleType)
-{
-    std::vector<std::vector<int>> scales = {
-        {0, 2, 4, 5, 7, 9, 11},           // Major
-        {0, 2, 3, 5, 7, 8, 10},           // Minor
-        {0, 2, 3, 5, 7, 9, 10},           // Dorian
-        {0, 1, 3, 5, 7, 8, 10},           // Phrygian
-        {0, 2, 4, 6, 7, 9, 11},           // Lydian
-        {0, 2, 4, 5, 7, 9, 10},           // Mixolydian
-        {0, 2, 3, 5, 7, 8, 10},           // Aeolian
-        {0, 1, 3, 5, 6, 8, 10},           // Locrian
-        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}  // Chromatic
-    };
-
-    std::vector<int> scaleNotes;
-    auto& intervals = scales[juce::jlimit(0, (int)scales.size() - 1, scaleType)];
-    
-    for (int octave = -2; octave <= 10; ++octave)
-    {
-        for (int interval : intervals)
-        {
-            int note = root + interval + (octave * 12);
-            if (note >= 0 && note <= 127)
-                scaleNotes.push_back(note);
-        }
-    }
-    
-    return scaleNotes;
-}
-
-int ObserverAudioProcessor::findNearestScaleNote(int note, const std::vector<int>& scaleNotes)
-{
-    int nearest = note;
-    int minDist = 128;
-    
-    for (int scaleNote : scaleNotes)
-    {
-        int dist = std::abs(note - scaleNote);
-        if (dist < minDist)
-        {
-            minDist = dist;
-            nearest = scaleNote;
-        }
-    }
-    
-    return nearest;
-}
-
-//==============================================================================
 const juce::String ObserverAudioProcessor::getName() const { return JucePlugin_Name; }
-bool ObserverAudioProcessor::acceptsMidi() const { return true; }
-bool ObserverAudioProcessor::producesMidi() const { return true; }
-bool ObserverAudioProcessor::isMidiEffect() const { return true; }
+bool ObserverAudioProcessor::acceptsMidi() const { return false; }
+bool ObserverAudioProcessor::producesMidi() const { return false; }
+bool ObserverAudioProcessor::isMidiEffect() const { return false; }
 double ObserverAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int ObserverAudioProcessor::getNumPrograms() { return 1; }
 int ObserverAudioProcessor::getCurrentProgram() { return 0; }
@@ -168,7 +118,23 @@ void ObserverAudioProcessor::changeProgramName (int, const juce::String&) {}
 //==============================================================================
 void ObserverAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    notePositions.fill(0.0f);
+    this->sampleRate = sampleRate;
+    
+    // Prepare band filters
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
+    spec.numChannels = 1;
+    
+    bandCoeffsL = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, 1000.0f, qValue, 1.0f);
+    bandCoeffsR = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, 1000.0f, qValue, 1.0f);
+    bandFilterL.prepare(spec);
+    bandFilterR.prepare(spec);
+    bandFilterL.coefficients = bandCoeffsL;
+    bandFilterR.coefficients = bandCoeffsR;
+    
+    envelope = 0.0f;
+    currentGain = 1.0f;
 }
 
 void ObserverAudioProcessor::releaseResources()
@@ -182,8 +148,15 @@ bool ObserverAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts)
     juce::ignoreUnused (layouts);
     return true;
   #else
+    // Accept mono or stereo input
+    if (layouts.getMainInputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+    
+    // Output must be stereo
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
+    
     return true;
   #endif
 }
@@ -213,34 +186,78 @@ void ObserverAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
         return;
     }
 
-    // TODO: Implement dynamic EQ DSP algorithm
-    // Parameters available:
-    // - PARAM_THRESHOLD (measurement)
-    // - PARAM_FREQUENCY (precision)
-    // - PARAM_RATIO (collapse ratio)
-    // - PARAM_ATTACK (observation time)
-    // - PARAM_RELEASE (uncertainty)
-    
-    float threshold = *parameters.getRawParameterValue(PARAM_THRESHOLD);
-    float frequency = *parameters.getRawParameterValue(PARAM_FREQUENCY);
+    // Get parameters
+    float thresholdDb = *parameters.getRawParameterValue(PARAM_THRESHOLD);
+    float centerFreq = *parameters.getRawParameterValue(PARAM_FREQUENCY);
     float ratio = *parameters.getRawParameterValue(PARAM_RATIO);
-    float attack = *parameters.getRawParameterValue(PARAM_ATTACK);
-    float release = *parameters.getRawParameterValue(PARAM_RELEASE);
-
-    // TODO: Implement dynamic EQ DSP algorithm
-    // Process audio buffer with frequency-dependent compression/expansion
-    // - threshold: detection threshold in dB (-60 to 0 dB)
-    // - frequency: center frequency for the band (20-20000 Hz)
-    // - ratio: compression/expansion ratio (1:1 to 10:1)
-    // - attack: attack time in ms (0.1-100 ms)
-    // - release: release time in ms (10-1000 ms)
+    float attackMs = *parameters.getRawParameterValue(PARAM_ATTACK);
+    float releaseMs = *parameters.getRawParameterValue(PARAM_RELEASE);
     
-    juce::ignoreUnused(threshold, frequency, ratio, attack, release);
+    // Convert threshold to linear
+    float thresholdLinear = juce::Decibels::decibelsToGain(thresholdDb);
     
-    // Calculate output level for UI - with bounds checking
+    // Calculate attack and release coefficients
+    float attackCoeff = std::exp(-1.0f / (attackMs * 0.001f * sampleRate));
+    float releaseCoeff = std::exp(-1.0f / (releaseMs * 0.001f * sampleRate));
+    
+    // Update band filter
+    centerFreq = juce::jlimit(20.0f, 20000.0f, centerFreq);
+    bandCoeffsL = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, centerFreq, qValue, 1.0f);
+    bandCoeffsR = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, centerFreq, qValue, 1.0f);
+    bandFilterL.coefficients = bandCoeffsL;
+    bandFilterR.coefficients = bandCoeffsR;
+    
+    // Process each channel
+    for (int channel = 0; channel < numChannels; ++channel)
+    {
+        auto* channelData = buffer.getWritePointer(channel);
+        auto& bandFilter = (channel == 0) ? bandFilterL : bandFilterR;
+        
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            float input = channelData[sample];
+            
+            // Extract band energy using band-pass filter
+            float bandEnergy = std::abs(bandFilter.processSample(input));
+            
+            // Envelope follower
+            if (bandEnergy > envelope)
+                envelope = bandEnergy + (envelope - bandEnergy) * attackCoeff;
+            else
+                envelope = bandEnergy + (envelope - bandEnergy) * releaseCoeff;
+            
+            // Calculate dynamic gain based on threshold
+            float targetGain = 1.0f;
+            if (envelope > thresholdLinear)
+            {
+                // Above threshold - apply compression
+                float overThresholdDb = juce::Decibels::gainToDecibels(envelope / thresholdLinear);
+                float compressedDb = overThresholdDb / ratio;
+                targetGain = juce::Decibels::decibelsToGain(compressedDb - overThresholdDb);
+            }
+            else
+            {
+                // Below threshold - apply expansion
+                float belowThresholdDb = juce::Decibels::gainToDecibels(envelope / thresholdLinear);
+                float expandedDb = belowThresholdDb * ratio;
+                targetGain = juce::Decibels::decibelsToGain(expandedDb - belowThresholdDb);
+            }
+            
+            // Smooth gain changes
+            currentGain = targetGain + (currentGain - targetGain) * 0.1f;
+            
+            // Apply dynamic gain
+            float output = input * currentGain;
+            output = juce::jlimit(-1.0f, 1.0f, output);
+            
+            channelData[sample] = output;
+        }
+    }
+    
+    // Calculate output level for UI
     float outLevel = 0.0f;
     if (numSamples > 0 && numChannels > 0) {
-        for (int channel = 0; channel < totalNumInputChannels && channel < numChannels; ++channel) {
+        for (int channel = 0; channel < numChannels; ++channel) {
             float channelLevel = buffer.getRMSLevel(channel, 0, numSamples);
             outLevel = std::max(outLevel, channelLevel);
         }

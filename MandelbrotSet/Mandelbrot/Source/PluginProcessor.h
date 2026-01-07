@@ -77,15 +77,15 @@ private:
     //==============================================================================
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     
-    // Note buffer for phrase reversal
-    struct NoteInfo
-    {
-        juce::MidiMessage message;
-        int samplePosition;
-        double timestamp;
-    };
-    std::deque<NoteInfo> noteBuffer;
-    int bufferSize = 8; // Number of notes to buffer
+    // Phaser DSP
+    static constexpr int maxStages = 12;
+    std::array<juce::dsp::IIR::Filter<float>, maxStages> allPassFiltersL;
+    std::array<juce::dsp::IIR::Filter<float>, maxStages> allPassFiltersR;
+    std::array<juce::dsp::IIR::Coefficients<float>::Ptr, maxStages> allPassCoeffsL;
+    std::array<juce::dsp::IIR::Coefficients<float>::Ptr, maxStages> allPassCoeffsR;
+    double sampleRate = 44100.0;
+    double lfoPhaseL = 0.0;
+    double lfoPhaseR = 0.0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MandelbrotAudioProcessor)
 };

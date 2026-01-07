@@ -80,6 +80,10 @@ private:
     double phase = 0.0;
     double sampleRate = 44100.0;
     juce::Random random;
+    
+    // Gate/Expander state
+    float envelope = 0.0f;
+    float gainReduction = 0.0f;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QuarksAudioProcessor)
 };

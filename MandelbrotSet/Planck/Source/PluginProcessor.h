@@ -62,6 +62,22 @@ public:
 
 private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+    
+    // 3-band EQ DSP
+    juce::dsp::IIR::Filter<float> lowFilterL;
+    juce::dsp::IIR::Filter<float> lowFilterR;
+    juce::dsp::IIR::Filter<float> midFilterL;
+    juce::dsp::IIR::Filter<float> midFilterR;
+    juce::dsp::IIR::Filter<float> highFilterL;
+    juce::dsp::IIR::Filter<float> highFilterR;
+    juce::dsp::IIR::Coefficients<float>::Ptr lowCoeffsL;
+    juce::dsp::IIR::Coefficients<float>::Ptr lowCoeffsR;
+    juce::dsp::IIR::Coefficients<float>::Ptr midCoeffsL;
+    juce::dsp::IIR::Coefficients<float>::Ptr midCoeffsR;
+    juce::dsp::IIR::Coefficients<float>::Ptr highCoeffsL;
+    juce::dsp::IIR::Coefficients<float>::Ptr highCoeffsR;
+    double sampleRate = 44100.0;
+    static constexpr float qValue = 1.0f; // Default Q
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlanckAudioProcessor)
 };

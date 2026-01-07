@@ -79,6 +79,13 @@ private:
     
     double sampleRate = 44100.0;
     juce::Random random;
+    
+    // Flanger DSP
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> delayLineL;
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> delayLineR;
+    double lfoPhaseL = 0.0;
+    double lfoPhaseR = 0.0;
+    static constexpr double maxDelayMs = 20.0; // Max flanger delay
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RabbitholeAudioProcessor)
 };

@@ -9,6 +9,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <cmath>
 #include <iostream>
 
 // Parameter IDs
@@ -37,9 +38,6 @@ FabricAudioProcessor::FabricAudioProcessor()
       parameters (*this, nullptr, juce::Identifier ("Fabric"), createParameterLayout())
 {
     smoothedVelocities.fill(64.0f);
-    generateTestTone = false; // Test tone DISABLED - testing real reverb processing
-    std::cerr << "=== FABRIC PROCESSOR CONSTRUCTOR ===" << std::endl;
-    std::cerr << "   generateTestTone set to: " << (generateTestTone ? "TRUE" : "FALSE") << std::endl;
 }
 
 FabricAudioProcessor::~FabricAudioProcessor()
@@ -195,12 +193,6 @@ void FabricAudioProcessor::changeProgramName (int index, const juce::String& new
 //==============================================================================
 void FabricAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    std::cerr << "=== PREPARE TO PLAY ===" << std::endl;
-    std::cerr << "   Sample rate: " << sampleRate << " Hz" << std::endl;
-    std::cerr << "   Block size: " << samplesPerBlock << " samples" << std::endl;
-    std::cerr << "   Input channels: " << getTotalNumInputChannels() << std::endl;
-    std::cerr << "   Output channels: " << getTotalNumOutputChannels() << std::endl;
-    
     smoothedVelocities.fill(64.0f);
     
     // Prepare reverb DSP
@@ -229,8 +221,8 @@ void FabricAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
     smoothedDiffusion.reset(sampleRate, 0.02);
     smoothedDamping.reset(sampleRate, 0.02);
     smoothedPredelay.reset(sampleRate, 0.02);
-    smoothedMix.reset(sampleRate, 0.02);
-    smoothedWetDry.reset(sampleRate, 0.02);
+    smoothedMix.reset(sampleRate, 0.001); // 1ms for faster response on mix
+    smoothedWetDry.reset(sampleRate, 0.001); // 1ms for faster response on wet/dry
     
     // Set initial values
     smoothedSize.setCurrentAndTargetValue(*parameters.getRawParameterValue(PARAM_SIZE) / 100.0f);
@@ -261,8 +253,15 @@ bool FabricAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) c
     juce::ignoreUnused (layouts);
     return true;
   #else
+    // Accept mono or stereo input
+    if (layouts.getMainInputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+    
+    // Output must be stereo
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
+    
     return true;
   #endif
 }
@@ -294,84 +293,11 @@ float FabricAudioProcessor::applyCurve(float normalizedInput, int curveType)
 
 void FabricAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    static bool processBlockLogged = false;
-    if (!processBlockLogged)
-    {
-        std::cerr << "=== PROCESS BLOCK CALLED FOR FIRST TIME ===" << std::endl;
-        processBlockLogged = true;
-    }
-    
     juce::ScopedNoDenormals noDenormals;
     const int numSamples = buffer.getNumSamples();
     const int numChannels = buffer.getNumChannels();
     
-    // Generate test tone if enabled (for debugging audio routing)
-    // This BYPASSES ALL PROCESSING and goes straight to output
-    static bool testToneLogged = false;
-    if (generateTestTone && numSamples > 0 && numChannels > 0 && currentSampleRate > 0.0)
-    {
-        if (!testToneLogged)
-        {
-            std::cerr << "🔊 TEST TONE GENERATOR ACTIVE - Generating 440Hz sine wave at 30% volume" << std::endl;
-            std::cerr << "   Sample rate: " << currentSampleRate << " Hz" << std::endl;
-            std::cerr << "   Channels: " << numChannels << std::endl;
-            std::cerr << "   Buffer size: " << numSamples << " samples" << std::endl;
-            testToneLogged = true;
-        }
-        
-        const double testToneFreq = 440.0; // A4 note
-        const double phaseIncrement = testToneFreq / currentSampleRate;
-        const float amplitude = 0.3f; // 30% volume
-        
-        for (int channel = 0; channel < numChannels; ++channel)
-        {
-            auto* channelData = buffer.getWritePointer(channel);
-            double phase = testTonePhase;
-            
-            for (int sample = 0; sample < numSamples; ++sample)
-            {
-                channelData[sample] = std::sin(phase * juce::MathConstants<double>::twoPi) * amplitude;
-                phase += phaseIncrement;
-                if (phase >= 1.0) phase -= 1.0;
-            }
-        }
-        
-        testTonePhase += phaseIncrement * numSamples;
-        if (testTonePhase >= 1.0) testTonePhase -= 1.0;
-        
-        // Verify audio is actually in the buffer
-        static int toneVerifyCounter = 0;
-        if (++toneVerifyCounter % 1000 == 0)
-        {
-            float maxSample = 0.0f;
-            for (int channel = 0; channel < numChannels; ++channel)
-            {
-                auto* channelData = buffer.getReadPointer(channel);
-                for (int sample = 0; sample < numSamples; ++sample)
-                {
-                    maxSample = std::max(maxSample, std::abs(channelData[sample]));
-                }
-            }
-            std::cerr << "✅ TEST TONE OUTPUT - Max sample in buffer: " << maxSample << std::endl;
-        }
-        
-        // Set levels for UI
-        inputLevel.store(-10.0f); // ~30% = -10dB
-        outputLevel.store(-10.0f);
-        
-        // Return early - test tone bypasses all processing
-        return;
-    }
-    else if (!testToneLogged)
-    {
-        std::cerr << "❌ TEST TONE DISABLED - generateTestTone=" << (generateTestTone ? "true" : "false") 
-                  << ", numSamples=" << numSamples 
-                  << ", numChannels=" << numChannels 
-                  << ", sampleRate=" << currentSampleRate << std::endl;
-        testToneLogged = true;
-    }
-    
-    // === NORMAL AUDIO PROCESSING (only runs when test tone is disabled) ===
+    // === AUDIO PROCESSING ===
     
     auto totalNumInputChannels  = getTotalNumInputChannels();
 
@@ -386,50 +312,9 @@ void FabricAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     }
     inputLevel.store(juce::Decibels::gainToDecibels(inLevel, -100.0f));
     
-    // Generate test signal for reverb processing (since no input device is configured)
-    static bool reverbTestSignalLogged = false;
-    if (inLevel < 0.001f && numSamples > 0 && numChannels > 0 && currentSampleRate > 0.0)
-    {
-        if (!reverbTestSignalLogged)
-        {
-            std::cerr << "🎵 GENERATING TEST SIGNAL FOR REVERB (no input detected)" << std::endl;
-            reverbTestSignalLogged = true;
-        }
-        
-        // Generate short impulses for reverb testing (like a click/snap)
-        static int impulseCounter = 0;
-        impulseCounter++;
-        
-        // Generate a continuous test tone for reverb testing
-        const double testToneFreq = 220.0; // A3 note (lower tone easier to hear reverb on)
-        const double phaseIncrement = testToneFreq / currentSampleRate;
-        const float amplitude = 0.5f; // 50% volume
-        static double reverbTestPhase = 0.0;
-        
-        for (int channel = 0; channel < numChannels; ++channel)
-        {
-            auto* channelData = buffer.getWritePointer(channel);
-            double phase = reverbTestPhase;
-            
-            for (int sample = 0; sample < numSamples; ++sample)
-            {
-                channelData[sample] = std::sin(phase * juce::MathConstants<double>::twoPi) * amplitude;
-                phase += phaseIncrement;
-                if (phase >= 1.0) phase -= 1.0;
-            }
-        }
-        
-        reverbTestPhase += phaseIncrement * numSamples;
-        if (reverbTestPhase >= 1.0) reverbTestPhase -= 1.0;
-        
-        // Recalculate input level
-        inLevel = amplitude;
-        inputLevel.store(juce::Decibels::gainToDecibels(inLevel, -100.0f));
-    }
-    
-    // Debug: Check audio level
-    static int postToneDebugCounter = 0;
-    if (++postToneDebugCounter % 1000 == 0 && numSamples > 0 && numChannels > 0)
+    // Debug: Log input levels to verify mic input
+    static int inputCheckCounter = 0;
+    if (++inputCheckCounter % 256 == 0) // Every 256 blocks (~3 seconds)
     {
         float maxSample = 0.0f;
         for (int channel = 0; channel < numChannels; ++channel)
@@ -440,22 +325,11 @@ void FabricAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
                 maxSample = std::max(maxSample, std::abs(channelData[sample]));
             }
         }
-        std::cerr << "Audio INPUT - Max sample: " << maxSample 
-                  << ", RMS: " << inLevel 
-                  << ", Channels: " << numChannels 
-                  << ", Samples: " << numSamples << std::endl;
+        std::cerr << "Input: RMS=" << inLevel << " Max=" << maxSample << " | Channels=" << numChannels << std::endl;
     }
     
     // Get parameters
     bool bypass = *parameters.getRawParameterValue(PARAM_BYPASS);
-    
-    static bool bypassLogged = false;
-    static bool bypassState = false;
-    if (bypass != bypassState)
-    {
-        std::cerr << (bypass ? "⏸️  BYPASS ENABLED - Audio passing through without processing" : "▶️  BYPASS DISABLED - Reverb processing active") << std::endl;
-        bypassState = bypass;
-    }
     
     if (bypass)
     {
@@ -478,13 +352,13 @@ void FabricAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     smoothedMix.setTargetValue(rawMix / 100.0f);
     smoothedWetDry.setTargetValue(rawWetDry / 100.0f);
     
-    // Get smoothed parameter values
-    float size = smoothedSize.getNextValue();
-    float diffusion = smoothedDiffusion.getNextValue();
-    float damping = smoothedDamping.getNextValue();
-    float predelayMs = smoothedPredelay.getNextValue();
-    float mix = smoothedMix.getNextValue();
-    float wetDry = smoothedWetDry.getNextValue();
+    // Get smoothed parameter values (skip to apply over full buffer for instant response)
+    float size = smoothedSize.skip(numSamples);
+    float diffusion = smoothedDiffusion.skip(numSamples);
+    float damping = smoothedDamping.skip(numSamples);
+    float predelayMs = smoothedPredelay.skip(numSamples);
+    float mix = smoothedMix.skip(numSamples);
+    float wetDry = smoothedWetDry.skip(numSamples);
     
     // Advanced reverb parameter mapping:
     // 
@@ -535,6 +409,15 @@ void FabricAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     reverbParams.wetLevel = reverbIntensity * wetDry;
     reverbParams.dryLevel = reverbIntensity * (1.0f - wetDry) + (1.0f - reverbIntensity);
     
+    // Debug wet/dry calculation
+    static int wetDryDebugCounter = 0;
+    if (++wetDryDebugCounter % 256 == 0)
+    {
+        std::cerr << "💧 WET/DRY: Raw=" << rawWetDry << "% → Normalized=" << wetDry 
+                  << " | Mix=" << mix << " → WetLvl=" << reverbParams.wetLevel 
+                  << " DryLvl=" << reverbParams.dryLevel << std::endl;
+    }
+    
     // Ensure we always have some signal (safety check)
     if (reverbParams.wetLevel < 0.001f && reverbParams.dryLevel < 0.001f)
     {
@@ -548,22 +431,25 @@ void FabricAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     // Update reverb parameters - this must be called before processing
     reverb.setParameters(reverbParams);
     
-    // Debug logging (only log occasionally to avoid spam)
-    static int debugCounter = 0;
-    if (++debugCounter % 1000 == 0) // Log every 1000 samples (~22ms at 44.1kHz)
+    // Debug: Log parameter changes
+    static float lastSize = -1, lastDiffusion = -1, lastDamping = -1, lastMix = -1, lastWetDry = -1;
+    bool paramChanged = (lastSize < 0) || // First time
+                        std::fabs(rawSize - lastSize) > 0.5f || 
+                        std::fabs(rawDiffusion - lastDiffusion) > 0.5f || 
+                        std::fabs(rawDamping - lastDamping) > 0.5f || 
+                        std::fabs(rawMix - lastMix) > 0.5f ||
+                        std::fabs(rawWetDry - lastWetDry) > 0.5f;
+    
+    if (paramChanged)
     {
-        DBG("DSP Parameters - Size: " + juce::String(rawSize) + 
-            ", Diffusion: " + juce::String(rawDiffusion) + 
-            ", Damping: " + juce::String(rawDamping) + 
-            ", Predelay: " + juce::String(rawPredelay) + 
-            ", Mix: " + juce::String(rawMix) +
-            ", Wet/Dry: " + juce::String(rawWetDry));
-        DBG("Mapped Values - RoomSize: " + juce::String(roomSize) + 
-            ", Width: " + juce::String(width) + 
-            ", Damping: " + juce::String(dampingAmount) +
-            ", WetLevel: " + juce::String(reverbParams.wetLevel) +
-            ", DryLevel: " + juce::String(reverbParams.dryLevel) +
-            ", ReverbIntensity: " + juce::String(reverbIntensity));
+        std::cerr << "🎚️ PARAMETER CHANGED: Size=" << rawSize << " Diff=" << rawDiffusion 
+                  << " Damp=" << rawDamping << " Mix=" << rawMix << " W/D=" << rawWetDry 
+                  << " → WetLvl=" << reverbParams.wetLevel << " DryLvl=" << reverbParams.dryLevel << std::endl;
+        lastSize = rawSize;
+        lastDiffusion = rawDiffusion;
+        lastDamping = rawDamping;
+        lastMix = rawMix;
+        lastWetDry = rawWetDry;
     }
     
     // PREDELAY (Time Dilation): Adds initial delay before reverb
@@ -617,23 +503,6 @@ void FabricAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     juce::dsp::AudioBlock<float> block(buffer);
     juce::dsp::ProcessContextReplacing<float> context(block);
     reverb.process(context);
-    
-    // Debug: Check if audio is actually in the buffer after reverb processing
-    static int audioDebugCounter = 0;
-    if (++audioDebugCounter % 1000 == 0 && numSamples > 0 && numChannels > 0)
-    {
-        float maxSample = 0.0f;
-        for (int channel = 0; channel < numChannels; ++channel)
-        {
-            auto* channelData = buffer.getReadPointer(channel);
-            for (int sample = 0; sample < numSamples; ++sample)
-            {
-                maxSample = std::max(maxSample, std::abs(channelData[sample]));
-            }
-        }
-        DBG("Audio after reverb - Max sample: " + juce::String(maxSample) + 
-            ", RMS: " + juce::String(buffer.getRMSLevel(0, 0, numSamples)));
-    }
     
     // Calculate output level for UI - with bounds checking
     float outLevel = 0.0f;

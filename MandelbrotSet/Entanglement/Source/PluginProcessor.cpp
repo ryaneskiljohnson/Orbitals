@@ -94,10 +94,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout EntanglementAudioProcessor::
 
 //==============================================================================
 const juce::String EntanglementAudioProcessor::getName() const { return JucePlugin_Name; }
-bool EntanglementAudioProcessor::acceptsMidi() const { return true; }
-bool EntanglementAudioProcessor::producesMidi() const { return true; }
-bool EntanglementAudioProcessor::isMidiEffect() const { return true; }
-double EntanglementAudioProcessor::getTailLengthSeconds() const { return 0.0; }
+bool EntanglementAudioProcessor::acceptsMidi() const { return false; }
+bool EntanglementAudioProcessor::producesMidi() const { return false; }
+bool EntanglementAudioProcessor::isMidiEffect() const { return false; }
+double EntanglementAudioProcessor::getTailLengthSeconds() const { return 2.0; } // Max delay time
 int EntanglementAudioProcessor::getNumPrograms() { return 1; }
 int EntanglementAudioProcessor::getCurrentProgram() { return 0; }
 void EntanglementAudioProcessor::setCurrentProgram (int) {}
@@ -108,6 +108,25 @@ void EntanglementAudioProcessor::changeProgramName (int, const juce::String&) {}
 void EntanglementAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     this->sampleRate = sampleRate;
+    
+    // Prepare delay lines (max 2 seconds)
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
+    spec.numChannels = 1;
+    
+    delayLineL.prepare(spec);
+    delayLineR.prepare(spec);
+    delayLineL.setMaximumDelayInSamples(static_cast<int>(sampleRate * 2.0));
+    delayLineR.setMaximumDelayInSamples(static_cast<int>(sampleRate * 2.0));
+    
+    // Prepare damping filters (low-pass for high-frequency damping)
+    dampingCoeffsL = juce::dsp::IIR::Coefficients<float>::makeLowPass(sampleRate, 20000.0f);
+    dampingCoeffsR = juce::dsp::IIR::Coefficients<float>::makeLowPass(sampleRate, 20000.0f);
+    dampingFilterL.prepare(spec);
+    dampingFilterR.prepare(spec);
+    dampingFilterL.coefficients = dampingCoeffsL;
+    dampingFilterR.coefficients = dampingCoeffsR;
 }
 
 void EntanglementAudioProcessor::releaseResources()
@@ -121,8 +140,15 @@ bool EntanglementAudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
     juce::ignoreUnused (layouts);
     return true;
   #else
+    // Accept mono or stereo input
+    if (layouts.getMainInputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+    
+    // Output must be stereo
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
+    
     return true;
   #endif
 }
@@ -151,38 +177,69 @@ void EntanglementAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         return;
     }
 
-    // TODO: Implement delay DSP algorithm
-    // Parameters available:
-    // - PARAM_TIME (delay time)
-    // - PARAM_FEEDBACK (coupling)
-    // - PARAM_MIX (coherence)
-    // - PARAM_DAMPING (decay)
-    
-    float time = *parameters.getRawParameterValue(PARAM_TIME);
+    // Get parameters
+    float timeMs = *parameters.getRawParameterValue(PARAM_TIME);
     float feedback = *parameters.getRawParameterValue(PARAM_FEEDBACK) / 100.0f;
     float mix = *parameters.getRawParameterValue(PARAM_MIX) / 100.0f;
-    float damping = *parameters.getRawParameterValue(PARAM_DAMPING) / 100.0f;
-
-    // TODO: Implement delay DSP algorithm
-    // Process audio buffer with delay effect
-    // - time: delay time in ms
-    // - feedback: feedback amount (0-100%)
-    // - mix: wet/dry mix (0-100%)
-    // - damping: high-frequency damping (0-100%)
+    float dampingAmount = *parameters.getRawParameterValue(PARAM_DAMPING) / 100.0f;
     
-    juce::ignoreUnused(time, feedback, mix, damping);
+    // Convert delay time to samples
+    float delayTimeSamples = (timeMs / 1000.0f) * static_cast<float>(sampleRate);
+    delayTimeSamples = juce::jlimit(0.0f, static_cast<float>(delayLineL.getMaximumDelayInSamples() - 1), delayTimeSamples);
     
-    // Calculate output level for UI - with bounds checking
+    // Update delay time if changed
+    if (std::abs(delayTimeSamples - lastDelayTimeL) > 0.5f)
+    {
+        delayLineL.setDelay(delayTimeSamples);
+        delayLineR.setDelay(delayTimeSamples);
+        lastDelayTimeL = delayTimeSamples;
+        lastDelayTimeR = delayTimeSamples;
+    }
+    
+    // Update damping filter cutoff (dampingAmount: 0% = no damping, 100% = heavy damping)
+    float dampingCutoff = 20000.0f * (1.0f - dampingAmount * 0.9f); // 2kHz to 20kHz range
+    dampingCutoff = juce::jmax(2000.0f, dampingCutoff);
+    dampingCoeffsL = juce::dsp::IIR::Coefficients<float>::makeLowPass(sampleRate, dampingCutoff);
+    dampingCoeffsR = juce::dsp::IIR::Coefficients<float>::makeLowPass(sampleRate, dampingCutoff);
+    dampingFilterL.coefficients = dampingCoeffsL;
+    dampingFilterR.coefficients = dampingCoeffsR;
+    
+    // Process each channel
+    for (int channel = 0; channel < numChannels; ++channel)
+    {
+        auto* channelData = buffer.getWritePointer(channel);
+        auto& delayLine = (channel == 0) ? delayLineL : delayLineR;
+        auto& dampingFilter = (channel == 0) ? dampingFilterL : dampingFilterR;
+        
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            float input = channelData[sample];
+            
+            // Read delayed signal
+            float delayed = delayLine.popSample(0);
+            
+            // Apply damping (low-pass filter)
+            delayed = dampingFilter.processSample(delayed);
+            
+            // Mix delayed signal with input
+            float output = input * (1.0f - mix) + delayed * mix;
+            
+            // Write to delay line with feedback
+            delayLine.pushSample(0, input + delayed * feedback);
+            
+            channelData[sample] = output;
+        }
+    }
+    
+    // Calculate output level for UI
     float outLevel = 0.0f;
     if (numSamples > 0 && numChannels > 0) {
-        for (int channel = 0; channel < totalNumInputChannels && channel < numChannels; ++channel) {
+        for (int channel = 0; channel < numChannels; ++channel) {
             float channelLevel = buffer.getRMSLevel(channel, 0, numSamples);
             outLevel = std::max(outLevel, channelLevel);
         }
     }
     outputLevel.store(juce::Decibels::gainToDecibels(outLevel, -100.0f));
-    
-    // For now, pass audio through unchanged
     // MIDI processing removed - this is an Audio FX plugin
 }
 

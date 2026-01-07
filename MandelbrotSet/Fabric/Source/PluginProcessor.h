@@ -97,10 +97,6 @@ private:
     juce::SmoothedValue<float> smoothedPredelay;
     juce::SmoothedValue<float> smoothedMix;
     juce::SmoothedValue<float> smoothedWetDry;
-    
-    // Test tone generator (for debugging)
-    double testTonePhase = 0.0;
-    bool generateTestTone = false; // Set to true to generate a test tone
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FabricAudioProcessor)
 };
