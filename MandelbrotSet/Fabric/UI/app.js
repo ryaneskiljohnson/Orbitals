@@ -261,19 +261,38 @@ function initializeFabricAnimation() {
         console.error('❌ Could not get 2D context!');
         return;
     }
-    canvas.width = 600;
-    canvas.height = 600;
-    console.log('✅ Canvas configured: 600x600');
+    canvas.width = 550;
+    canvas.height = 550;
+    console.log('✅ Canvas configured: 550x550');
     
+    const padding = 60; // Padding around the grid
+    const gridWidth = canvas.width - (padding * 2);
+    const gridHeight = canvas.height - (padding * 2);
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const gridSize = 40;
     const points = [];
     
     console.log('📐 Creating grid points...');
-    // Create grid points
-    for (let x = 0; x < canvas.width; x += gridSize) {
-        for (let y = 0; y < canvas.height; y += gridSize) {
+    // Create grid points (centered within padded area)
+    // Calculate grid bounds to center it
+    const gridStartX = padding;
+    const gridEndX = canvas.width - padding;
+    const gridStartY = padding;
+    const gridEndY = canvas.height - padding;
+    
+    // Center the grid by adjusting start positions
+    const gridWidthActual = gridEndX - gridStartX;
+    const gridHeightActual = gridEndY - gridStartY;
+    const gridCols = Math.floor(gridWidthActual / gridSize);
+    const gridRows = Math.floor(gridHeightActual / gridSize);
+    const totalGridWidth = gridCols * gridSize;
+    const totalGridHeight = gridRows * gridSize;
+    const offsetX = (gridWidthActual - totalGridWidth) / 2;
+    const offsetY = (gridHeightActual - totalGridHeight) / 2;
+    
+    for (let x = gridStartX + offsetX; x <= gridEndX - offsetX; x += gridSize) {
+        for (let y = gridStartY + offsetY; y <= gridEndY - offsetY; y += gridSize) {
             points.push({
                 x: x,
                 y: y,
@@ -295,6 +314,61 @@ function initializeFabricAnimation() {
     
     function animate() {
         try {
+            // If bypassed (effect OFF), show default static state
+            if (state.bypass) {
+                // Clear canvas
+                ctx.fillStyle = 'rgba(13, 13, 21, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw static grid (no animation, no warping) - centered with padding
+                const padding = 60;
+                ctx.strokeStyle = 'rgba(0, 229, 255, 0.2)';
+                ctx.lineWidth = 1;
+                
+                // Calculate centered grid bounds
+                const gridStartX = padding;
+                const gridEndX = canvas.width - padding;
+                const gridStartY = padding;
+                const gridEndY = canvas.height - padding;
+                const gridWidthActual = gridEndX - gridStartX;
+                const gridHeightActual = gridEndY - gridStartY;
+                const gridCols = Math.floor(gridWidthActual / gridSize);
+                const gridRows = Math.floor(gridHeightActual / gridSize);
+                const totalGridWidth = gridCols * gridSize;
+                const totalGridHeight = gridRows * gridSize;
+                const offsetX = (gridWidthActual - totalGridWidth) / 2;
+                const offsetY = (gridHeightActual - totalGridHeight) / 2;
+                
+                // Draw static horizontal lines - centered
+                for (let y = gridStartY + offsetY; y <= gridEndY - offsetY; y += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(gridStartX + offsetX, y);
+                    ctx.lineTo(gridEndX - offsetX, y);
+                    ctx.stroke();
+                }
+                
+                // Draw static vertical lines - centered
+                for (let x = gridStartX + offsetX; x <= gridEndX - offsetX; x += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, gridStartY + offsetY);
+                    ctx.lineTo(x, gridEndY - offsetY);
+                    ctx.stroke();
+                }
+                
+                // Draw static intersection points - centered
+                ctx.fillStyle = 'rgba(102, 255, 255, 0.3)';
+                for (let x = gridStartX + offsetX; x <= gridEndX - offsetX; x += gridSize) {
+                    for (let y = gridStartY + offsetY; y <= gridEndY - offsetY; y += gridSize) {
+                        ctx.beginPath();
+                        ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                
+                requestAnimationFrame(animate);
+                return;
+            }
+            
             time += 0.02;
             
             // Debug: Log first few frames
@@ -428,29 +502,50 @@ function initializeFabricAnimation() {
         ctx.strokeStyle = `rgba(0, 229, 255, ${lineOpacity})`;
         ctx.lineWidth = 1 + normalizedLevel * 1 + mixInfluence * 0.5;
         
-        // Horizontal lines
-        for (let y = 0; y < canvas.height; y += gridSize) {
-            ctx.beginPath();
-            const rowPoints = points.filter(p => Math.abs(p.baseY - y) < 1);
-            rowPoints.sort((a, b) => a.baseX - b.baseX);
-            rowPoints.forEach((p, i) => {
-                if (i === 0) ctx.moveTo(p.x, p.y);
-                else ctx.lineTo(p.x, p.y);
-            });
-            ctx.stroke();
-        }
+        // Calculate centered grid bounds (same as point creation)
+        const padding = 60;
+        const gridStartX = padding;
+        const gridEndX = canvas.width - padding;
+        const gridStartY = padding;
+        const gridEndY = canvas.height - padding;
+        const gridWidthActual = gridEndX - gridStartX;
+        const gridHeightActual = gridEndY - gridStartY;
+        const gridCols = Math.floor(gridWidthActual / gridSize);
+        const gridRows = Math.floor(gridHeightActual / gridSize);
+        const totalGridWidth = gridCols * gridSize;
+        const totalGridHeight = gridRows * gridSize;
+        const offsetX = (gridWidthActual - totalGridWidth) / 2;
+        const offsetY = (gridHeightActual - totalGridHeight) / 2;
         
-        // Vertical lines
-        for (let x = 0; x < canvas.width; x += gridSize) {
+        // Horizontal lines - use actual grid point baseY values
+        const uniqueYValues = [...new Set(points.map(p => p.baseY))].sort((a, b) => a - b);
+        uniqueYValues.forEach(baseY => {
             ctx.beginPath();
-            const colPoints = points.filter(p => Math.abs(p.baseX - x) < 1);
+            const rowPoints = points.filter(p => Math.abs(p.baseY - baseY) < 0.5);
+            rowPoints.sort((a, b) => a.baseX - b.baseX);
+            if (rowPoints.length > 0) {
+                rowPoints.forEach((p, i) => {
+                    if (i === 0) ctx.moveTo(p.x, p.y);
+                    else ctx.lineTo(p.x, p.y);
+                });
+                ctx.stroke();
+            }
+        });
+        
+        // Vertical lines - use actual grid point baseX values
+        const uniqueXValues = [...new Set(points.map(p => p.baseX))].sort((a, b) => a - b);
+        uniqueXValues.forEach(baseX => {
+            ctx.beginPath();
+            const colPoints = points.filter(p => Math.abs(p.baseX - baseX) < 0.5);
             colPoints.sort((a, b) => a.baseY - b.baseY);
-            colPoints.forEach((p, i) => {
-                if (i === 0) ctx.moveTo(p.x, p.y);
-                else ctx.lineTo(p.x, p.y);
-            });
-            ctx.stroke();
-        }
+            if (colPoints.length > 0) {
+                colPoints.forEach((p, i) => {
+                    if (i === 0) ctx.moveTo(p.x, p.y);
+                    else ctx.lineTo(p.x, p.y);
+                });
+                ctx.stroke();
+            }
+        });
         
         // Draw intersection points - size and brightness respond to audio and diffusion
         const pointOpacity = 0.5 + normalizedLevel * 0.3 + diffusionInfluence * 0.2;

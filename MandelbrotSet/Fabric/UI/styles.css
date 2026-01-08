@@ -8,6 +8,11 @@
     --plugin-background-opacity: 0.4;
 }
 
+/* Override plugin-container overflow to allow animation to overflow */
+.fabric-theme.plugin-container {
+    overflow: visible !important;
+}
+
 .plugin-main {
     display: flex;
     align-items: center;
@@ -16,7 +21,7 @@
     padding: var(--spacing-md) var(--spacing-lg);
     flex: 1;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     min-height: 0;
     max-height: calc(100vh - 120px); /* Account for header (64px) + footer (56px) */
 }
@@ -49,25 +54,27 @@
 
 .animation-center {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 600px;
-    height: 600px;
+    width: 700px;
+    height: 700px;
     flex-shrink: 0;
     margin: 0 auto;
     padding: 0;
-    overflow: hidden;
+    overflow: visible !important;
     box-sizing: border-box;
 }
 
 #fabricCanvas {
-    width: 600px;
-    height: 600px;
+    width: 550px !important;
+    height: 550px !important;
+    max-width: 550px !important;
+    max-height: 550px !important;
     display: block;
     margin: 0;
     padding: 0;
-    position: relative;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     opacity: 0.6;
     z-index: 1;
     pointer-events: none;
