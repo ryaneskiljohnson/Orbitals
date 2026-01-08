@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     new MandelbrotKnob(document.getElementById('highGainKnob'), { min: -12, max: 12, value: 0, onChange: (v, p) => { state.highgain = v; document.getElementById('highGainValue').textContent = `${v >= 0 ? '+' : ''}${v.toFixed(1)} dB`; sendToPlugin(p, v); } });
     new MandelbrotKnob(document.getElementById('qKnob'), { min: 0.1, max: 10, value: 1, onChange: (v, p) => { state.q = v; document.getElementById('qValue').textContent = v.toFixed(1); sendToPlugin(p, v); } });
     
-    document.getElementById('bypassToggle').addEventListener('click', (e) => { state.bypass = !state.bypass; e.currentTarget.classList.toggle('active'); e.currentTarget.querySelector('.bypass-text').textContent = e.currentTarget.classList.contains('active') ? 'ON' : 'OFF'; sendToPlugin('bypass', e.currentTarget.classList.contains('active') ? 0 : 1); });
+    initializeBypassToggle();
     
     // Quantum foam animation - responds to audio
     const canvas = document.getElementById('planckCanvas');
@@ -140,4 +140,27 @@ function updateVUMeter(type, levelDb) {
     } else {
         meterPeak.classList.remove('visible');
     }
+}
+
+
+function initializeBypassToggle() {
+    const bypassButton = document.getElementById('bypassToggle');
+    if (!bypassButton) return;
+    
+    // Set initial state
+    state.bypass = false;
+    bypassButton.classList.add('active');
+    bypassButton.querySelector('.bypass-text').textContent = 'ON';
+    
+    // Use onclick for direct event handling
+    bypassButton.onclick = function() {
+        state.bypass = !state.bypass;
+        const isActive = !state.bypass;
+        
+        bypassButton.classList.toggle('active', isActive);
+        bypassButton.querySelector('.bypass-text').textContent = isActive ? 'ON' : 'OFF';
+        
+        sendToPlugin('bypass', state.bypass ? 1.0 : 0.0);
+        return false;
+    };
 }

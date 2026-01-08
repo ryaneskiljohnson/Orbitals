@@ -120,12 +120,25 @@ function initializeControls() {
 
 function initializeBypassToggle() {
     const bypassButton = document.getElementById('bypassToggle');
-    bypassButton.addEventListener('click', () => {
+    if (!bypassButton) return;
+    
+    // Set initial state
+    state.bypass = false;
+    bypassButton.classList.add('active');
+    bypassButton.querySelector('.bypass-text').textContent = 'ON';
+    
+    // Use onclick for direct event handling
+    bypassButton.onclick = function() {
         state.bypass = !state.bypass;
-        bypassButton.classList.toggle('active', !state.bypass);
-        bypassButton.querySelector('.bypass-text').textContent = state.bypass ? 'OFF' : 'ON';
-        sendToPlugin('bypass', state.bypass ? 1 : 0);
-    });
+        const isActive = !state.bypass;
+        
+        bypassButton.classList.toggle('active', isActive);
+        bypassButton.querySelector('.bypass-text').textContent = isActive ? 'ON' : 'OFF';
+        
+        sendToPlugin('bypass', state.bypass ? 1.0 : 0.0);
+        return false;
+    };
+});
 }
 
 // ===================================================================

@@ -47,8 +47,21 @@ function waitForJuce() {
     });
 }
 
+console.log('🚀🚀🚀 APP.JS LOADING 🚀🚀🚀');
+
+// Test button click globally
+window.testBypassButton = function() {
+    console.log('🧪 Manual bypass button test...');
+    const btn = document.getElementById('bypassToggle');
+    console.log('Button element:', btn);
+    if (btn) {
+        console.log('Triggering click programmatically...');
+        btn.click();
+    }
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🔵 DOMContentLoaded fired');
+    console.log('🔵🔵🔵 DOMContentLoaded fired 🔵🔵🔵');
     
     // AUTOMATIC BRIDGE TEST - Runs immediately after page loads
     console.log('🧪 Starting automatic bridge test...');
@@ -57,10 +70,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 1000); // Wait 1 second for everything to initialize
     await waitForJuce();
     console.log('🔵 Initializing controls...');
-    initializeSettingsButton();
-    initializeControls();
-    initializeFabricAnimation();
-    initializeBypassToggle();
+    
+    try {
+        initializeSettingsButton();
+        console.log('✅ Settings button initialized');
+    } catch (e) {
+        console.error('❌ Settings button error:', e);
+    }
+    
+    try {
+        initializeControls();
+        console.log('✅ Controls initialized');
+    } catch (e) {
+        console.error('❌ Controls error:', e);
+    }
+    
+    try {
+        initializeFabricAnimation();
+        console.log('✅ Animation initialized');
+    } catch (e) {
+        console.error('❌ Animation error:', e);
+    }
+    
+    try {
+        console.log('🔵 ABOUT TO INITIALIZE BYPASS TOGGLE...');
+        initializeBypassToggle();
+        console.log('✅✅✅ BYPASS TOGGLE INITIALIZED ✅✅✅');
+    } catch (e) {
+        console.error('❌❌❌ BYPASS TOGGLE ERROR:', e);
+        console.error('Stack:', e.stack);
+    }
+    
     console.log('🔵 All controls initialized');
 });
 
@@ -153,13 +193,44 @@ function initializeControls() {
 }
 
 function initializeBypassToggle() {
+    console.log('🔵 initializeBypassToggle() STARTED');
+    
     const bypassButton = document.getElementById('bypassToggle');
-    bypassButton.addEventListener('click', () => {
+    console.log('🔍 bypassButton element:', bypassButton);
+    
+    if (!bypassButton) {
+        console.error('❌ Button not found!');
+        return;
+    }
+    
+    console.log('✅ Button found, setting up...');
+    
+    // Set initial state
+    state.bypass = false;
+    bypassButton.classList.add('active');
+    bypassButton.querySelector('.bypass-text').textContent = 'ON';
+    
+    console.log('✅ Initial state set');
+    
+    // Add click listener
+    bypassButton.onclick = function(e) {
+        console.log('🖱️ ONCLICK FIRED');
+        
         state.bypass = !state.bypass;
-        bypassButton.classList.toggle('active', !state.bypass);
-        bypassButton.querySelector('.bypass-text').textContent = state.bypass ? 'OFF' : 'ON';
-        sendToPlugin('bypass', state.bypass ? 1 : 0);
-    });
+        const isActive = !state.bypass;
+        
+        bypassButton.classList.toggle('active', isActive);
+        bypassButton.querySelector('.bypass-text').textContent = isActive ? 'ON' : 'OFF';
+        
+        console.log('📤 About to call sendToPlugin with bypass =', state.bypass ? 1.0 : 0.0);
+        sendToPlugin('bypass', state.bypass ? 1.0 : 0.0);
+        console.log('✅ sendToPlugin called');
+        
+        return false;
+    };
+    
+    console.log('✅ Click listener attached via onclick');
+    console.log('🔵 initializeBypassToggle() COMPLETE');
 }
 
 function updateSpaceInfo() {
@@ -190,9 +261,9 @@ function initializeFabricAnimation() {
         console.error('❌ Could not get 2D context!');
         return;
     }
-    canvas.width = 700;
-    canvas.height = 700;
-    console.log('✅ Canvas configured: 700x700');
+    canvas.width = 600;
+    canvas.height = 600;
+    console.log('✅ Canvas configured: 600x600');
     
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
@@ -442,6 +513,11 @@ function initializeSettingsButton() {
 }
 
 function sendToPlugin(parameter, value) {
+    // Special alert for bypass to confirm it's being sent
+    if (parameter === 'bypass') {
+        alert('sendToPlugin: bypass=' + value);
+    }
+    
     console.log('📤 sendToPlugin called:', parameter, value);
     
     // JUCE 8 uses window.__JUCE__.backend.emitEvent() for event listeners
@@ -457,6 +533,10 @@ function sendToPlugin(parameter, value) {
         console.log('📤 Sending message via emitEvent:', JSON.stringify(message));
         // Use emitEvent instead of postMessage for withEventListener
         juceBackend.backend.emitEvent('message', message);
+        
+        if (parameter === 'bypass') {
+            alert('Sent to C++: ' + JSON.stringify(message));
+        }
     } else if (window.__JUCE__) {
         // Fallback: try postMessage (old API)
         console.log('⚠️ Using fallback postMessage API');
@@ -573,14 +653,14 @@ function updateVUMeter(type, levelDb) {
     const minDb = -60;
     const maxDb = 0;
     const normalized = Math.max(0, Math.min(1, (levelDb - minDb) / (maxDb - minDb)));
-    const heightPercent = normalized * 100;
+    const widthPercent = normalized * 100;
     
-    meterFill.style.height = `${heightPercent}%`;
+    meterFill.style.width = `${widthPercent}%`;
     meterLabel.textContent = levelDb > -100 ? `${levelDb.toFixed(1)} dB` : '-∞ dB';
     
     // Update peak hold
     if (levelDb > -60) {
-        meterPeak.style.top = `${100 - heightPercent}%`;
+        meterPeak.style.left = `${widthPercent}%`;
         meterPeak.classList.add('visible');
         
         // Reset peak after 1 second

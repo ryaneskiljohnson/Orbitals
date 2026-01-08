@@ -8,27 +8,70 @@
     --plugin-background-opacity: 0.4;
 }
 
-.controls-reverb {
+.plugin-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+    max-height: calc(100vh - 120px); /* Account for header (64px) + footer (56px) */
+}
+
+.controls-left {
     position: relative;
     z-index: var(--z-controls);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--spacing-3xl);
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: var(--spacing-xl) 0;
+    justify-content: center;
+    gap: var(--spacing-2xl);
+    min-width: 200px;
+    height: 100%;
+    margin-right: var(--spacing-sm);
 }
 
-.control-row-top,
-.control-row-middle,
-.control-row-bottom {
+.controls-right {
+    position: relative;
+    z-index: var(--z-controls);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2xl);
+    min-width: 200px;
+    height: 100%;
+    margin-left: var(--spacing-sm);
+}
+
+.animation-center {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-3xl);
-    width: 100%;
+    width: 600px;
+    height: 600px;
+    flex-shrink: 0;
+    margin: 0 auto;
+    padding: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#fabricCanvas {
+    width: 600px;
+    height: 600px;
+    display: block;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    opacity: 0.6;
+    z-index: 1;
+    pointer-events: none;
+    box-sizing: border-box;
 }
 
 .control-group {
@@ -39,13 +82,10 @@
     min-width: 120px;
 }
 
-.large-knob {
-    width: 100px;
-    height: 100px;
-}
+/* All knobs are the same size - using default from design system */
 
 .slider-container {
-    width: 300px;
+    width: 200px;
     margin: var(--spacing-md) 0;
 }
 
@@ -54,44 +94,41 @@
     height: 8px;
 }
 
-#fabricCanvas {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 700px;
-    height: 700px;
-    opacity: 0.6;
-    z-index: 1;
-    pointer-events: none;
-}
+/* Canvas styles are defined above in animation-center section */
 
 .mandelbrot-footer {
-    display: grid;
-    grid-template-columns: 120px 1fr;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: var(--spacing-md) var(--spacing-lg);
     min-height: 56px;
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     border-top: 1px solid var(--glass-border);
-    z-index: var(--z-header);
+    z-index: 1000;
+    position: relative;
 }
 
 .bypass-toggle {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius-md);
-    background: var(--glass-bg-light);
+    background: var(--glass-bg-dark);
     border: 2px solid var(--glass-border);
-    cursor: pointer;
+    cursor: pointer !important;
     transition: var(--transition-fast);
     font-family: var(--font-header);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     color: var(--planck-white);
+    min-width: 120px;
+    pointer-events: auto !important;
+    z-index: 1001;
+    position: relative;
+    user-select: none;
 }
 
 .bypass-toggle:hover {
@@ -100,13 +137,15 @@
 }
 
 .bypass-toggle.active {
-    background: var(--plugin-primary);
+    background: var(--glass-bg-dark);
     border-color: var(--plugin-primary);
+    color: var(--plugin-primary);
 }
 
 .power-icon {
     width: 20px;
     height: 20px;
+    pointer-events: none;
 }
 
 .power-icon svg {
@@ -116,16 +155,22 @@
     stroke: currentColor;
     stroke-width: 2;
     stroke-linecap: round;
+    pointer-events: none;
+}
+
+.bypass-text {
+    pointer-events: none;
 }
 
 .info-display {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: var(--spacing-xl);
+    justify-content: center;
+    gap: var(--spacing-2xl);
     font-family: var(--font-mono);
     font-size: var(--font-size-xs);
     color: var(--planck-white);
+    flex: 1;
 }
 
 .meter-container {
@@ -133,6 +178,7 @@
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-xs);
+    min-width: 200px;
 }
 
 .meter-container label {
@@ -148,11 +194,12 @@
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-xs);
+    width: 100%;
 }
 
 .vu-meter-bar {
-    width: 8px;
-    height: 120px;
+    width: 100%;
+    height: 8px;
     background: var(--glass-bg-dark);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-sm);
@@ -163,29 +210,28 @@
 
 .vu-meter-fill {
     position: absolute;
-    bottom: 0;
     left: 0;
-    width: 100%;
-    height: 0%;
-    background: linear-gradient(to top,
-        #00ff00 0%,
-        #88ff00 20%,
-        #ffff00 50%,
-        #ff8800 80%,
-        #ff0000 100%);
-    transition: height 50ms linear;
-    box-shadow: 0 0 8px currentColor;
-    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    top: 0;
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(to right,
+        rgba(0, 229, 255, 0.3) 0%,
+        rgba(0, 229, 255, 0.6) 50%,
+        #00e5ff 100%);
+    transition: width 50ms linear;
+    box-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
+    border-radius: var(--radius-sm);
 }
 
 .vu-meter-peak {
     position: absolute;
+    top: 0;
     left: 0;
-    width: 100%;
-    height: 2px;
+    width: 2px;
+    height: 100%;
     background: white;
     box-shadow: 0 0 6px white;
-    transition: top 100ms linear;
+    transition: left 100ms linear;
     opacity: 0;
 }
 

@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     new MandelbrotKnob(document.getElementById('feedbackKnob'), { min: 0, max: 100, value: 30, onChange: (v, p) => { state.feedback = v; document.getElementById('feedbackValue').textContent = `${v.toFixed(0)}%`; sendToPlugin(p, v); } });
     new MandelbrotKnob(document.getElementById('stereoKnob'), { min: 0, max: 100, value: 100, onChange: (v, p) => { state.stereo = v; document.getElementById('stereoValue').textContent = `${v.toFixed(0)}%`; sendToPlugin(p, v); } });
     new MandelbrotKnob(document.getElementById('mixKnob'), { min: 0, max: 100, value: 50, onChange: (v, p) => { state.mix = v; document.getElementById('mixValue').textContent = `${v.toFixed(0)}%`; sendToPlugin(p, v); } });
-    document.getElementById('bypassToggle').addEventListener('click', (e) => { state.bypass = !state.bypass; e.currentTarget.classList.toggle('active'); e.currentTarget.querySelector('.bypass-text').textContent = e.currentTarget.classList.contains('active') ? 'ON' : 'OFF'; sendToPlugin('bypass', e.currentTarget.classList.contains('active') ? 0 : 1); });
+    initializeBypassToggle();
     
     // Rabbit hole spiral animation - responds to audio
     const canvas = document.getElementById('rabbitholeCanvas');
@@ -148,4 +148,27 @@ function updateVUMeter(type, levelDb) {
     } else {
         meterPeak.classList.remove('visible');
     }
+}
+
+
+function initializeBypassToggle() {
+    const bypassButton = document.getElementById('bypassToggle');
+    if (!bypassButton) return;
+    
+    // Set initial state
+    state.bypass = false;
+    bypassButton.classList.add('active');
+    bypassButton.querySelector('.bypass-text').textContent = 'ON';
+    
+    // Use onclick for direct event handling
+    bypassButton.onclick = function() {
+        state.bypass = !state.bypass;
+        const isActive = !state.bypass;
+        
+        bypassButton.classList.toggle('active', isActive);
+        bypassButton.querySelector('.bypass-text').textContent = isActive ? 'ON' : 'OFF';
+        
+        sendToPlugin('bypass', state.bypass ? 1.0 : 0.0);
+        return false;
+    };
 }

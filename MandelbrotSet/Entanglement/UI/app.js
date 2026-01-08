@@ -84,12 +84,24 @@ function initializeControls() {
 
 function initializeBypassToggle() {
     const bypassButton = document.getElementById('bypassToggle');
-    bypassButton.addEventListener('click', () => {
+    if (!bypassButton) return;
+    
+    // Set initial state
+    state.bypass = false;
+    bypassButton.classList.add('active');
+    bypassButton.querySelector('.bypass-text').textContent = 'ON';
+    
+    // Use onclick for direct event handling
+    bypassButton.onclick = function() {
         state.bypass = !state.bypass;
-        bypassButton.classList.toggle('active', !state.bypass);
-        bypassButton.querySelector('.bypass-text').textContent = state.bypass ? 'OFF' : 'ON';
-        sendToPlugin('bypass', state.bypass ? 1 : 0);
-    });
+        const isActive = !state.bypass;
+        
+        bypassButton.classList.toggle('active', isActive);
+        bypassButton.querySelector('.bypass-text').textContent = isActive ? 'ON' : 'OFF';
+        
+        sendToPlugin('bypass', state.bypass ? 1.0 : 0.0);
+        return false;
+    };
 }
 
 // ===================================================================
@@ -269,14 +281,14 @@ function updateVUMeter(type, levelDb) {
     const minDb = -60;
     const maxDb = 0;
     const normalized = Math.max(0, Math.min(1, (levelDb - minDb) / (maxDb - minDb)));
-    const heightPercent = normalized * 100;
+    const widthPercent = normalized * 100;
     
-    meterFill.style.height = `${heightPercent}%`;
+    meterFill.style.width = `${widthPercent}%`;
     meterLabel.textContent = levelDb > -100 ? `${levelDb.toFixed(1)} dB` : '-∞ dB';
     
     // Update peak hold
     if (levelDb > -60) {
-        meterPeak.style.top = `${100 - heightPercent}%`;
+        meterPeak.style.left = `${widthPercent}%`;
         meterPeak.classList.add('visible');
         
         // Reset peak after 1 second

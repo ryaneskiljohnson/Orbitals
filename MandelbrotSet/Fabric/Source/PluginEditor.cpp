@@ -25,7 +25,15 @@ FabricAudioProcessorEditor::FabricAudioProcessorEditor (FabricAudioProcessor& p)
     
     // Enable native title bar on the top-level window (for standalone builds)
     if (auto* top_level = juce::TopLevelWindow::getTopLevelWindow(0))
+    {
         top_level->setUsingNativeTitleBar(true);
+        
+        // Ensure close button is shown (only DocumentWindow has this method)
+        if (auto* docWindow = dynamic_cast<juce::DocumentWindow*>(top_level))
+        {
+            docWindow->setTitleBarButtonsRequired(juce::DocumentWindow::closeButton, true);
+        }
+    }
 
     setSize (1200, 750);
     setResizable (false, false);
@@ -296,32 +304,56 @@ void FabricAudioProcessorEditor::handleJavaScriptMessage (const juce::var& messa
             else
             {
                 // For non-ranged parameters (like bypass bool)
+                // AudioParameterBool expects 0.0 or 1.0
                 float normalizedValue = static_cast<float>(value);
+                
+                // Special logging for bypass parameter
+                if (param == "bypass")
+                {
+                    std::cout << "=====================================" << std::endl;
+                    std::cout << "🎛️ BYPASS PARAMETER UPDATE" << std::endl;
+                    std::cout << "Value from JS: " << normalizedValue << std::endl;
+                    std::cout << "Interpreted as: " << (normalizedValue > 0.5f ? "BYPASS (effect OFF)" : "ACTIVE (effect ON)") << std::endl;
+                    
+                    // Get current value before setting
+                    float currentValue = p->getValue();
+                    std::cout << "Current value before set: " << currentValue << std::endl;
+                }
+                
+                // For AudioParameterBool, setValue expects 0.0 or 1.0
                 p->setValueNotifyingHost(normalizedValue);
                 std::cout << "  ✅ Non-ranged parameter set: " << normalizedValue << std::endl;
                 
-                // Use std::cout for logging instead of DBG to avoid JUCE String assertion issues
-                if (!std::isnan(normalizedValue) && !std::isinf(normalizedValue))
+                if (param == "bypass")
                 {
-                    std::cout << "  ✅ Non-ranged parameter updated: " << param.toStdString() 
-                              << " -> " << normalizedValue << std::endl;
-                }
-                else
-                {
-                    std::cout << "  ⚠️ Non-ranged parameter has invalid value (NaN/Inf)" << std::endl;
+                    // Verify the parameter was actually set
+                    float newValue = p->getValue();
+                    std::cout << "New value after set: " << newValue << std::endl;
+                    
+                    std::atomic<float>* rawValue = audioProcessor.parameters.getRawParameterValue(param);
+                    if (rawValue != nullptr)
+                    {
+                        float actualValue = rawValue->load();
+                        std::cout << "Verified actual value in processor: " << actualValue << std::endl;
+                        std::cout << "Bypass state in processor: " << (actualValue > 0.5f ? "BYPASSED" : "ACTIVE") << std::endl;
+                    }
+                    std::cout << "=====================================" << std::endl;
                 }
             }
         }
         else
         {
             std::cout << "  ❌ Parameter not found: " << param.toStdString() << std::endl;
-            DBG("❌ Parameter not found: " + param);
-            DBG("Available parameters:");
+            std::cout << "Available parameters:" << std::endl;
             for (auto* availParam : audioProcessor.parameters.processor.getParameters())
             {
                 if (auto* rangedParam = dynamic_cast<juce::RangedAudioParameter*>(availParam))
                 {
-                    DBG("  - " + rangedParam->getParameterID());
+                    std::cout << "  - " << rangedParam->getParameterID().toStdString() << std::endl;
+                }
+                else
+                {
+                    std::cout << "  - " << availParam->getName(100).toStdString() << std::endl;
                 }
             }
         }

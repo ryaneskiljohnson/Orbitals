@@ -25,96 +25,91 @@
         </header>
 
         <main class="plugin-main">
-            <canvas id="fabricCanvas"></canvas>
-
-            <div class="controls-reverb">
-                <!-- Top Row: Space Controls -->
-                <div class="control-row-top">
-                    <!-- Weave (Size) -->
-                    <div class="control-group">
-                        <label class="control-label">WEAVE</label>
-                        <div class="knob large-knob" id="sizeKnob" data-param="size"
-                             data-help-title="WEAVE"
-                             data-help-description="How much fabric of spacetime. Larger weaves create bigger spaces.">
-                            <div class="knob-inner">
-                                <div class="knob-indicator"></div>
-                            </div>
+            <div class="controls-left">
+                <!-- Weave (Size) -->
+                <div class="control-group">
+                    <label class="control-label">WEAVE</label>
+                    <div class="knob" id="sizeKnob" data-param="size"
+                         data-help-title="WEAVE"
+                         data-help-description="How much fabric of spacetime. Larger weaves create bigger spaces.">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
                         </div>
-                        <div class="value-display large" id="sizeValue">50%</div>
                     </div>
-
-                    <!-- Thread Density (Diffusion) -->
-                    <div class="control-group">
-                        <label class="control-label">THREAD DENSITY</label>
-                        <div class="knob" id="diffusionKnob" data-param="diffusion"
-                             data-help-title="THREAD DENSITY"
-                             data-help-description="Texture detail of the fabric. Higher density creates more complex reflections.">
-                            <div class="knob-inner">
-                                <div class="knob-indicator"></div>
-                            </div>
-                        </div>
-                        <div class="value-display" id="diffusionValue">50%</div>
-                    </div>
+                    <div class="value-display" id="sizeValue">50%</div>
                 </div>
 
-                <!-- Middle Row: Character Controls -->
-                <div class="control-row-middle">
-                    <!-- Fold (Damping) -->
-                    <div class="control-group">
-                        <label class="control-label">FOLD</label>
-                        <div class="knob" id="dampingKnob" data-param="damping"
-                             data-help-title="FOLD"
-                             data-help-description="How fabric absorbs energy. More fold dampens high frequencies.">
-                            <div class="knob-inner">
-                                <div class="knob-indicator"></div>
-                            </div>
+                <!-- Fold (Damping) -->
+                <div class="control-group">
+                    <label class="control-label">FOLD</label>
+                    <div class="knob" id="dampingKnob" data-param="damping"
+                         data-help-title="FOLD"
+                         data-help-description="How fabric absorbs energy. More fold dampens high frequencies.">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
                         </div>
-                        <div class="value-display" id="dampingValue">50%</div>
                     </div>
-
-                    <!-- Time Dilation (Pre-Delay) -->
-                    <div class="control-group">
-                        <label class="control-label">TIME DILATION</label>
-                        <div class="knob" id="predelayKnob" data-param="predelay"
-                             data-help-title="TIME DILATION"
-                             data-help-description="Relativity effect. Delays initial reflection as if time is warped.">
-                            <div class="knob-inner">
-                                <div class="knob-indicator"></div>
-                            </div>
-                        </div>
-                        <div class="value-display" id="predelayValue">0 ms</div>
-                    </div>
+                    <div class="value-display" id="dampingValue">50%</div>
                 </div>
 
-                <!-- Bottom Row: Mix Controls -->
-                <div class="control-row-bottom">
-                    <!-- Warp (Mix) -->
-                    <div class="control-group">
-                        <label class="control-label">WARP</label>
-                        <div class="slider-container">
-                            <div class="slider horizontal-slider" id="mixSlider" data-param="mix"
-                                 data-help-title="WARP"
-                                 data-help-description="Additional mix control for creative effects.">
-                                <div class="slider-track"></div>
-                                <div class="slider-handle"></div>
-                            </div>
+                <!-- Warp (Mix) -->
+                <div class="control-group">
+                    <label class="control-label">WARP</label>
+                    <div class="slider-container">
+                        <div class="slider horizontal-slider" id="mixSlider" data-param="mix"
+                             data-help-title="WARP"
+                             data-help-description="Additional mix control for creative effects.">
+                            <div class="slider-track"></div>
+                            <div class="slider-handle"></div>
                         </div>
-                        <div class="value-display" id="mixValue">50%</div>
                     </div>
+                    <div class="value-display" id="mixValue">50%</div>
+                </div>
+            </div>
 
-                    <!-- Wet/Dry -->
-                    <div class="control-group">
-                        <label class="control-label">WET/DRY</label>
-                        <div class="slider-container">
-                            <div class="slider horizontal-slider" id="wetdrySlider" data-param="wetdry"
-                                 data-help-title="WET/DRY"
-                                 data-help-description="Balance between dry signal and reverb. Left = dry, right = wet.">
-                                <div class="slider-track"></div>
-                                <div class="slider-handle"></div>
-                            </div>
+            <div class="animation-center">
+                <canvas id="fabricCanvas"></canvas>
+            </div>
+
+            <div class="controls-right">
+                <!-- Thread Density (Diffusion) -->
+                <div class="control-group">
+                    <label class="control-label">THREAD DENSITY</label>
+                    <div class="knob" id="diffusionKnob" data-param="diffusion"
+                         data-help-title="THREAD DENSITY"
+                         data-help-description="Texture detail of the fabric. Higher density creates more complex reflections.">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
                         </div>
-                        <div class="value-display" id="wetdryValue">50/50</div>
                     </div>
+                    <div class="value-display" id="diffusionValue">50%</div>
+                </div>
+
+                <!-- Time Dilation (Pre-Delay) -->
+                <div class="control-group">
+                    <label class="control-label">TIME DILATION</label>
+                    <div class="knob" id="predelayKnob" data-param="predelay"
+                         data-help-title="TIME DILATION"
+                         data-help-description="Relativity effect. Delays initial reflection as if time is warped.">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="value-display" id="predelayValue">0 ms</div>
+                </div>
+
+                <!-- Wet/Dry -->
+                <div class="control-group">
+                    <label class="control-label">WET/DRY</label>
+                    <div class="slider-container">
+                        <div class="slider horizontal-slider" id="wetdrySlider" data-param="wetdry"
+                             data-help-title="WET/DRY"
+                             data-help-description="Balance between dry signal and reverb. Left = dry, right = wet.">
+                            <div class="slider-track"></div>
+                            <div class="slider-handle"></div>
+                        </div>
+                    </div>
+                    <div class="value-display" id="wetdryValue">50/50</div>
                 </div>
             </div>
         </main>

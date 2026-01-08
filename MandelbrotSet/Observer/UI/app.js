@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     new MandelbrotKnob(document.getElementById('ratioKnob'), { min: 1, max: 10, value: 2, onChange: (v, p) => { state.ratio = v; document.getElementById('ratioValue').textContent = `${v.toFixed(1)}:1`; sendToPlugin(p, v); } });
     new MandelbrotKnob(document.getElementById('attackKnob'), { min: 0.1, max: 100, value: 10, onChange: (v, p) => { state.attack = v; document.getElementById('attackValue').textContent = `${v.toFixed(1)} ms`; sendToPlugin(p, v); } });
     new MandelbrotKnob(document.getElementById('releaseKnob'), { min: 10, max: 1000, value: 100, onChange: (v, p) => { state.release = v; document.getElementById('releaseValue').textContent = `${v.toFixed(0)} ms`; sendToPlugin(p, v); } });
-    document.getElementById('bypassToggle').addEventListener('click', (e) => { state.bypass = !state.bypass; e.currentTarget.classList.toggle('active'); e.currentTarget.querySelector('.bypass-text').textContent = e.currentTarget.classList.contains('active') ? 'ON' : 'OFF'; sendToPlugin('bypass', e.currentTarget.classList.contains('active') ? 0 : 1); });
+    initializeBypassToggle();
     
     // Wavefunction animation - responds to audio
     const canvas = document.getElementById('observerCanvas');
@@ -167,4 +167,27 @@ function updateVUMeter(type, levelDb) {
     } else {
         meterPeak.classList.remove('visible');
     }
+}
+
+
+function initializeBypassToggle() {
+    const bypassButton = document.getElementById('bypassToggle');
+    if (!bypassButton) return;
+    
+    // Set initial state
+    state.bypass = false;
+    bypassButton.classList.add('active');
+    bypassButton.querySelector('.bypass-text').textContent = 'ON';
+    
+    // Use onclick for direct event handling
+    bypassButton.onclick = function() {
+        state.bypass = !state.bypass;
+        const isActive = !state.bypass;
+        
+        bypassButton.classList.toggle('active', isActive);
+        bypassButton.querySelector('.bypass-text').textContent = isActive ? 'ON' : 'OFF';
+        
+        sendToPlugin('bypass', state.bypass ? 1.0 : 0.0);
+        return false;
+    };
 }

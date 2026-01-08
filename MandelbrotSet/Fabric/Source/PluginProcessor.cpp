@@ -328,12 +328,20 @@ void FabricAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         std::cerr << "Input: RMS=" << inLevel << " Max=" << maxSample << " | Channels=" << numChannels << std::endl;
     }
     
-    // Get parameters
+    // Get bypass parameter
     bool bypass = *parameters.getRawParameterValue(PARAM_BYPASS);
     
+    // Debug logging (every 100 blocks)
+    static int bypassCheckCounter = 0;
+    if (++bypassCheckCounter % 100 == 0) {
+        std::cout << "Bypass state: " << (bypass ? "BYPASSED (effect OFF)" : "ACTIVE (effect ON)") << std::endl;
+    }
+    
+    // If bypassed, just pass the input through unchanged (dry signal)
     if (bypass)
     {
         outputLevel.store(inputLevel.load());
+        // Audio passes through unprocessed - no return needed, just skip reverb processing
         return;
     }
 

@@ -99,84 +99,55 @@
    =================================================================== */
 
 .mandelbrot-footer {
-    display: grid;
-    grid-template-columns: 120px 1fr;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: var(--spacing-md) var(--spacing-lg);
     min-height: 56px;
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     border-top: 1px solid var(--glass-border);
-    z-index: var(--z-header);
+    z-index: 1000;
     position: relative;
 }
 
 .bypass-toggle {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius-md);
-    background: var(--glass-bg-light);
+    background: var(--glass-bg-dark);
     border: 2px solid var(--glass-border);
-    cursor: pointer;
-    transition: all var(--transition-medium);
+    cursor: pointer !important;
+    transition: var(--transition-fast);
     font-family: var(--font-header);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     color: var(--planck-white);
-    letter-spacing: 1px;
+    min-width: 120px;
+    pointer-events: auto !important;
+    z-index: 1001;
     position: relative;
-    overflow: hidden;
-}
-
-.bypass-toggle::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, var(--plugin-primary), transparent);
-    opacity: 0;
-    transition: opacity var(--transition-medium);
+    user-select: none;
 }
 
 .bypass-toggle:hover {
     border-color: var(--plugin-primary);
-    box-shadow: 0 0 15px var(--plugin-glow), 0 0 30px var(--plugin-glow);
-    transform: scale(1.05);
-}
-
-.bypass-toggle:hover::before {
-    opacity: 0.1;
-}
-
-.bypass-toggle:active {
-    transform: scale(0.98);
+    box-shadow: 0 0 15px var(--plugin-glow);
 }
 
 .bypass-toggle.active {
-    background: linear-gradient(135deg, var(--plugin-primary), var(--plugin-accent));
+    background: var(--glass-bg-dark);
     border-color: var(--plugin-primary);
-    box-shadow: 0 0 25px var(--plugin-glow), 0 0 50px var(--plugin-glow);
-    animation: glowPulse 2s ease-in-out infinite;
-}
-
-.bypass-toggle.active .bypass-text {
-    color: var(--quantum-black);
-    font-weight: var(--font-weight-bold);
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-}
-
-.bypass-toggle.active .power-icon svg {
-    stroke: var(--quantum-black);
-    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+    color: var(--plugin-primary);
 }
 
 .power-icon {
     width: 20px;
     height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    pointer-events: none;
 }
 
 .power-icon svg {
@@ -186,17 +157,22 @@
     stroke: currentColor;
     stroke-width: 2;
     stroke-linecap: round;
-    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+.bypass-text {
+    pointer-events: none;
 }
 
 .info-display {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: var(--spacing-xl);
+    justify-content: center;
+    gap: var(--spacing-2xl);
     font-family: var(--font-mono);
     font-size: var(--font-size-xs);
     color: var(--planck-white);
+    flex: 1;
 }
 
 .meter-container {
@@ -204,6 +180,7 @@
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-xs);
+    min-width: 200px;
 }
 
 .meter-container label {
@@ -219,11 +196,12 @@
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-xs);
+    width: 100%;
 }
 
 .vu-meter-bar {
-    width: 8px;
-    height: 120px;
+    width: 100%;
+    height: 8px;
     background: var(--glass-bg-dark);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-sm);
@@ -234,29 +212,28 @@
 
 .vu-meter-fill {
     position: absolute;
-    bottom: 0;
     left: 0;
-    width: 100%;
-    height: 0%;
-    background: linear-gradient(to top,
-        #00ff00 0%,
-        #88ff00 20%,
-        #ffff00 50%,
-        #ff8800 80%,
-        #ff0000 100%);
-    transition: height 50ms linear;
-    box-shadow: 0 0 8px currentColor;
-    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    top: 0;
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(to right,
+        rgba(139, 61, 255, 0.3) 0%,
+        rgba(139, 61, 255, 0.6) 50%,
+        #8b3dff 100%);
+    transition: width 50ms linear;
+    box-shadow: 0 0 8px rgba(139, 61, 255, 0.8);
+    border-radius: var(--radius-sm);
 }
 
 .vu-meter-peak {
     position: absolute;
+    top: 0;
     left: 0;
-    width: 100%;
-    height: 2px;
+    width: 2px;
+    height: 100%;
     background: white;
     box-shadow: 0 0 6px white;
-    transition: top 100ms linear;
+    transition: left 100ms linear;
     opacity: 0;
 }
 
