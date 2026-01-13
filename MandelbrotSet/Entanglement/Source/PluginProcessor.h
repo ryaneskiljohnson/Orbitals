@@ -63,6 +63,8 @@ public:
     static const juce::String PARAM_FEEDBACK;
     static const juce::String PARAM_MIX;
     static const juce::String PARAM_DAMPING;
+    static const juce::String PARAM_WETDRY;
+    static const juce::String PARAM_HIGHPASS;
     static const juce::String PARAM_BYPASS;
 
     // Get parameters
@@ -86,6 +88,10 @@ private:
     juce::dsp::IIR::Filter<float> dampingFilterR;
     juce::dsp::IIR::Coefficients<float>::Ptr dampingCoeffsL;
     juce::dsp::IIR::Coefficients<float>::Ptr dampingCoeffsR;
+    juce::dsp::IIR::Filter<float> highpassFilterL;
+    juce::dsp::IIR::Filter<float> highpassFilterR;
+    juce::dsp::IIR::Coefficients<float>::Ptr highpassCoeffsL;
+    juce::dsp::IIR::Coefficients<float>::Ptr highpassCoeffsR;
     float lastDelayTimeL = 0.0f;
     float lastDelayTimeR = 0.0f;
 

@@ -65,6 +65,7 @@ public:
     static const juce::String PARAM_ATTACK;
     static const juce::String PARAM_RELEASE;
     static const juce::String PARAM_MAKEUP;
+    static const juce::String PARAM_MIX;
     static const juce::String PARAM_BYPASS;
 
     // Get parameters

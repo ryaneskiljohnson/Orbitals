@@ -14,6 +14,8 @@ const juce::String EntanglementAudioProcessor::PARAM_TIME = "time";
 const juce::String EntanglementAudioProcessor::PARAM_FEEDBACK = "feedback";
 const juce::String EntanglementAudioProcessor::PARAM_MIX = "mix";
 const juce::String EntanglementAudioProcessor::PARAM_DAMPING = "damping";
+const juce::String EntanglementAudioProcessor::PARAM_WETDRY = "wetdry";
+const juce::String EntanglementAudioProcessor::PARAM_HIGHPASS = "highpass";
 const juce::String EntanglementAudioProcessor::PARAM_BYPASS = "bypass";
 
 //==============================================================================
@@ -83,8 +85,31 @@ juce::AudioProcessorValueTreeState::ParameterLayout EntanglementAudioProcessor::
         [](float value, int) { return juce::String ((int)value) + "%"; }
     ));
 
+    params.push_back (std::make_unique<juce::AudioParameterFloat> (
+        juce::ParameterID (PARAM_WETDRY, 5),
+        "Wet/Dry",
+        juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f),
+        50.0f,
+        juce::String(),
+        juce::AudioProcessorParameter::genericParameter,
+        [](float value, int) { return juce::String ((int)value) + "%"; }
+    ));
+
+    params.push_back (std::make_unique<juce::AudioParameterFloat> (
+        juce::ParameterID (PARAM_HIGHPASS, 6),
+        "Highpass",
+        juce::NormalisableRange<float> (20.0f, 20000.0f, 1.0f),
+        20.0f,
+        juce::String(),
+        juce::AudioProcessorParameter::genericParameter,
+        [](float value, int) { 
+            if (value >= 1000.0f) return juce::String (value / 1000.0f, 1) + " kHz";
+            return juce::String ((int)value) + " Hz"; 
+        }
+    ));
+
     params.push_back (std::make_unique<juce::AudioParameterBool> (
-        juce::ParameterID (PARAM_BYPASS, 5),
+        juce::ParameterID (PARAM_BYPASS, 7),
         "Bypass",
         false
     ));
@@ -127,6 +152,14 @@ void EntanglementAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
     dampingFilterR.prepare(spec);
     dampingFilterL.coefficients = dampingCoeffsL;
     dampingFilterR.coefficients = dampingCoeffsR;
+    
+    // Prepare highpass filters
+    highpassCoeffsL = juce::dsp::IIR::Coefficients<float>::makeHighPass(sampleRate, 20.0f);
+    highpassCoeffsR = juce::dsp::IIR::Coefficients<float>::makeHighPass(sampleRate, 20.0f);
+    highpassFilterL.prepare(spec);
+    highpassFilterR.prepare(spec);
+    highpassFilterL.coefficients = highpassCoeffsL;
+    highpassFilterR.coefficients = highpassCoeffsR;
 }
 
 void EntanglementAudioProcessor::releaseResources()
@@ -182,6 +215,8 @@ void EntanglementAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     float feedback = *parameters.getRawParameterValue(PARAM_FEEDBACK) / 100.0f;
     float mix = *parameters.getRawParameterValue(PARAM_MIX) / 100.0f;
     float dampingAmount = *parameters.getRawParameterValue(PARAM_DAMPING) / 100.0f;
+    float wetDry = *parameters.getRawParameterValue(PARAM_WETDRY) / 100.0f;
+    float highpassFreq = *parameters.getRawParameterValue(PARAM_HIGHPASS);
     
     // Convert delay time to samples
     float delayTimeSamples = (timeMs / 1000.0f) * static_cast<float>(sampleRate);
@@ -204,16 +239,26 @@ void EntanglementAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     dampingFilterL.coefficients = dampingCoeffsL;
     dampingFilterR.coefficients = dampingCoeffsR;
     
+    // Update highpass filter
+    highpassCoeffsL = juce::dsp::IIR::Coefficients<float>::makeHighPass(sampleRate, highpassFreq);
+    highpassCoeffsR = juce::dsp::IIR::Coefficients<float>::makeHighPass(sampleRate, highpassFreq);
+    highpassFilterL.coefficients = highpassCoeffsL;
+    highpassFilterR.coefficients = highpassCoeffsR;
+    
     // Process each channel
     for (int channel = 0; channel < numChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer(channel);
         auto& delayLine = (channel == 0) ? delayLineL : delayLineR;
         auto& dampingFilter = (channel == 0) ? dampingFilterL : dampingFilterR;
+        auto& highpassFilter = (channel == 0) ? highpassFilterL : highpassFilterR;
         
         for (int sample = 0; sample < numSamples; ++sample)
         {
             float input = channelData[sample];
+            
+            // Apply highpass filter to input
+            float filteredInput = highpassFilter.processSample(input);
             
             // Read delayed signal
             float delayed = delayLine.popSample(0);
@@ -221,11 +266,16 @@ void EntanglementAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             // Apply damping (low-pass filter)
             delayed = dampingFilter.processSample(delayed);
             
-            // Mix delayed signal with input
-            float output = input * (1.0f - mix) + delayed * mix;
+            // Mix delayed signal with input (coherence/mix parameter)
+            float wetSignal = filteredInput * (1.0f - mix) + delayed * mix;
+            
+            // Apply wet/dry mix
+            float wetLevel = wetDry;
+            float dryLevel = 1.0f - wetDry;
+            float output = input * dryLevel + wetSignal * wetLevel;
             
             // Write to delay line with feedback
-            delayLine.pushSample(0, input + delayed * feedback);
+            delayLine.pushSample(0, filteredInput + delayed * feedback);
             
             channelData[sample] = output;
         }

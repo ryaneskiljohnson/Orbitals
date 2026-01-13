@@ -376,6 +376,9 @@ window.receiveAudioData = function(data) {
 
 // Update VU meter bar and peak
 function updateVUMeter(type, levelDb) {
+        // Update meter colors based on bypass state
+    updateMeterColors();
+
     const meterFill = document.getElementById(`${type}MeterFill`);
     const meterPeak = document.getElementById(`${type}MeterPeak`);
     const meterLabel = document.getElementById(`${type}Level`);
@@ -407,6 +410,34 @@ function updateVUMeter(type, levelDb) {
 }
 
 
+
+function updateMeterColors() {
+    const inputMeterFill = document.getElementById('inputMeterFill');
+    const outputMeterFill = document.getElementById('outputMeterFill');
+    
+    if (state.bypass) {
+        // Grey when bypassed
+        if (inputMeterFill) {
+            inputMeterFill.style.background = 'linear-gradient(to right, rgba(128, 128, 128, 0.3) 0%, rgba(128, 128, 128, 0.6) 50%, #808080 100%)';
+            inputMeterFill.style.boxShadow = '0 0 8px rgba(128, 128, 128, 0.8)';
+        }
+        if (outputMeterFill) {
+            outputMeterFill.style.background = 'linear-gradient(to right, rgba(128, 128, 128, 0.3) 0%, rgba(128, 128, 128, 0.6) 50%, #808080 100%)';
+            outputMeterFill.style.boxShadow = '0 0 8px rgba(128, 128, 128, 0.8)';
+        }
+    } else {
+        // Theme color when active
+        if (inputMeterFill) {
+            inputMeterFill.style.background = 'linear-gradient(to right, rgba(255, 68, 68, 0.3) 0%, rgba(255, 68, 68, 0.6) 50%, #ff4444 100%)';
+            inputMeterFill.style.boxShadow = '0 0 8px rgba(255, 68, 68, 0.8)';
+        }
+        if (outputMeterFill) {
+            outputMeterFill.style.background = 'linear-gradient(to right, rgba(255, 68, 68, 0.3) 0%, rgba(255, 68, 68, 0.6) 50%, #ff4444 100%)';
+            outputMeterFill.style.boxShadow = '0 0 8px rgba(255, 68, 68, 0.8)';
+        }
+    }
+}
+
 function initializeBypassToggle() {
     const bypassButton = document.getElementById('bypassToggle');
     if (!bypassButton) return;
@@ -415,10 +446,12 @@ function initializeBypassToggle() {
     state.bypass = false;
     bypassButton.classList.add('active');
     bypassButton.querySelector('.bypass-text').textContent = 'ON';
+    updateMeterColors();
     
     // Use onclick for direct event handling
     bypassButton.onclick = function() {
         state.bypass = !state.bypass;
+        updateMeterColors();
         const isActive = !state.bypass;
         
         bypassButton.classList.toggle('active', isActive);

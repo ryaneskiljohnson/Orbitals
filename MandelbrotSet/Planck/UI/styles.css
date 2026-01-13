@@ -2,17 +2,24 @@
 .controls-eq { display: flex; gap: var(--spacing-2xl); justify-content: center; }
 .eq-band { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs); }
 #planckCanvas { width: 800px; height: 400px; opacity: 0.5; }
+
+.plugin-main {
+    flex: 1;
+    min-height: 0;
+    overflow: visible;
+}
 .mandelbrot-footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     padding: var(--spacing-md) var(--spacing-lg);
     min-height: 56px;
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     border-top: 1px solid var(--glass-border);
-    z-index: 1000;
+    z-index: var(--z-footer, 1000);
     position: relative;
+    margin-top: auto;
 }
 
 .bypass-toggle {
@@ -33,7 +40,8 @@
     min-width: 120px;
     pointer-events: auto !important;
     z-index: 1001;
-    position: relative;
+    position: absolute;
+    left: var(--spacing-lg);
     user-select: none;
 }
 
@@ -76,7 +84,9 @@
     font-family: var(--font-mono);
     font-size: var(--font-size-xs);
     color: var(--planck-white);
-    flex: 1;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .meter-container {

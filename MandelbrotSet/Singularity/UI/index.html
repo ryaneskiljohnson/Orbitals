@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Singularity - Black Hole Compressor</title>
-    
+    <style>
+        /* Set background to black immediately to prevent white flash */
+        html, body { 
+            background-color: #000000; 
+            margin: 0; 
+            padding: 0; 
+        }
+    </style>
     <link rel="stylesheet" href="../../_Shared/UI/mandelbrot-design-system.css">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -23,96 +30,89 @@
         </header>
 
         <main class="plugin-main">
-            <canvas id="singularityCanvas"></canvas>
-
-            <div class="controls-compressor">
-                <!-- Top Row: Main Controls -->
-                <div class="control-row-top">
-                    <!-- Event Horizon (Threshold) -->
-                    <div class="control-group">
-                        <label class="control-label">EVENT HORIZON</label>
-                        <div class="knob" id="thresholdKnob" data-param="threshold"
-                             data-help-title="EVENT HORIZON"
-                             data-help-description="The point of no return. Audio above this level is pulled into compression.">
-                            <div class="knob-inner">
-                                <div class="knob-indicator"></div>
-                            </div>
+            <div class="controls-left">
+                <!-- Event Horizon (Threshold) -->
+                <div class="control-group">
+                    <label class="control-label">EVENT HORIZON</label>
+                    <div class="knob" id="thresholdKnob" data-param="threshold"
+                         data-help-title="EVENT HORIZON"
+                         data-help-description="The point of no return. Audio above this level is pulled into compression.">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
                         </div>
-                        <div class="value-display" id="thresholdValue">-20 dB</div>
                     </div>
-
-                    <!-- Gravity (Ratio) -->
-                    <div class="control-group">
-                        <label class="control-label">GRAVITY</label>
-                        <div class="knob" id="ratioKnob" data-param="ratio"
-                             data-help-title="GRAVITY"
-                             data-help-description="Gravitational pull strength. How much the singularity crushes dynamics.">
-                            <div class="knob-inner">
-                                <div class="knob-indicator"></div>
-                            </div>
-                        </div>
-                        <div class="value-display" id="ratioValue">4:1</div>
-                    </div>
+                    <div class="value-display" id="thresholdValue">-20 dB</div>
                 </div>
 
-                <!-- Middle Row: Time Controls -->
-                <div class="control-row-middle">
-                    <!-- Collapse (Attack) -->
-                    <div class="control-group">
-                        <label class="control-label">COLLAPSE</label>
-                        <div class="knob" id="attackKnob" data-param="attack"
-                             data-help-title="COLLAPSE"
-                             data-help-description="How fast matter collapses into the singularity.">
-                            <div class="knob-inner">
-                                <div class="knob-indicator"></div>
-                            </div>
+                <!-- Gravity (Ratio) -->
+                <div class="control-group">
+                    <label class="control-label">GRAVITY</label>
+                    <div class="knob" id="ratioKnob" data-param="ratio"
+                         data-help-title="GRAVITY"
+                         data-help-description="Gravitational pull strength. How much the singularity crushes dynamics.">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
                         </div>
-                        <div class="value-display" id="attackValue">10 ms</div>
                     </div>
-
-                    <!-- Hawking Radiation (Release) -->
-                    <div class="control-group">
-                        <label class="control-label">HAWKING RADIATION</label>
-                        <div class="knob" id="releaseKnob" data-param="release"
-                             data-help-title="HAWKING RADIATION"
-                             data-help-description="Slow escape from the singularity through quantum radiation.">
-                            <div class="knob-inner">
-                                <div class="knob-indicator"></div>
-                            </div>
-                        </div>
-                        <div class="value-display" id="releaseValue">100 ms</div>
-                    </div>
+                    <div class="value-display" id="ratioValue">4:1</div>
                 </div>
 
-                <!-- Bottom Row: Output -->
-                <div class="control-row-bottom">
-                    <!-- Mass (Makeup Gain) -->
-                    <div class="control-group">
-                        <label class="control-label">MASS</label>
-                        <div class="knob" id="makeupKnob" data-param="makeup"
-                             data-help-title="MASS"
-                             data-help-description="Total mass and energy of the singularity. Makeup gain after compression.">
-                            <div class="knob-inner">
-                                <div class="knob-indicator"></div>
-                            </div>
+                <!-- Collapse (Attack) -->
+                <div class="control-group">
+                    <label class="control-label">COLLAPSE</label>
+                    <div class="knob" id="attackKnob" data-param="attack"
+                         data-help-title="COLLAPSE"
+                         data-help-description="How fast matter collapses into the singularity.">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
                         </div>
-                        <div class="value-display" id="makeupValue">+0 dB</div>
                     </div>
+                    <div class="value-display" id="attackValue">10 ms</div>
+                </div>
+            </div>
 
-                    <!-- Gain Reduction Meter -->
-                    <div class="control-group meter-group">
-                        <label class="control-label">CRUSHING</label>
-                        <div class="gain-reduction-meter">
-                            <div class="meter-bar" id="gainReductionBar"></div>
-                            <div class="meter-scale">
-                                <span>0</span>
-                                <span>-6</span>
-                                <span>-12</span>
-                                <span>-18</span>
-                            </div>
+            <div class="animation-center">
+                <canvas id="singularityCanvas"></canvas>
+            </div>
+
+            <div class="controls-right">
+                <!-- Hawking Radiation (Release) -->
+                <div class="control-group">
+                    <label class="control-label">HAWKING RADIATION</label>
+                    <div class="knob" id="releaseKnob" data-param="release"
+                         data-help-title="HAWKING RADIATION"
+                         data-help-description="Slow escape from the singularity through quantum radiation.">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
                         </div>
-                        <div class="value-display" id="grValue">0 dB</div>
                     </div>
+                    <div class="value-display" id="releaseValue">100 ms</div>
+                </div>
+
+                <!-- Mass (Makeup Gain) -->
+                <div class="control-group">
+                    <label class="control-label">MASS</label>
+                    <div class="knob" id="makeupKnob" data-param="makeup"
+                         data-help-title="MASS"
+                         data-help-description="Total mass and energy of the singularity. Makeup gain after compression.">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="value-display" id="makeupValue">+0 dB</div>
+                </div>
+
+                <!-- Mix (Wet/Dry) -->
+                <div class="control-group">
+                    <label class="control-label">MIX</label>
+                    <div class="knob" id="mixKnob" data-param="mix"
+                         data-help-title="MIX"
+                         data-help-description="Blend between dry signal and compressed signal. 0% = dry, 100% = compressed.">
+                        <div class="knob-inner">
+                            <div class="knob-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="value-display" id="mixValue">100%</div>
                 </div>
             </div>
         </main>

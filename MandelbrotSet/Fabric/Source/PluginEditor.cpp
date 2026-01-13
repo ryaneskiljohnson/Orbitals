@@ -981,8 +981,8 @@ void FabricAudioProcessorEditor::timerCallback()
     
     // Always send metering data when authorized and visible (fast update for animation)
     if (isAuthorized && webView != nullptr && webView->isVisible())
-    {
-        sendMeteringData();
+        {
+            sendMeteringData();
     }
 }
 

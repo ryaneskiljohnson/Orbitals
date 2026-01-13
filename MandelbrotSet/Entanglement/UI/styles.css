@@ -1,6 +1,53 @@
 :root { --plugin-background-image: url('../../_Shared/Assets/backgrounds/entanglement.png'); }
-.controls { display: flex; gap: var(--spacing-3xl); justify-content: center; align-items: center; }
-#entanglementCanvas { width: 600px; height: 600px; opacity: 0.7; }
+
+.plugin-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    flex: 1;
+    position: relative;
+    overflow: visible;
+    min-height: 0;
+}
+
+.animation-center {
+    position: relative;
+    width: 600px;
+    height: 600px;
+    flex-shrink: 0;
+    margin: 0 auto;
+    padding: 0;
+    overflow: visible !important;
+    box-sizing: border-box;
+}
+
+.control-group.circular {
+    z-index: var(--z-controls);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+#entanglementCanvas {
+    width: 600px !important;
+    height: 600px !important;
+    max-width: 600px !important;
+    max-height: 600px !important;
+    display: block;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.7;
+    z-index: 1;
+    pointer-events: none;
+    box-sizing: border-box;
+}
 
 .mandelbrot-footer {
     display: flex;
@@ -11,9 +58,12 @@
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     border-top: 1px solid var(--glass-border);
-    z-index: 1000;
+    z-index: var(--z-footer, 1000);
     position: relative;
+    margin-top: auto;
+    gap: var(--spacing-lg);
 }
+
 
 .bypass-toggle {
     display: flex;
@@ -76,7 +126,9 @@
     font-family: var(--font-mono);
     font-size: var(--font-size-xs);
     color: var(--planck-white);
-    flex: 1;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .meter-container {

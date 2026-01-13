@@ -57,6 +57,7 @@ private:
     void loadAuthScreen();
     void loadHTMLFile (const juce::File& htmlFile);
     void handleJavaScriptMessage (const juce::var& message);
+    void openAudioSettings();
     bool checkAuthorization();
     static juce::File getAuthFile();
     static juce::String loadAndDecryptLicenseFile();

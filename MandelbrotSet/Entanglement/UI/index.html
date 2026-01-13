@@ -18,10 +18,12 @@
         </header>
 
         <main class="plugin-main">
-            <canvas id="entanglementCanvas"></canvas>
-
-            <div class="controls">
-                <div class="control-group">
+            <div class="animation-center">
+                <canvas id="entanglementCanvas"></canvas>
+                
+                <!-- Knobs arranged in a circle around the animation -->
+                <!-- 11 o'clock -->
+                <div class="control-group circular" style="position: absolute; top: 10%; left: 20%;">
                     <label class="control-label">DISTANCE</label>
                     <div class="knob" id="timeKnob" data-param="time"
                          data-help-title="DISTANCE"
@@ -31,7 +33,8 @@
                     <div class="value-display" id="timeValue">250 ms</div>
                 </div>
 
-                <div class="control-group">
+                <!-- 1 o'clock -->
+                <div class="control-group circular" style="position: absolute; top: 10%; right: 20%;">
                     <label class="control-label">COUPLING</label>
                     <div class="knob" id="feedbackKnob" data-param="feedback"
                          data-help-title="COUPLING"
@@ -41,7 +44,8 @@
                     <div class="value-display" id="feedbackValue">30%</div>
                 </div>
 
-                <div class="control-group">
+                <!-- 3 o'clock -->
+                <div class="control-group circular" style="position: absolute; top: 50%; right: 5%; transform: translateY(-50%);">
                     <label class="control-label">COHERENCE</label>
                     <div class="knob" id="mixKnob" data-param="mix"
                          data-help-title="COHERENCE"
@@ -51,7 +55,8 @@
                     <div class="value-display" id="mixValue">50%</div>
                 </div>
 
-                <div class="control-group">
+                <!-- 5 o'clock -->
+                <div class="control-group circular" style="position: absolute; bottom: 10%; right: 20%;">
                     <label class="control-label">DECAY</label>
                     <div class="knob" id="dampingKnob" data-param="damping"
                          data-help-title="DECAY"
@@ -59,6 +64,28 @@
                         <div class="knob-inner"><div class="knob-indicator"></div></div>
                     </div>
                     <div class="value-display" id="dampingValue">50%</div>
+                </div>
+
+                <!-- 7 o'clock -->
+                <div class="control-group circular" style="position: absolute; bottom: 10%; left: 20%;">
+                    <label class="control-label">WET/DRY</label>
+                    <div class="knob" id="wetdryKnob" data-param="wetdry"
+                         data-help-title="WET/DRY"
+                         data-help-description="Blend between dry input and processed signal.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="wetdryValue">50%</div>
+                </div>
+
+                <!-- 9 o'clock -->
+                <div class="control-group circular" style="position: absolute; top: 50%; left: 5%; transform: translateY(-50%);">
+                    <label class="control-label">HIGHPASS</label>
+                    <div class="knob" id="highpassKnob" data-param="highpass"
+                         data-help-title="HIGHPASS"
+                         data-help-description="Highpass filter cutoff frequency. Removes low frequencies.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="highpassValue">20 Hz</div>
                 </div>
             </div>
         </main>

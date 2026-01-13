@@ -9,6 +9,9 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#if JucePlugin_Build_Standalone
+#include <juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h>
+#endif
 
 //==============================================================================
 SingularityAudioProcessorEditor::SingularityAudioProcessorEditor (SingularityAudioProcessor& p)
@@ -29,6 +32,10 @@ SingularityAudioProcessorEditor::SingularityAudioProcessorEditor (SingularityAud
         .withNativeIntegrationEnabled (true)
         .withKeepPageLoadedWhenBrowserIsHidden() // Keep page loaded when hidden (like NNAudioAccess)
         .withEventListener ("message", [this](const juce::var& message) {
+            std::cout << "=== EVENT LISTENER TRIGGERED ===" << std::endl;
+            DBG("=== EVENT LISTENER TRIGGERED ===");
+            std::cout << "Message received: " << message.toString() << std::endl;
+            DBG("Message received: " + message.toString());
             handleJavaScriptMessage (message);
         });
 
@@ -93,7 +100,7 @@ SingularityAudioProcessorEditor::SingularityAudioProcessorEditor (SingularityAud
     if (isAuthorized)
     {
         loadWebUI();
-        startTimer(50); // Re-check every 15 minutes
+        startTimer(50); // Fast timer for audio-reactive animation (20 FPS data updates)
     }
     else
     {
@@ -307,19 +314,34 @@ void SingularityAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
 
 void SingularityAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
 {
+    std::cout << "=== RECEIVED MESSAGE FROM JAVASCRIPT ===" << std::endl;
+    DBG("=== RECEIVED MESSAGE FROM JAVASCRIPT ===");
+    
     if (!message.isObject())
+    {
+        std::cout << "Message is not an object" << std::endl;
+        DBG("Message is not an object");
         return;
+    }
 
     auto obj = message.getDynamicObject();
     if (obj == nullptr)
+    {
+        std::cout << "Message dynamic object is nullptr" << std::endl;
+        DBG("Message dynamic object is nullptr");
         return;
+    }
 
+    std::cout << "Message type check: " << obj->getProperty("type").toString() << std::endl;
+    
     auto type = obj->getProperty("type").toString();
     
-        if (type == "parameterChange")
+    if (type == "parameterChange")
     {
         auto param = obj->getProperty("parameter").toString();
         auto value = obj->getProperty("value");
+        
+        std::cout << "Parameter change request: " << param << " = " << value.toString() << std::endl;
         
         auto* p = audioProcessor.parameters.getParameter(param);
         if (p != nullptr)
@@ -329,7 +351,30 @@ void SingularityAudioProcessorEditor::handleJavaScriptMessage (const juce::var& 
             rawValue = juce::jlimit(range.start, range.end, rawValue);
             float normalizedValue = range.convertTo0to1(rawValue);
             p->setValueNotifyingHost(normalizedValue);
+            
+            std::cout << "✅ Parameter updated: " << param << " -> normalized: " << normalizedValue << ", raw: " << rawValue << std::endl;
         }
+        else
+        {
+            std::cout << "❌ Parameter not found: " << param << std::endl;
+        }
+    }
+    else if (type == "openSettings")
+    {
+        std::cout << "Received openSettings message from JavaScript" << std::endl;
+        DBG("Received openSettings message from JavaScript");
+        openAudioSettings();
+    }
+    else if (type == "test")
+    {
+        auto testValue = obj->getProperty("value").toString();
+        std::cout << "✅✅✅ BRIDGE TEST SUCCESSFUL! ✅✅✅    Received test message: " << testValue << std::endl;
+        DBG("✅✅✅ BRIDGE TEST SUCCESSFUL! ✅✅✅    Received test message: " + testValue);
+    }
+    else
+    {
+        std::cout << "Unknown message type: " << type << std::endl;
+        DBG("Unknown message type: " + type);
     }
 }
 
@@ -589,17 +634,27 @@ void SingularityAudioProcessorEditor::timerCallback()
             if (isAuthorized)
             {
                 loadWebUI();
-                startTimer(50);
             }
         }
     }
     
             
     
-    // Send metering data for audio-reactive animation
+    // Always send metering data when authorized and visible (fast update for animation)
     if (isAuthorized && webView != nullptr && webView->isVisible())
     {
         sendMeteringData();
+    }
+    else
+    {
+        // Debug: Log why metering data isn't being sent
+        static int debugCounter = 0;
+        if (++debugCounter % 200 == 0) // Every 10 seconds
+        {
+            std::cout << "⚠️ Not sending metering data: authorized=" << isAuthorized 
+                      << ", webView=" << (webView != nullptr) 
+                      << ", visible=" << (webView != nullptr && webView->isVisible()) << std::endl;
+        }
     }
 }
 
@@ -608,17 +663,113 @@ void SingularityAudioProcessorEditor::sendMeteringData()
     // Get audio levels from processor
     float inputLevelDb = audioProcessor.inputLevel.load();
     float outputLevelDb = audioProcessor.outputLevel.load();
+    float gainReductionDb = audioProcessor.currentGainReduction.load();
+    
+    // Debug logging (every 100 calls = ~5 seconds)
+    static int meteringDebugCounter = 0;
+    if (++meteringDebugCounter % 100 == 0)
+    {
+        std::cout << "📊 sendMeteringData: Input=" << inputLevelDb << "dB, Output=" << outputLevelDb << "dB, GR=" << gainReductionDb << "dB" << std::endl;
+    }
     
     // Send to JavaScript
     juce::String script = juce::String::formatted(
-        "if (window.receiveAudioData) { window.receiveAudioData({ inputLevel: %.2f, outputLevel: %.2f }); }",
-        inputLevelDb, outputLevelDb
+        "if (window.receiveAudioData) { window.receiveAudioData({ inputLevel: %.2f, outputLevel: %.2f, gainReduction: %.2f }); }",
+        inputLevelDb, outputLevelDb, gainReductionDb
     );
     
     if (webView != nullptr && webView->isVisible())
     {
         webView->evaluateJavascript(script);
     }
+    else if (meteringDebugCounter % 100 == 0)
+    {
+        std::cout << "⚠️ Cannot send metering data: webView=" << (webView != nullptr) 
+                  << ", visible=" << (webView != nullptr && webView->isVisible()) << std::endl;
+    }
+}
+
+void SingularityAudioProcessorEditor::openAudioSettings()
+{
+#if JucePlugin_Build_Standalone
+    // In standalone mode, show the audio/MIDI settings dialog
+    juce::MessageManager::callAsync([this]()
+    {
+        DBG("Opening audio settings...");
+        
+        // Try multiple approaches to access the settings dialog
+        
+        // Approach 1: Get through StandalonePluginHolder singleton
+        if (auto* pluginHolder = juce::StandalonePluginHolder::getInstance())
+        {
+            DBG("Found StandalonePluginHolder via getInstance()");
+            pluginHolder->showAudioSettingsDialog();
+            return;
+        }
+        
+        DBG("StandalonePluginHolder::getInstance() returned nullptr");
+        
+        // Approach 2: Try to find StandaloneFilterWindow in the component hierarchy
+        juce::Component* comp = this;
+        while (comp != nullptr)
+        {
+            if (auto* window = dynamic_cast<juce::StandaloneFilterWindow*>(comp))
+            {
+                DBG("Found StandaloneFilterWindow in component hierarchy");
+                if (auto* holder = window->getPluginHolder())
+                {
+                    holder->showAudioSettingsDialog();
+                    return;
+                }
+            }
+            comp = comp->getParentComponent();
+        }
+        
+        DBG("Could not find StandaloneFilterWindow in component hierarchy");
+        
+        // Approach 3: Try top-level window
+        if (auto* topLevelWindow = juce::TopLevelWindow::getTopLevelWindow(0))
+        {
+            DBG("Found top-level window");
+            if (auto* standaloneWindow = dynamic_cast<juce::StandaloneFilterWindow*>(topLevelWindow))
+            {
+                DBG("Top-level window is StandaloneFilterWindow");
+                if (auto* pluginHolder = standaloneWindow->getPluginHolder())
+                {
+                    pluginHolder->showAudioSettingsDialog();
+                    return;
+                }
+            }
+            else
+            {
+                DBG("Top-level window is NOT StandaloneFilterWindow");
+            }
+        }
+        
+        DBG("Failed to open audio settings - no method worked");
+        
+        // Show error message
+        juce::AlertWindow::showMessageBoxAsync(
+            juce::AlertWindow::WarningIcon,
+            "Settings Unavailable",
+            "Unable to access audio/MIDI settings.\n\nThis feature is only available in standalone mode.",
+            "OK"
+        );
+    });
+#else
+    // In plugin mode (VST3/AU), show a message explaining that audio settings
+    // are managed by the host DAW
+    juce::MessageManager::callAsync([this]()
+    {
+        juce::AlertWindow::showMessageBoxAsync(
+            juce::AlertWindow::InfoIcon,
+            "Audio/MIDI Settings",
+            "Audio and MIDI device settings are managed by your DAW.\n\n"
+            "Please use your DAW's audio/MIDI preferences to configure devices.",
+            "OK"
+        );
+    });
+#endif
 }
 
 void SingularityAudioProcessorEditor::notifyMIDINote(int noteNumber, int velocity)

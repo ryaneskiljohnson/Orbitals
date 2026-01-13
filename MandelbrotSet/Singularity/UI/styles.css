@@ -3,40 +3,82 @@
  * @module Singularity Styles
  */
 
-/* ===================================================================
-   SINGULARITY THEME OVERRIDES
-   =================================================================== */
-
 :root {
     --plugin-background-image: url('../../_Shared/Assets/backgrounds/singularity.png');
     --plugin-background-opacity: 0.5;
 }
 
-/* ===================================================================
-   LAYOUT - COMPRESSOR CONTROLS
-   =================================================================== */
+/* Override plugin-container overflow to allow animation to overflow */
+.singularity-theme.plugin-container {
+    overflow: visible !important;
+}
 
-.controls-compressor {
+.plugin-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    flex: 1;
+    position: relative;
+    overflow: visible;
+    min-height: 0;
+    max-height: calc(100vh - 120px); /* Account for header (64px) + footer (56px) */
+}
+
+.controls-left {
     position: relative;
     z-index: var(--z-controls);
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: var(--spacing-2xl);
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: var(--spacing-xl) 0;
+    min-width: 200px;
+    height: 100%;
+    margin-right: var(--spacing-sm);
 }
 
-.control-row-top,
-.control-row-middle,
-.control-row-bottom {
+.controls-right {
+    position: relative;
+    z-index: var(--z-controls);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-3xl);
-    width: 100%;
+    gap: var(--spacing-2xl);
+    min-width: 200px;
+    height: 100%;
+    margin-left: var(--spacing-sm);
+}
+
+.animation-center {
+    position: relative;
+    width: 700px;
+    height: 700px;
+    flex-shrink: 0;
+    margin: 0 auto;
+    padding: 0;
+    overflow: visible !important;
+    box-sizing: border-box;
+}
+
+#singularityCanvas {
+    width: 550px !important;
+    height: 550px !important;
+    max-width: 550px !important;
+    max-height: 550px !important;
+    display: block;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.8;
+    z-index: 1;
+    pointer-events: none;
+    box-sizing: border-box;
 }
 
 .control-group {
@@ -47,68 +89,20 @@
     min-width: 120px;
 }
 
-.meter-group {
-    min-width: 200px;
-}
-
-/* ===================================================================
-   GAIN REDUCTION METER
-   =================================================================== */
-
-.gain-reduction-meter {
-    width: 200px;
-    height: 20px;
-    background: var(--glass-bg);
-    border: 2px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    position: relative;
-    overflow: hidden;
-    margin: var(--spacing-sm) 0;
-}
-
-.meter-bar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, 
-        var(--plugin-primary) 0%, 
-        var(--plugin-accent) 100%
-    );
-    box-shadow: 0 0 20px var(--plugin-glow);
-    transition: width 50ms ease-out;
-}
-
-.meter-scale {
-    position: absolute;
-    bottom: -20px;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-between;
-    font-family: var(--font-mono);
-    font-size: var(--font-size-xs);
-    color: var(--planck-white);
-    opacity: 0.6;
-    padding: 0 4px;
-}
-
-/* ===================================================================
-   FOOTER STYLES
-   =================================================================== */
+/* All knobs are the same size - using default from design system */
 
 .mandelbrot-footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     padding: var(--spacing-md) var(--spacing-lg);
     min-height: 56px;
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     border-top: 1px solid var(--glass-border);
-    z-index: 1000;
+    z-index: var(--z-footer, 1000);
     position: relative;
+    margin-top: auto;
 }
 
 .bypass-toggle {
@@ -129,7 +123,8 @@
     min-width: 120px;
     pointer-events: auto !important;
     z-index: 1001;
-    position: relative;
+    position: absolute;
+    left: var(--spacing-lg);
     user-select: none;
 }
 
@@ -172,7 +167,9 @@
     font-family: var(--font-mono);
     font-size: var(--font-size-xs);
     color: var(--planck-white);
-    flex: 1;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .meter-container {
@@ -248,52 +245,4 @@
     opacity: 0.8;
     min-width: 60px;
     text-align: center;
-}
-
-/* ===================================================================
-   CANVAS ANIMATION
-   =================================================================== */
-
-#singularityCanvas {
-    width: 600px;
-    height: 600px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.8;
-}
-
-/* ===================================================================
-   ANIMATIONS
-   =================================================================== */
-
-@keyframes singularityPull {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(0.95);
-        opacity: 0.8;
-    }
-}
-
-@keyframes eventHorizonGlow {
-    0%, 100% {
-        box-shadow: 0 0 20px var(--plugin-glow);
-    }
-    50% {
-        box-shadow: 0 0 40px var(--plugin-glow);
-    }
-}
-
-.knob:active {
-    animation: singularityPull 0.3s ease-in-out;
-}
-
-.meter-bar {
-    animation: eventHorizonGlow 2s ease-in-out infinite;
 }

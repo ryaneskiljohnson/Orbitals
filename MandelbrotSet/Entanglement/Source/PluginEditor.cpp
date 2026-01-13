@@ -321,11 +321,11 @@ void EntanglementAudioProcessorEditor::handleJavaScriptMessage (const juce::var&
 
     auto type = obj->getProperty("type").toString();
     
-        if (type == "parameterChange")
+    if (type == "parameterChange")
     {
         auto param = obj->getProperty("parameter").toString();
         auto value = obj->getProperty("value");
-        
+
         auto* p = audioProcessor.parameters.getParameter(param);
         if (p != nullptr)
         {
@@ -603,8 +603,8 @@ void EntanglementAudioProcessorEditor::timerCallback()
     if (isAuthorized && webView != nullptr && webView->isVisible())
     {
         sendMeteringData();
-    }
-}
+            }
+        }
 
 void EntanglementAudioProcessorEditor::sendMeteringData()
 {

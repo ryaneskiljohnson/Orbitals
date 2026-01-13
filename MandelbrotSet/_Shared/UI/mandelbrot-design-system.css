@@ -83,7 +83,8 @@
   --z-controls: 10;
   --z-header: 50;
   --z-modal: 100;
-  --z-tooltip: 200;
+  --z-footer: 1000;
+  --z-tooltip: 10000;
 }
 
 /* ===================================================================
@@ -780,7 +781,7 @@ button {
 
 .mandelbrot-tooltip {
   position: fixed;
-  z-index: var(--z-tooltip);
+  z-index: var(--z-tooltip) !important;
   max-width: 280px;
   padding: var(--spacing-sm) var(--spacing-md);
   background: rgba(18, 18, 26, 0.98);
