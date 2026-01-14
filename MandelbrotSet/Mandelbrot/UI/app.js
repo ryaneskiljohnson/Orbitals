@@ -23,55 +23,114 @@ document.addEventListener('DOMContentLoaded', () => {
     new MandelbrotKnob(document.getElementById('mixKnob'), { min: 0, max: 100, value: 50, onChange: (v, p) => { state.mix = v; document.getElementById('mixValue').textContent = `${v.toFixed(0)}%`; sendToPlugin(p, v); } });
     initializeBypassToggle();
     
-    // Mandelbrot fractal animation - responds to audio
+    // Mandelbrot fractal animation - continuous zoom into fractal boundaries
     const canvas = document.getElementById('mandelbrotCanvas');
     if (canvas) {
         const ctx = canvas.getContext('2d');
         canvas.width = 600;
         canvas.height = 600;
+        
+        // Zoom state
         let zoom = 1;
-        let zoomTarget = 1;
-        let centerX = -0.5;
-        let centerY = 0;
+        let centerX = -0.7;
+        let centerY = 0.0;
+        let targetX = -0.7;
+        let targetY = 0.0;
         let time = 0;
         
+        // Interesting zoom targets (areas with detail on the Mandelbrot boundary)
+        const zoomTargets = [
+            { x: -0.7, y: 0.0 },           // Main cardioid
+            { x: -0.75, y: 0.1 },          // Upper tendril
+            { x: -0.16, y: 1.04 },         // Elephant valley
+            { x: -0.7269, y: 0.1889 },     // Seahorse valley
+            { x: 0.285, y: 0.01 },         // Mini-brot
+            { x: -0.8, y: 0.156 },         // Spiral area
+        ];
+        let currentTargetIndex = 0;
+        
         function drawMandelbrot() {
-            // Calculate audio reactivity
-            const audioLevel = state.inputLevel > -100 ? state.inputLevel : -60;
-            const normalizedLevel = Math.max(0, Math.min(1, (audioLevel + 60) / 60));
-            
-            time += 0.01;
-            
-            // Zoom responds to audio
-            zoomTarget = 1 + normalizedLevel * 2;
-            zoom += (zoomTarget - zoom) * 0.05;
-            
-            const maxIter = 50 + Math.floor(normalizedLevel * 50);
-            const pixelStep = 3 - Math.floor(normalizedLevel * 1); // Higher detail with audio
-            
-            for (let px = 0; px < 600; px += pixelStep) {
-                for (let py = 0; py < 600; py += pixelStep) {
-                    let x0 = (px / 600 - 0.5) * 4 / zoom + centerX;
-                    let y0 = (py / 600 - 0.5) * 4 / zoom + centerY;
-                    let x = 0, y = 0, iter = 0;
-                    
-                    while (x * x + y * y <= 4 && iter < maxIter) {
-                        const xtemp = x * x - y * y + x0;
-                        y = 2 * x * y + y0;
-                        x = xtemp;
-                        iter++;
-                    }
-                    
-                    // Color intensity responds to audio
-                    const hue = (iter / maxIter) * 360 + time * 50;
-                    const saturation = 100;
-                    const lightness = iter === maxIter ? 0 : 50 + normalizedLevel * 30;
-                    ctx.fillStyle = iter === maxIter ? '#000' : `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-                    ctx.fillRect(px, py, pixelStep, pixelStep);
+            try {
+                // Calculate audio reactivity
+                const audioLevel = state.inputLevel > -100 ? state.inputLevel : -60;
+                const normalizedLevel = Math.max(0, Math.min(1, (audioLevel + 60) / 60));
+                
+                // Parameter influences
+                const rateInfluence = state.rate / 10; // 0.1 to 10 Hz -> 0.01 to 1
+                const depthInfluence = state.depth / 100; // 0 to 100% -> 0 to 1
+                const feedbackInfluence = state.feedback / 100;
+                const stagesInfluence = state.stages / 12; // 2 to 12 -> ~0.17 to 1
+                const mixInfluence = state.mix / 100;
+                
+                time += 0.01 * (0.5 + rateInfluence * 0.5);
+                
+                // Continuous zoom in - rate parameter controls zoom speed
+                const zoomSpeed = 1.02 + rateInfluence * 0.03 + normalizedLevel * 0.01;
+                zoom *= zoomSpeed;
+                
+                // Gradually move toward target
+                centerX += (targetX - centerX) * 0.02;
+                centerY += (targetY - centerY) * 0.02;
+                
+                // Switch to next target when zoom gets deep
+                if (zoom > 1000 + depthInfluence * 9000) {
+                    zoom = 1;
+                    currentTargetIndex = (currentTargetIndex + 1) % zoomTargets.length;
+                    targetX = zoomTargets[currentTargetIndex].x;
+                    targetY = zoomTargets[currentTargetIndex].y;
+                    centerX = targetX;
+                    centerY = targetY;
                 }
+                
+                // Iteration count affects detail - more stages = more iterations
+                const maxIter = 80 + Math.floor(stagesInfluence * 120) + Math.floor(normalizedLevel * 50);
+                
+                // Pixel step for performance - feedback affects resolution
+                const pixelStep = Math.max(1, 4 - Math.floor(feedbackInfluence * 2) - Math.floor(normalizedLevel * 1));
+                
+                // Render Mandelbrot set
+                for (let px = 0; px < canvas.width; px += pixelStep) {
+                    for (let py = 0; py < canvas.height; py += pixelStep) {
+                        let x0 = (px / canvas.width - 0.5) * 3.5 / zoom + centerX;
+                        let y0 = (py / canvas.height - 0.5) * 3.5 / zoom + centerY;
+                        let x = 0, y = 0, iter = 0;
+                        
+                        while (x * x + y * y <= 4 && iter < maxIter) {
+                            const xtemp = x * x - y * y + x0;
+                            y = 2 * x * y + y0;
+                            x = xtemp;
+                            iter++;
+                        }
+                        
+                        // Color scheme - purple fractal colors with audio-reactive brightness
+                        if (iter === maxIter) {
+                            // Inside the set - black
+                            ctx.fillStyle = '#000';
+                        } else {
+                            // Outside the set - colorful boundaries
+                            // Mix parameter affects color saturation
+                            const normalizedIter = iter / maxIter;
+                            const hue = 270 + normalizedIter * 90 + time * 20; // Purple to magenta range
+                            const saturation = 70 + mixInfluence * 30;
+                            const lightness = 30 + normalizedIter * 40 + normalizedLevel * 20;
+                            ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+                        }
+                        
+                        ctx.fillRect(px, py, pixelStep, pixelStep);
+                    }
+                }
+                
+                // Draw zoom indicator (shows current zoom depth)
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.font = '12px monospace';
+                const zoomText = `Zoom: ${zoom.toExponential(2)}x`;
+                ctx.fillText(zoomText, 10, canvas.height - 10);
+                
+                requestAnimationFrame(drawMandelbrot);
+            } catch (error) {
+                console.error('❌ Mandelbrot animation error:', error);
+                requestAnimationFrame(drawMandelbrot);
             }
-            
-            requestAnimationFrame(drawMandelbrot);
         }
         drawMandelbrot();
     }
