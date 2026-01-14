@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ByteBeat - Retro Music Generator</title>
+    <style>
+        /* Set background to black immediately to prevent white flash */
+        html, body { 
+            background-color: #000000 !important; 
+            margin: 0; 
+            padding: 0; 
+        }
+    </style>
+    <link rel="stylesheet" href="../../_Shared/UI/mandelbrot-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container bytebeat-theme">
+        <header class="mandelbrot-header">
+            <div class="mandelbrot-logo"></div>
+            <h1 data-help-title="RABBITHOLE"
+                data-help-description="Quantum Descent Flanger - Falling down the quantum rabbit hole. Descending through layers of reality with flanging modulation.">RABBITHOLE</h1>
+            <button class="settings-toggle" id="settingsButton" title="Audio/MIDI Settings" style="display: none;"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5a3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97c0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.4-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1c0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.73 1.69.98l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.98l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"/></svg></button><button class="help-toggle" title="Toggle contextual help"></button>
+        </header>
+
+        <main class="plugin-main">
+            <canvas id="bytebeatCanvas"></canvas>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label class="control-label">DESCENT RATE</label>
+                    <div class="knob" id="rateKnob" data-param="rate"
+                         data-help-title="DESCENT RATE"
+                         data-help-description="How fast you fall down the rabbit hole. Flanger LFO rate.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="rateValue">0.5 Hz</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">TUNNEL DEPTH</label>
+                    <div class="knob" id="depthKnob" data-param="depth"
+                         data-help-title="TUNNEL DEPTH"
+                         data-help-description="Depth of the quantum tunnel. Flanger modulation depth.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="depthValue">50%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">GRAVITY WELL</label>
+                    <div class="knob" id="feedbackKnob" data-param="feedback"
+                         data-help-title="GRAVITY WELL"
+                         data-help-description="Gravitational pull deeper into the hole. Flanger feedback creates resonance.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="feedbackValue">30%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">DUALITY</label>
+                    <div class="knob" id="stereoKnob" data-param="stereo"
+                         data-help-title="DUALITY"
+                         data-help-description="Quantum duality. Stereo width between left and right channels.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="stereoValue">100%</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">WONDERLAND</label>
+                    <div class="knob" id="mixKnob" data-param="mix"
+                         data-help-title="WONDERLAND"
+                         data-help-description="How deep in wonderland. Blend of dry and flanged signal.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="mixValue">50%</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mandelbrot-footer">
+            <button class="bypass-toggle active" id="bypassToggle"
+                    data-help-title="BYPASS"
+                    data-help-description="Climbs back out of the rabbit hole. Returns to normal reality.">
+                <span class="power-icon"><svg viewBox="0 0 24 24"><path d="M12 2v10M18 6a9 9 0 1 1-12 0"/></svg></span>
+                <span class="bypass-text">ON</span>
+            </button>
+            <div class="info-display">
+                <div class="meter-container">
+                    <label>INPUT</label>
+                    <div class="vu-meter">
+                        <div class="vu-meter-bar">
+                            <div class="vu-meter-fill" id="inputMeterFill"></div>
+                            <div class="vu-meter-peak" id="inputMeterPeak"></div>
+                        </div>
+                        <span class="meter-label" id="inputLevel">-∞ dB</span>
+                    </div>
+                </div>
+                <div class="meter-container">
+                    <label>OUTPUT</label>
+                    <div class="vu-meter">
+                        <div class="vu-meter-bar">
+                            <div class="vu-meter-fill" id="outputMeterFill"></div>
+                            <div class="vu-meter-peak" id="outputMeterPeak"></div>
+                        </div>
+                        <span class="meter-label" id="outputLevel">-∞ dB</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../../_Shared/UI/mandelbrot-animations.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-particles.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-components.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,12 +1,96 @@
-:root { --plugin-background-image: url('../../_Shared/Assets/backgrounds/mandelbrot.png'); }
-.controls { display: flex; gap: var(--spacing-2xl); justify-content: center; }
-#mandelbrotCanvas { width: 600px; height: 600px; opacity: 0.8; image-rendering: crisp-edges; }
+/**
+ * @fileoverview Singularity - Black Hole Compressor Styles
+ * @module Singularity Styles
+ */
+
+:root {
+    --plugin-background-image: url('../../_Shared/Assets/backgrounds/singularity.png');
+    --plugin-background-opacity: 0.5;
+}
+
+/* Override plugin-container overflow to allow animation to overflow */
+.singularity-theme.plugin-container {
+    overflow: visible !important;
+}
 
 .plugin-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
     flex: 1;
-    min-height: 0;
+    position: relative;
     overflow: visible;
+    min-height: 0;
+    max-height: calc(100vh - 120px); /* Account for header (64px) + footer (56px) */
 }
+
+.controls-left {
+    position: relative;
+    z-index: var(--z-controls);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2xl);
+    min-width: 200px;
+    height: 100%;
+    margin-right: var(--spacing-sm);
+}
+
+.controls-right {
+    position: relative;
+    z-index: var(--z-controls);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2xl);
+    min-width: 200px;
+    height: 100%;
+    margin-left: var(--spacing-sm);
+}
+
+.animation-center {
+    position: relative;
+    width: 700px;
+    height: 700px;
+    flex-shrink: 0;
+    margin: 0 auto;
+    padding: 0;
+    overflow: visible !important;
+    box-sizing: border-box;
+}
+
+#singularityCanvas {
+    width: 550px !important;
+    height: 550px !important;
+    max-width: 550px !important;
+    max-height: 550px !important;
+    display: block;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.8;
+    z-index: 1;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-width: 120px;
+}
+
+/* All knobs are the same size - using default from design system */
+
 .mandelbrot-footer {
     display: flex;
     align-items: center;

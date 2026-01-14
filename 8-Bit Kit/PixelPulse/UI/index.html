@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelPulse - Retro Rhythm Game</title>
+    <style>
+        /* Set background to black immediately to prevent white flash */
+        html, body { 
+            background-color: #000000 !important; 
+            margin: 0; 
+            padding: 0; 
+        }
+    </style>
+    <link rel="stylesheet" href="../../_Shared/UI/mandelbrot-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container pixelpulse-theme">
+        <header class="mandelbrot-header">
+            <div class="mandelbrot-logo"></div>
+            <h1 data-help-title="PIXELPULSE"
+                data-help-description="Retro Rhythm Game - Hit beats on time to generate chords and melodies. Classic arcade-style rhythm game that creates music through gameplay.">PIXELPULSE</h1>
+            <button class="help-toggle" title="Toggle contextual help"></button>
+        </header>
+
+        <main class="plugin-main">
+            <!-- Left Controls -->
+            <div class="controls-left">
+                <div class="control-group">
+                    <label class="control-label">TEMPO</label>
+                    <div class="knob" id="tempoKnob" data-param="tempo"
+                         data-help-title="TEMPO"
+                         data-help-description="Game tempo in BPM. Controls how fast notes fall.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="tempoValue">120 BPM</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">SCALE</label>
+                    <div class="knob" id="scaleKnob" data-param="scale"
+                         data-help-title="SCALE"
+                         data-help-description="Musical scale for generated notes.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="scaleValue">Major</div>
+                </div>
+            </div>
+
+            <!-- Game Screen -->
+            <div class="game-container" title="Click here then press PLAY to start!">
+                <canvas id="gameCanvas"></canvas>
+                
+                <!-- HUD Overlay -->
+                <div class="game-hud">
+                    <div class="hud-top">
+                        <div class="score-display">
+                            <span class="score-label">SCORE</span>
+                            <span class="score-value" id="scoreValue">000000</span>
+                        </div>
+                        <div class="combo-display">
+                            <span class="combo-label">COMBO</span>
+                            <span class="combo-value" id="comboValue">x0</span>
+                        </div>
+                    </div>
+                    <div class="hud-bottom">
+                        <div class="hit-feedback" id="hitFeedback"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Controls -->
+            <div class="controls-right">
+                <div class="control-group">
+                    <label class="control-label">DIFFICULTY</label>
+                    <div class="knob" id="difficultyKnob" data-param="difficulty"
+                         data-help-title="DIFFICULTY"
+                         data-help-description="Game difficulty. More lanes and faster notes.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="difficultyValue">Normal</div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">VOLUME</label>
+                    <div class="knob" id="volumeKnob" data-param="volume"
+                         data-help-title="VOLUME"
+                         data-help-description="Output volume of generated music.">
+                        <div class="knob-inner"><div class="knob-indicator"></div></div>
+                    </div>
+                    <div class="value-display" id="volumeValue">0 dB</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mandelbrot-footer">
+            <button class="bypass-toggle active" id="bypassToggle"
+                    data-help-title="PLAY/PAUSE"
+                    data-help-description="Start or pause the game.">
+                <span class="power-icon"><svg viewBox="0 0 24 24"><path d="M12 2v10M18 6a9 9 0 1 1-12 0"/></svg></span>
+                <span class="bypass-text">PLAY</span>
+            </button>
+            <div class="info-display">
+                <div class="game-instructions">
+                    <span>Press <strong>A S D F</strong> keys OR <strong>CLICK LANES</strong> to hit notes</span>
+                    <span class="difficulty-info" id="difficultyInfo">4 Lanes • 120 BPM</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../../_Shared/UI/mandelbrot-animations.js"></script>
+    <script src="../../_Shared/UI/mandelbrot-components.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

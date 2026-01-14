@@ -65,12 +65,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 time += 0.01 * (0.5 + rateInfluence * 0.5);
                 
                 // Continuous zoom in - rate parameter controls zoom speed
-                const zoomSpeed = 1.02 + rateInfluence * 0.03 + normalizedLevel * 0.01;
-                zoom *= zoomSpeed;
+                // Smoother zoom acceleration
+                const baseZoomSpeed = 1.01 + rateInfluence * 0.02 + normalizedLevel * 0.005;
+                zoom *= baseZoomSpeed;
                 
-                // Gradually move toward target
-                centerX += (targetX - centerX) * 0.02;
-                centerY += (targetY - centerY) * 0.02;
+                // Gradually move toward target - smoother interpolation
+                centerX += (targetX - centerX) * 0.01;
+                centerY += (targetY - centerY) * 0.01;
                 
                 // Switch to next target when zoom gets deep
                 if (zoom > 1000 + depthInfluence * 9000) {
@@ -83,10 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 // Iteration count affects detail - more stages = more iterations
-                const maxIter = 80 + Math.floor(stagesInfluence * 120) + Math.floor(normalizedLevel * 50);
+                // Capped to maintain performance
+                const maxIter = 60 + Math.floor(stagesInfluence * 80) + Math.floor(normalizedLevel * 20);
                 
                 // Pixel step for performance - feedback affects resolution
-                const pixelStep = Math.max(1, 4 - Math.floor(feedbackInfluence * 2) - Math.floor(normalizedLevel * 1));
+                // Fixed at 2px for smooth animation, only drop to 1px with very high feedback
+                const pixelStep = feedbackInfluence > 0.9 ? 1 : 2;
                 
                 // Render Mandelbrot set
                 for (let px = 0; px < canvas.width; px += pixelStep) {
