@@ -1,8 +1,8 @@
 /*
   ==============================================================================
 
-    ChipTune - Classic Arcade Music Generator
-    Video Game Music Generator Plugin Editor
+    CymaSynth
+    Plugin Editor
 
   ==============================================================================
 */
@@ -32,28 +32,18 @@ public:
 };
 
 //==============================================================================
-class ChipTuneAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Timer
+class CymaSynthAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Timer
 {
 public:
-    ChipTuneAudioProcessorEditor (ChipTuneAudioProcessor&);
-    ~ChipTuneAudioProcessorEditor() override;
+    CymaSynthAudioProcessorEditor (CymaSynthAudioProcessor&);
+    ~CymaSynthAudioProcessorEditor() override;
 
     void paint (juce::Graphics&) override;
     void resized() override;
     void timerCallback() override;
-    void sendMeteringData();
-    
-    // Mouse handling
-    void mouseDown(const juce::MouseEvent& e) override;
-    
-    // Keyboard handling
-    bool keyPressed(const juce::KeyPress& key) override;
-    
-    // MIDI note notification
-    void notifyMIDINote(int noteNumber, int velocity);
 
 private:
-    ChipTuneAudioProcessor& audioProcessor;
+    CymaSynthAudioProcessor& audioProcessor;
     std::unique_ptr<WebBrowserWithCallbacks> webView;
     
     // Authentication state
@@ -63,10 +53,9 @@ private:
     void loadAuthScreen();
     void loadHTMLFile (const juce::File& htmlFile);
     void handleJavaScriptMessage (const juce::var& message);
-    void openAudioSettings();
     bool checkAuthorization();
     static juce::File getAuthFile();
     static juce::String loadAndDecryptLicenseFile();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChipTuneAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CymaSynthAudioProcessorEditor)
 };

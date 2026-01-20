@@ -1,20 +1,17 @@
 /*
   ==============================================================================
 
-    ChipTune - Classic Arcade Music Generator
-    Video Game Music Generator Plugin Editor Implementation
+    CymaSynth
+    Plugin Editor Implementation
 
   ==============================================================================
 */
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#if JucePlugin_Build_Standalone
-#include <juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h>
-#endif
 
 //==============================================================================
-ChipTuneAudioProcessorEditor::ChipTuneAudioProcessorEditor (ChipTuneAudioProcessor& p)
+CymaSynthAudioProcessorEditor::CymaSynthAudioProcessorEditor (CymaSynthAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
     // Make component opaque so black background shows through (like NNAudioAccess)
@@ -27,19 +24,11 @@ ChipTuneAudioProcessorEditor::ChipTuneAudioProcessorEditor (ChipTuneAudioProcess
     setSize (1200, 750);
     setResizable (false, false);
     
-    // Enable keyboard focus
-    setWantsKeyboardFocus(true);
-    setMouseClickGrabsKeyboardFocus(true);
-    
     // Create WebView with native integration enabled for message passing
     auto options = juce::WebBrowserComponent::Options{}
         .withNativeIntegrationEnabled (true)
         .withKeepPageLoadedWhenBrowserIsHidden() // Keep page loaded when hidden (like NNAudioAccess)
         .withEventListener ("message", [this](const juce::var& message) {
-            std::cout << "=== EVENT LISTENER TRIGGERED ===" << std::endl;
-            DBG("=== EVENT LISTENER TRIGGERED ===");
-            std::cout << "Message received: " << message.toString() << std::endl;
-            DBG("Message received: " + message.toString());
             handleJavaScriptMessage (message);
         });
 
@@ -49,21 +38,49 @@ ChipTuneAudioProcessorEditor::ChipTuneAudioProcessorEditor (ChipTuneAudioProcess
     webView->setBounds (getLocalBounds());
     webView->setVisible (false); // Start hidden to avoid white screen flash
     
-    // Set up page finished loading callback - show webView after page loads
+    // Set up page finished loading callback - show webView only after page loads AND renders (like NNAudioAccess)
     webView->onPageFinishedLoading = [this](const juce::String& url) {
         juce::MessageManager::callAsync([this]() {
-            // Show webView after a short delay to ensure HTML is rendered
-            juce::Timer::callAfterDelay(100, [this]() {
-                if (webView != nullptr && !webView->isVisible()) {
-                    webView->setVisible(true);
-                    repaint();
-                }
+            // Wait 2 seconds to ensure HTML with inline black styles has fully rendered
+            // Then verify background is black before showing
+            juce::Timer::callAfterDelay(2000, [this]() {
+                if (webView == nullptr || webView->isVisible()) return;
+                
+                // Verify background is black via JavaScript before showing
+                juce::String checkScript = R"(
+                    (function() {
+                        if (!document.body) return false;
+                        var style = window.getComputedStyle(document.body);
+                        var bg = style.backgroundColor;
+                        return bg === 'rgb(0, 0, 0)' || bg === 'black' || bg.indexOf('0, 0, 0') >= 0;
+                    })();
+                )";
+                
+                webView->evaluateJavascript(checkScript, [this](const juce::WebBrowserComponent::EvaluationResult& result) {
+                    if (webView == nullptr || webView->isVisible()) return;
+                    
+                    bool isBlack = false;
+                    if (auto* value = result.getResult()) {
+                        if (value->isBool()) {
+                            isBlack = static_cast<bool>(*value);
+                        }
+                    }
+                    
+                    // Show if black, or after additional delay if not confirmed
+                    juce::Timer::callAfterDelay(isBlack ? 0 : 500, [this]() {
+                        if (webView != nullptr && !webView->isVisible()) {
+                            webView->setVisible(true);
+                            repaint();
+                        }
+                    });
+                });
             });
         });
     };
     
-    // Fallback: Show webView after 1 second if callback doesn't fire
-    juce::Timer::callAfterDelay(1000, [this]() {
+    // Fallback: Show webView after 3 seconds if callback doesn't fire (like NNAudioAccess fallback)
+    // Longer delay ensures HTML/CSS is fully loaded and rendered
+    juce::Timer::callAfterDelay(3000, [this]() {
         if (webView != nullptr && !webView->isVisible()) {
             webView->setVisible(true);
             repaint();
@@ -76,38 +93,31 @@ ChipTuneAudioProcessorEditor::ChipTuneAudioProcessorEditor (ChipTuneAudioProcess
     if (isAuthorized)
     {
         loadWebUI();
-        startTimer(50); // Fast timer for audio-reactive animation (20 FPS data updates)
+        startTimer(1000 * 60 * 15); // Re-check every 15 minutes
     }
     else
     {
         loadAuthScreen();
         startTimer(5000); // Re-check every 5 seconds
     }
-    
-    // Try to grab focus after a short delay
-    juce::Timer::callAfterDelay(500, [this]() {
-        DBG("Attempting to grab keyboard focus after delay");
-        grabKeyboardFocus();
-        DBG(juce::String("Focus grabbed: ") + (hasKeyboardFocus(true) ? "true" : "false"));
-    });
 }
 
-ChipTuneAudioProcessorEditor::~ChipTuneAudioProcessorEditor()
+CymaSynthAudioProcessorEditor::~CymaSynthAudioProcessorEditor()
 {
 }
 
-void ChipTuneAudioProcessorEditor::paint (juce::Graphics& g)
+void CymaSynthAudioProcessorEditor::paint (juce::Graphics& g)
 {
     g.fillAll (juce::Colours::black); // Fill with black background to prevent white flash (like NNAudioAccess)
 }
 
-void ChipTuneAudioProcessorEditor::resized()
+void CymaSynthAudioProcessorEditor::resized()
 {
     if (webView != nullptr)
         webView->setBounds (getLocalBounds());
 }
 
-void ChipTuneAudioProcessorEditor::loadWebUI()
+void CymaSynthAudioProcessorEditor::loadWebUI()
 {
     // Navigate DIRECTLY to actual content while webView is HIDDEN (like NNAudioAccess)
     // Content has inline black styles, so it will be black when it loads
@@ -122,40 +132,27 @@ void ChipTuneAudioProcessorEditor::loadWebUI()
         // Fallback: try development path
         if (!htmlFile.existsAsFile())
         {
-            auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals/8-Bit Kit");
-            htmlFile = projectRoot.getChildFile ("ChipTune").getChildFile ("UI").getChildFile ("index.html");
+            auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
+            htmlFile = projectRoot.getChildFile ("CymaSynth").getChildFile ("UI").getChildFile ("index.html");
         }
 
         if (htmlFile.existsAsFile())
         {
-            DBG("Found HTML file: " + htmlFile.getFullPathName());
             loadHTMLFile(htmlFile);
             // webView will be shown automatically via onPageFinishedLoading callback
         }
         else
         {
-            DBG("Could not find index.html");
-            DBG("Tried path: " + htmlFile.getFullPathName());
-            // Try alternative path
-            auto altPath = juce::File("/Users/rjmacbookpro/Development/Orbitals/8-Bit Kit/ChipTune/UI/index.html");
-            if (altPath.existsAsFile())
-            {
-                DBG("Found HTML file at alternative path: " + altPath.getFullPathName());
-                loadHTMLFile(altPath);
-            }
-            else
-            {
-                DBG("Alternative path also failed: " + altPath.getFullPathName());
-            }
+            DBG ("Could not find index.html");
         }
     });
 }
 
-void ChipTuneAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
+void CymaSynthAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
 {
     auto htmlContent = htmlFile.loadFileAsString();
     auto uiDir = htmlFile.getParentDirectory();
-    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals/8-Bit Kit");
+    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals");
     auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
 
     // CRITICAL: Inject inline black styles FIRST (before any CSS links)
@@ -201,7 +198,7 @@ void ChipTuneAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
                                            "<style>" + cssContent + "</style>");
     }
 
-    auto designSystemFile = sharedDir.getChildFile ("mandelbrot-design-system.css");
+    auto designSystemFile = sharedDir.getChildFile ("orbitals-design-system.css");
     if (designSystemFile.existsAsFile())
     {
         auto designSystemContent = designSystemFile.loadFileAsString();
@@ -215,7 +212,7 @@ void ChipTuneAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
         designSystemContent = designSystemContent.replace (logoOldPattern1, logoNewPattern);
         designSystemContent = designSystemContent.replace (logoOldPattern2, logoNewPattern);
         
-        htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"../../_Shared/UI/mandelbrot-design-system.css\">",
+        htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"../../_Shared/UI/orbitals-design-system.css\">",
                                            "<style>" + designSystemContent + "</style>");
     }
 
@@ -228,54 +225,44 @@ void ChipTuneAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
                                            "<script>" + jsContent + "</script>");
     }
 
-    auto animationsFile = sharedDir.getChildFile ("mandelbrot-animations.js");
+    auto animationsFile = sharedDir.getChildFile ("orbitals-animations.js");
     if (animationsFile.existsAsFile())
     {
-        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/mandelbrot-animations.js\"></script>",
+        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-animations.js\"></script>",
                                            "<script>" + animationsFile.loadFileAsString() + "</script>");
     }
 
-    auto particlesFile = sharedDir.getChildFile ("mandelbrot-particles.js");
+    auto particlesFile = sharedDir.getChildFile ("orbitals-particles.js");
     if (particlesFile.existsAsFile())
     {
-        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/mandelbrot-particles.js\"></script>",
+        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-particles.js\"></script>",
                                            "<script>" + particlesFile.loadFileAsString() + "</script>");
     }
 
-    auto componentsFile = sharedDir.getChildFile ("mandelbrot-components.js");
+    auto componentsFile = sharedDir.getChildFile ("orbitals-components.js");
     if (componentsFile.existsAsFile())
     {
-        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/mandelbrot-components.js\"></script>",
+        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/orbitals-components.js\"></script>",
                                            "<script>" + componentsFile.loadFileAsString() + "</script>");
     }
 
     // Handle background image
-    auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/chiptune.png");
+    auto backgroundImage = uiDir.getChildFile("cymatics-background.png");
     if (backgroundImage.existsAsFile())
     {
         juce::MemoryBlock imageData;
         if (backgroundImage.loadFileAsData(imageData))
         {
             juce::String base64 = juce::Base64::toBase64(imageData.getData(), imageData.getSize());
-            htmlContent = htmlContent.replace("../../_Shared/Assets/backgrounds/chiptune.png", 
+            htmlContent = htmlContent.replace("cymatics-background.png", 
                                             "data:image/png;base64," + base64);
         }
     }
 
-    // Disable right-click context menu and set standalone mode flag
+    // Disable right-click context menu
     juce::String disableRightClickScript = R"(<script>
         document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
         document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
-        // Set standalone mode flag (only true in standalone builds)
-        window.isStandaloneMode = )";
-    
-#if JucePlugin_Build_Standalone
-    disableRightClickScript += "true";
-#else
-    disableRightClickScript += "false";
-#endif
-    
-    disableRightClickScript += R"(;
     </script>)";
     
     // Inject script before closing body tag
@@ -288,7 +275,7 @@ void ChipTuneAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
     
     // Load HTML using temporary file approach (avoids data URL encoding issues)
     auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
-        .getChildFile("ChipTuneUI_" + juce::String(juce::Time::currentTimeMillis()));
+        .getChildFile("CymaSynthUI_" + juce::String(juce::Time::currentTimeMillis()));
     tempDir.createDirectory();
     
     // Copy logo image to temp directory if it exists
@@ -308,36 +295,21 @@ void ChipTuneAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
     webView->goToURL(fileURL);
 }
 
-void ChipTuneAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
+void CymaSynthAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
 {
-    std::cout << "=== RECEIVED MESSAGE FROM JAVASCRIPT ===" << std::endl;
-    DBG("=== RECEIVED MESSAGE FROM JAVASCRIPT ===");
-    
     if (!message.isObject())
-    {
-        std::cout << "Message is not an object" << std::endl;
-        DBG("Message is not an object");
         return;
-    }
 
     auto obj = message.getDynamicObject();
     if (obj == nullptr)
-    {
-        std::cout << "Message dynamic object is nullptr" << std::endl;
-        DBG("Message dynamic object is nullptr");
         return;
-    }
 
-    std::cout << "Message type check: " << obj->getProperty("type").toString() << std::endl;
-    
     auto type = obj->getProperty("type").toString();
     
     if (type == "parameterChange")
     {
         auto param = obj->getProperty("parameter").toString();
         auto value = obj->getProperty("value");
-        
-        std::cout << "Parameter change request: " << param << " = " << value.toString() << std::endl;
         
         auto* p = audioProcessor.parameters.getParameter(param);
         if (p != nullptr)
@@ -347,35 +319,12 @@ void ChipTuneAudioProcessorEditor::handleJavaScriptMessage (const juce::var& mes
             rawValue = juce::jlimit(range.start, range.end, rawValue);
             float normalizedValue = range.convertTo0to1(rawValue);
             p->setValueNotifyingHost(normalizedValue);
-            
-            std::cout << "✅ Parameter updated: " << param << " -> normalized: " << normalizedValue << ", raw: " << rawValue << std::endl;
         }
-        else
-        {
-            std::cout << "❌ Parameter not found: " << param << std::endl;
-        }
-    }
-    else if (type == "openSettings")
-    {
-        std::cout << "Received openSettings message from JavaScript" << std::endl;
-        DBG("Received openSettings message from JavaScript");
-        openAudioSettings();
-    }
-    else if (type == "test")
-    {
-        auto testValue = obj->getProperty("value").toString();
-        std::cout << "✅✅✅ BRIDGE TEST SUCCESSFUL! ✅✅✅    Received test message: " << testValue << std::endl;
-        DBG("✅✅✅ BRIDGE TEST SUCCESSFUL! ✅✅✅    Received test message: " + testValue);
-    }
-    else
-    {
-        std::cout << "Unknown message type: " << type << std::endl;
-        DBG("Unknown message type: " + type);
     }
 }
 
 //==============================================================================
-void ChipTuneAudioProcessorEditor::loadAuthScreen()
+void CymaSynthAudioProcessorEditor::loadAuthScreen()
 {
     // Navigate DIRECTLY to auth content while webView is HIDDEN (like NNAudioAccess)
     // Content has inline black styles, so it will be black when it loads
@@ -387,7 +336,7 @@ void ChipTuneAudioProcessorEditor::loadAuthScreen()
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChipTune - Authentication Required</title>
+    <title>CymaSynth - Authentication Required</title>
     <style>
         /* Set background to black immediately to prevent white flash */
         html, body { 
@@ -459,7 +408,7 @@ void ChipTuneAudioProcessorEditor::loadAuthScreen()
             <img src="PLACEHOLDER_LOGO" alt="NNAudio Logo">
         </div>
         <div class="text-content">
-            <h1 class="auth-title">CHIPTUNE</h1>
+            <h1 class="auth-title">CYMASYNTH</h1>
             <p class="auth-message">
                 Your plugin's authentication needs to be refreshed.<br><br>
                 Please launch the NNAudio Access app to continue.
@@ -475,8 +424,9 @@ void ChipTuneAudioProcessorEditor::loadAuthScreen()
 </html>)";
     
     // Load and inline background image as base64
-    auto projectRoot = juce::File("/Users/rjmacbookpro/Development/Orbitals/8-Bit Kit");
-    auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/chiptune.png");
+    auto projectRoot = juce::File("/Users/rjmacbookpro/Development/Orbitals");
+    auto uiDir = projectRoot.getChildFile("CymaSynth").getChildFile("UI");
+    auto backgroundImage = uiDir.getChildFile("cymatics-background.png");
     
     if (backgroundImage.existsAsFile())
     {
@@ -515,7 +465,7 @@ void ChipTuneAudioProcessorEditor::loadAuthScreen()
     
     // Load auth HTML using temporary file approach
     auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
-        .getChildFile("ChipTuneAuth_" + juce::String(juce::Time::currentTimeMillis()));
+        .getChildFile("CymaSynthAuth_" + juce::String(juce::Time::currentTimeMillis()));
     tempDir.createDirectory();
     
     auto tempFile = tempDir.getChildFile("auth.html");
@@ -531,7 +481,7 @@ void ChipTuneAudioProcessorEditor::loadAuthScreen()
 }
 
 //==============================================================================
-bool ChipTuneAudioProcessorEditor::checkAuthorization()
+bool CymaSynthAudioProcessorEditor::checkAuthorization()
 {
     const auto decrypted_text = loadAndDecryptLicenseFile();
     
@@ -547,9 +497,7 @@ bool ChipTuneAudioProcessorEditor::checkAuthorization()
     if (!product_list.isEmpty())
         expiration_date = juce::Time::fromISO8601(product_list[0]);
     
-    // Read product ID from BinaryData resource (product_id.txt)
-    juce::String product_id = juce::String::fromUTF8(BinaryData::product_id_txt, BinaryData::product_id_txtSize).trim();
-    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains(product_id));
+    bool authorized = (expiration_date > juce::Time::getCurrentTime() && product_list.contains("200004"));
     
     if (authorized != isAuthorized)
     {
@@ -557,7 +505,7 @@ bool ChipTuneAudioProcessorEditor::checkAuthorization()
         if (isAuthorized)
         {
             loadWebUI();
-            startTimer(50); // Check every 15 minutes
+            startTimer(1000 * 60 * 15); // Check every 15 minutes
         }
         else
         {
@@ -570,7 +518,7 @@ bool ChipTuneAudioProcessorEditor::checkAuthorization()
 }
 
 //==============================================================================
-juce::File ChipTuneAudioProcessorEditor::getAuthFile()
+juce::File CymaSynthAudioProcessorEditor::getAuthFile()
 {
     juce::File app_data_dir;
 
@@ -591,7 +539,7 @@ juce::File ChipTuneAudioProcessorEditor::getAuthFile()
 }
 
 //==============================================================================
-juce::String ChipTuneAudioProcessorEditor::loadAndDecryptLicenseFile()
+juce::String CymaSynthAudioProcessorEditor::loadAndDecryptLicenseFile()
 {
     const auto auth_file = getAuthFile();
 
@@ -619,7 +567,7 @@ juce::String ChipTuneAudioProcessorEditor::loadAndDecryptLicenseFile()
 }
 
 //==============================================================================
-void ChipTuneAudioProcessorEditor::timerCallback()
+void CymaSynthAudioProcessorEditor::timerCallback()
 {
     if (!isAuthorized)
     {
@@ -630,178 +578,8 @@ void ChipTuneAudioProcessorEditor::timerCallback()
             if (isAuthorized)
             {
                 loadWebUI();
+                startTimer(1000 * 60 * 15);
             }
         }
     }
-    
-            
-    
-    // Always send metering data when authorized and visible (fast update for animation)
-    if (isAuthorized && webView != nullptr && webView->isVisible())
-    {
-        sendMeteringData();
-    }
-    else
-    {
-        // Debug: Log why metering data isn't being sent
-        static int debugCounter = 0;
-        if (++debugCounter % 200 == 0) // Every 10 seconds
-        {
-            std::cout << "⚠️ Not sending metering data: authorized=" << isAuthorized 
-                      << ", webView=" << (webView != nullptr) 
-                      << ", visible=" << (webView != nullptr && webView->isVisible()) << std::endl;
-        }
-    }
-}
-
-void ChipTuneAudioProcessorEditor::sendMeteringData()
-{
-    // Get audio levels from processor
-    float inputLevelDb = audioProcessor.inputLevel.load();
-    float outputLevelDb = audioProcessor.outputLevel.load();
-    
-    // Debug logging (every 100 calls = ~5 seconds)
-    static int meteringDebugCounter = 0;
-    if (++meteringDebugCounter % 100 == 0)
-    {
-        std::cout << "📊 sendMeteringData: Input=" << inputLevelDb << "dB, Output=" << outputLevelDb << "dB" << std::endl;
-    }
-    
-    // Send to JavaScript
-    juce::String script = juce::String::formatted(
-        "if (window.receiveAudioData) { window.receiveAudioData({ inputLevel: %.2f, outputLevel: %.2f }); }",
-        inputLevelDb, outputLevelDb
-    );
-    
-    if (webView != nullptr && webView->isVisible())
-    {
-        webView->evaluateJavascript(script);
-    }
-    else if (meteringDebugCounter % 100 == 0)
-    {
-        std::cout << "⚠️ Cannot send metering data: webView=" << (webView != nullptr) 
-                  << ", visible=" << (webView != nullptr && webView->isVisible()) << std::endl;
-    }
-}
-
-void ChipTuneAudioProcessorEditor::openAudioSettings()
-{
-#if JucePlugin_Build_Standalone
-    // In standalone mode, show the audio/MIDI settings dialog
-    juce::MessageManager::callAsync([this]()
-    {
-        DBG("Opening audio settings...");
-        
-        // Try multiple approaches to access the settings dialog
-        
-        // Approach 1: Get through StandalonePluginHolder singleton
-        if (auto* pluginHolder = juce::StandalonePluginHolder::getInstance())
-        {
-            DBG("Found StandalonePluginHolder via getInstance()");
-            pluginHolder->showAudioSettingsDialog();
-            return;
-        }
-        
-        DBG("StandalonePluginHolder::getInstance() returned nullptr");
-        
-        // Approach 2: Try to find StandaloneFilterWindow in the component hierarchy
-        juce::Component* comp = this;
-        while (comp != nullptr)
-        {
-            if (auto* window = dynamic_cast<juce::StandaloneFilterWindow*>(comp))
-            {
-                DBG("Found StandaloneFilterWindow in component hierarchy");
-                if (auto* holder = window->getPluginHolder())
-                {
-                    holder->showAudioSettingsDialog();
-                    return;
-                }
-            }
-            comp = comp->getParentComponent();
-        }
-        
-        DBG("Could not find StandaloneFilterWindow in component hierarchy");
-        
-        // Approach 3: Try top-level window
-        if (auto* topLevelWindow = juce::TopLevelWindow::getTopLevelWindow(0))
-        {
-            DBG("Found top-level window");
-            if (auto* standaloneWindow = dynamic_cast<juce::StandaloneFilterWindow*>(topLevelWindow))
-            {
-                DBG("Top-level window is StandaloneFilterWindow");
-                if (auto* pluginHolder = standaloneWindow->getPluginHolder())
-                {
-                    pluginHolder->showAudioSettingsDialog();
-                    return;
-                }
-            }
-            else
-            {
-                DBG("Top-level window is NOT StandaloneFilterWindow");
-            }
-        }
-        
-        DBG("Failed to open audio settings - no method worked");
-        
-        // Show error message
-        juce::AlertWindow::showMessageBoxAsync(
-            juce::AlertWindow::WarningIcon,
-            "Settings Unavailable",
-            "Unable to access audio/MIDI settings.\n\nThis feature is only available in standalone mode.",
-            "OK"
-        );
-    });
-#else
-    // In plugin mode (VST3/AU), show a message explaining that audio settings
-    // are managed by the host DAW
-    juce::MessageManager::callAsync([this]()
-    {
-        juce::AlertWindow::showMessageBoxAsync(
-            juce::AlertWindow::InfoIcon,
-            "Audio/MIDI Settings",
-            "Audio and MIDI device settings are managed by your DAW.\n\n"
-            "Please use your DAW's audio/MIDI preferences to configure devices.",
-            "OK"
-        );
-    });
-#endif
-}
-
-void ChipTuneAudioProcessorEditor::notifyMIDINote(int noteNumber, int velocity)
-{
-    if (webView != nullptr && isAuthorized)
-    {
-        juce::String script = "if (window.receiveMessageFromJUCE) { window.receiveMessageFromJUCE({ type: 'midiNote', note: " 
-            + juce::String(noteNumber) + ", velocity: " + juce::String(velocity) + " }); }";
-        webView->emitEventIfBrowserIsVisible("eval", script);
-    }
-}
-
-void ChipTuneAudioProcessorEditor::mouseDown(const juce::MouseEvent& e)
-{
-    DBG("Mouse clicked - grabbing keyboard focus");
-    grabKeyboardFocus();
-    DBG(juce::String("Has focus after click: ") + (hasKeyboardFocus(true) ? "true" : "false"));
-}
-
-bool ChipTuneAudioProcessorEditor::keyPressed(const juce::KeyPress& key)
-{
-    DBG("=== KEY PRESSED IN C++ (ChipTune) ===");
-    DBG(juce::String("Key code: ") + juce::String(key.getKeyCode()));
-    DBG(juce::String("Text character: ") + juce::String(key.getTextCharacter()));
-    DBG(juce::String("Has keyboard focus: ") + (hasKeyboardFocus(true) ? "true" : "false"));
-    
-    if (webView != nullptr && webView->isVisible())
-    {
-        // Check for spacebar
-        if (key.getKeyCode() == juce::KeyPress::spaceKey)
-        {
-            DBG("Spacebar pressed - sending jump command to JavaScript");
-            juce::String script = "if (window.handleKeyFromJUCE) { window.handleKeyFromJUCE('Space'); } else if (window.handleJump) { window.handleJump(); }";
-            webView->evaluateJavascript(script);
-            return true;
-        }
-    }
-    
-    return false;
 }

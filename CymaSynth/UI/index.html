@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CymaSynth</title>
+    <style>
+        /* Set background to black immediately to prevent white flash */
+        html, body { 
+            background-color: #000000 !important; 
+            margin: 0; 
+            padding: 0; 
+        }
+    </style>
+    <link rel="stylesheet" href="../../_Shared/UI/orbitals-design-system.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="plugin-container cymasynth-theme">
+        <header class="orbitals-header">
+            <div class="orbitals-logo" title="NNAudio"></div>
+            <h1 data-help-title="CYMASYNTH"
+                data-help-description="CymaSynth - A visual plugin experience.">CYMASYNTH</h1>
+            <button class="help-toggle" title="Toggle contextual help"></button>
+        </header>
+
+        <main class="plugin-main">
+            <!-- Visualization Canvas -->
+            <canvas id="cymasynthCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: rgba(56, 189, 248, 0.2);"></canvas>
+            
+            <div class="controls-layout">
+                <!-- Empty layout - all controls removed -->
+            </div>
+        </main>
+
+        <footer class="orbitals-footer">
+            <div class="info-display">
+                <span>CymaSynth</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../../_Shared/UI/orbitals-animations.js"></script>
+    <script src="../../_Shared/UI/orbitals-particles.js"></script>
+    <script src="../../_Shared/UI/orbitals-components.js"></script>
+    
+    <script src="app.js"></script>
+</body>
+</html>
