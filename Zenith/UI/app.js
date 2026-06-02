@@ -350,7 +350,7 @@ function setupControls() {
         document.getElementById('expansionValue').textContent = Math.round(v) + '%';
         expansionSlider.style.setProperty('--slider-value', v / 100);
         if (window.updateExpansionValue) window.updateExpansionValue(v);
-        sendParameterToJUCE('expansion', v);
+        sendToJUCE('expansion', v);
       }
     });
     expansionSlider.style.setProperty('--slider-value', 0.5);
@@ -365,7 +365,7 @@ function setupControls() {
         document.getElementById('thresholdValue').textContent = Math.round(v);
         thresholdSlider.style.setProperty('--slider-value', v / 127);
         if (window.updateThresholdValue) window.updateThresholdValue(v);
-        sendParameterToJUCE('threshold', v);
+        sendToJUCE('threshold', v);
       }
     });
     thresholdSlider.style.setProperty('--slider-value', 64 / 127);
@@ -380,7 +380,7 @@ function setupControls() {
         document.getElementById('curveValue').textContent = Math.round(v) + '%';
         curveSlider.style.setProperty('--slider-value', v / 100);
         if (window.updateCurveValue) window.updateCurveValue(v);
-        sendParameterToJUCE('curve', v);
+        sendToJUCE('curve', v);
       }
     });
     curveSlider.style.setProperty('--slider-value', 0.5);
@@ -395,21 +395,25 @@ function setupControls() {
         document.getElementById('ceilingValue').textContent = Math.round(v);
         ceilingSlider.style.setProperty('--slider-value', v / 127);
         if (window.updateCeilingValue) window.updateCeilingValue(v);
-        sendParameterToJUCE('ceiling', v);
+        sendToJUCE('ceiling', v);
       }
     });
     ceilingSlider.style.setProperty('--slider-value', 1.0);
   }
   
   if (window.setupBypassToggle) {
-    window.setupBypassToggle(sendParameterToJUCE);
+    window.setupBypassToggle(sendToJUCE);
   }
 }
 
-function sendParameterToJUCE(param, value) {
-  if (window.chrome?.webview) {
-    window.chrome.webview.postMessage({ type: 'parameterChange', parameter: param, value });
-  }
+/**
+ * @brief Sends parameter changes to C++ via JUCE native bridge (macOS + Windows).
+ * @param {string} param Parameter ID.
+ * @param {*} value Raw parameter value.
+ */
+function sendToJUCE(param, value) {
+    if (typeof window.postMessageToJUCE !== 'function') return;
+    window.postMessageToJUCE({ type: 'parameterChange', parameter: param, value: value });
 }
 
 window.receiveMessageFromJUCE = function(message) {

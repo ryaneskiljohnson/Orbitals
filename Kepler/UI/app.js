@@ -239,6 +239,7 @@ function setupControls() {
       document.getElementById('semiMajorValue').textContent = Math.round(v);
       if (window.updateOrbitCount) window.updateOrbitCount(Math.round(v));
       if (window.updateOrbitPreview) window.updateOrbitPreview();
+      sendToJUCE('orbitCount', Math.round(v));
     }
   });
   
@@ -250,6 +251,7 @@ function setupControls() {
       document.getElementById('eccentricityValue').textContent = eccValue.toFixed(2);
       if (window.updateEccentricity) window.updateEccentricity(eccValue);
       if (window.updateOrbitPreview) window.updateOrbitPreview();
+      sendToJUCE('eccentricity', eccValue);
     }
   });
   
@@ -260,8 +262,23 @@ function setupControls() {
     onChange: (v) => {
       document.getElementById('spreadValue').textContent = Math.round(v);
       if (window.updateRotationSpeed) window.updateRotationSpeed(v);
+      sendToJUCE('rotationSpeed', v);
     }
   });
+
+  const stabilityPad = document.getElementById('stabilityPad');
+  if (stabilityPad) {
+    new OrbitalsXYPad(stabilityPad, {
+      minX: 0, maxX: 100, minY: 0, maxY: 100,
+      valueX: 50, valueY: 50,
+      onChange: (x, y) => {
+        document.getElementById('stabilityValue').textContent =
+          `X:${Math.round(x)} Y:${Math.round(y)}`;
+        sendToJUCE('stabilityX', x);
+        sendToJUCE('stabilityY', y);
+      }
+    });
+  }
   
   // Period selector buttons
   document.querySelectorAll('.period-selector button').forEach(btn => {
@@ -269,7 +286,8 @@ function setupControls() {
       document.querySelectorAll('.period-selector button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const period = btn.dataset.period;
-      // Value display removed - selected button shows the value
+      const periodMap = { bar: 0, beat: 1, half: 2, double: 3 };
+      sendToJUCE('period', periodMap[period] ?? 0);
     });
   });
   
@@ -280,6 +298,8 @@ function setupControls() {
       btn.classList.add('active');
       const direction = btn.dataset.dir;
       if (window.updateDirection) window.updateDirection(direction);
+      const directionMap = { cw: 0, ccw: 1, pendulum: 2 };
+      sendToJUCE('direction', directionMap[direction] ?? 0);
     });
   });
   
@@ -291,8 +311,12 @@ function setupControls() {
   }
 }
 
+/**
+ * @brief Sends parameter changes to C++ via JUCE native bridge (macOS + Windows).
+ * @param {string} param Parameter ID.
+ * @param {*} value Raw parameter value.
+ */
 function sendToJUCE(param, value) {
-  if (window.chrome?.webview) {
-    window.chrome.webview.postMessage({ type: 'parameterChange', parameter: param, value });
-  }
+    if (typeof window.postMessageToJUCE !== 'function') return;
+    window.postMessageToJUCE({ type: 'parameterChange', parameter: param, value: value });
 }

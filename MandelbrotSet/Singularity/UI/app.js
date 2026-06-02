@@ -526,35 +526,12 @@ function initializeBlackHoleAnimation() {
 }
 
 function sendToPlugin(parameter, value) {
-    console.log('📤 sendToPlugin called:', parameter, value);
-    
-    // JUCE 8 uses window.__JUCE__.backend.emitEvent() for event listeners
-    const juceBackend = window.__JUCE__;
-    
-    if (juceBackend && juceBackend.backend) {
-        console.log('✅ JUCE backend found: window.__JUCE__.backend');
-        const message = {
-            type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
-            parameter: parameter,
-            value: value
-        };
-        console.log('📤 Sending message via emitEvent:', JSON.stringify(message));
-        // Use emitEvent instead of postMessage for withEventListener
-        juceBackend.backend.emitEvent('message', message);
-    } else if (window.__JUCE__) {
-        // Fallback: try postMessage (old API)
-        console.log('⚠️ Using fallback postMessage API');
-        const message = {
-            type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
-            parameter: parameter,
-            value: value
-        };
-        const messageString = JSON.stringify(message);
-        window.__JUCE__.postMessage(messageString);
-    } else {
-        console.error('❌ window.__JUCE__ is not available!');
-        console.error('Available window properties:', Object.keys(window).filter(k => k.includes('JUCE') || k.includes('juce') || k.includes('webkit')));
-    }
+    if (typeof window.postMessageToJUCE !== 'function') return;
+    window.postMessageToJUCE({
+        type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
+        parameter: parameter,
+        value: value
+    });
 }
 
 // Receive audio data from C++ for reactive animations

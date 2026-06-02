@@ -236,23 +236,15 @@ void TidalAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     int rateIndex = (int)*parameters.getRawParameterValue(PARAM_RATE);
     int shapeIndex = (int)*parameters.getRawParameterValue(PARAM_SHAPE);
 
-    // Get timing info
-    auto playHead = getPlayHead();
-    if (playHead == nullptr)
+    double bpm = 120.0;
+    if (auto* playHead = getPlayHead())
     {
-        // No playhead info, pass through
-        return;
+        if (auto positionInfo = playHead->getPosition(); positionInfo.hasValue())
+            if (positionInfo->getBpm().hasValue())
+                bpm = *positionInfo->getBpm();
     }
 
-    auto positionInfo = playHead->getPosition();
-    if (!positionInfo.hasValue() || !positionInfo->getBpm().hasValue())
-    {
-        // No tempo info, pass through
-        return;
-    }
-
-    double bpm = *positionInfo->getBpm();
-    double beatsPerSample = bpm / (60.0 * sampleRate);
+    const double beatsPerSample = bpm / (60.0 * sampleRate);
     
     // Calculate rate in beats based on note division
     double rateInBeats = getRateMultiplier(rateIndex);

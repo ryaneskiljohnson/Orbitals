@@ -1,4 +1,4 @@
-:root { --plugin-background-image: url('../../_Shared/Assets/backgrounds/entanglement.png'); }
+:root { --plugin-background-image: url('plugin-background.png'); }
 
 .plugin-main {
     display: flex;

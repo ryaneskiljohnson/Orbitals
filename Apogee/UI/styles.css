@@ -26,7 +26,7 @@
   --trajectory-gradient: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.2) 0%, rgba(0, 212, 255, 0.1) 50%, transparent 100%);
   
   /* Background image */
-  --plugin-background-image: url('../../_Shared/Assets/backgrounds/apogee-background.png');
+  --plugin-background-image: url('plugin-background.png');
   --plugin-background-opacity: 0.6;
   
   /* Ceiling-based tint (updated by JavaScript) */

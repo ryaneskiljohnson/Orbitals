@@ -1,5 +1,5 @@
 :root { 
-    --plugin-background-image: url('../../_Shared/Assets/backgrounds/chiptune.png'); 
+    --plugin-background-image: url('plugin-background.png'); 
     --game-red: #ff0000;
     --game-orange: #ff8800;
     --game-yellow: #ffff00;

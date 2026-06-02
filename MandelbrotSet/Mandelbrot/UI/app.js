@@ -158,13 +158,12 @@ function initializeSettingsButton() {
 }
 
 function sendToPlugin(parameter, value) {
-    if (window.juce) {
-        window.juce.postMessage({
-            type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
-            parameter: parameter,
-            value: value
-        });
-    }
+    if (typeof window.postMessageToJUCE !== 'function') return;
+    window.postMessageToJUCE({
+        type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
+        parameter: parameter,
+        value: value
+    });
 }
 
 // Receive audio data from C++ for reactive animations

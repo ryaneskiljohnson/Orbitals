@@ -68,12 +68,20 @@ public:
     // Get parameters
     juce::AudioProcessorValueTreeState parameters;
 
+    /** @brief Queue a note event for the UI thread (RT-safe). */
+    void flagLatestMidiNote (int noteNumber, int velocity) noexcept;
+
+    /** @brief Consume a queued note event on the message thread. @returns false if none pending. */
+    bool consumeLatestMidiNote (int& noteNumber, int& velocity) noexcept;
+
 private:
     //==============================================================================
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     
     double sampleRate = 44100.0;
     juce::Random random;
+    std::atomic<int> latestMidiNote { -1 };
+    std::atomic<int> latestMidiVelocity { 0 };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZenithAudioProcessor)
 };

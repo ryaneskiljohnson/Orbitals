@@ -62,12 +62,6 @@ window.testBypassButton = function() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🔵🔵🔵 DOMContentLoaded fired 🔵🔵🔵');
-    
-    // AUTOMATIC BRIDGE TEST - Runs immediately after page loads
-    console.log('🧪 Starting automatic bridge test...');
-    setTimeout(() => {
-        testBridge();
-    }, 1000); // Wait 1 second for everything to initialize
     await waitForJuce();
     console.log('🔵 Initializing controls...');
     
@@ -638,113 +632,12 @@ function initializeSettingsButton() {
 }
 
 function sendToPlugin(parameter, value) {
-    // Special alert for bypass to confirm it's being sent
-    if (parameter === 'bypass') {
-        alert('sendToPlugin: bypass=' + value);
-    }
-    
-    console.log('📤 sendToPlugin called:', parameter, value);
-    
-    // JUCE 8 uses window.__JUCE__.backend.emitEvent() for event listeners
-    const juceBackend = window.__JUCE__;
-    
-    if (juceBackend && juceBackend.backend) {
-        console.log('✅ JUCE backend found: window.__JUCE__.backend');
-        const message = {
-            type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
-            parameter: parameter,
-            value: value
-        };
-        console.log('📤 Sending message via emitEvent:', JSON.stringify(message));
-        // Use emitEvent instead of postMessage for withEventListener
-        juceBackend.backend.emitEvent('message', message);
-        
-        if (parameter === 'bypass') {
-            alert('Sent to C++: ' + JSON.stringify(message));
-        }
-    } else if (window.__JUCE__) {
-        // Fallback: try postMessage (old API)
-        console.log('⚠️ Using fallback postMessage API');
-        const message = {
-            type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
-            parameter: parameter,
-            value: value
-        };
-        const messageString = JSON.stringify(message);
-        window.__JUCE__.postMessage(messageString);
-    } else {
-        console.error('❌ window.__JUCE__ is not available!');
-        console.error('Available window properties:', Object.keys(window).filter(k => k.includes('JUCE') || k.includes('juce') || k.includes('webkit')));
-    }
-}
-
-// Test function to verify bridge is working
-function testBridge() {
-    console.log('🧪 ========================================');
-    console.log('🧪 BRIDGE TEST STARTING');
-    console.log('🧪 ========================================');
-    
-    // Test 1: Check if JUCE backend exists
-    const juceBackend = window.__JUCE__;
-    if (juceBackend && juceBackend.backend) {
-        console.log('✅ TEST 1 PASSED: JUCE backend found');
-        console.log('   window.__JUCE__:', juceBackend);
-        console.log('   window.__JUCE__.backend:', juceBackend.backend);
-        console.log('   Available methods:', Object.keys(juceBackend.backend));
-    } else {
-        console.error('❌ TEST 1 FAILED: No JUCE backend found!');
-        console.error('   window.__JUCE__:', window.__JUCE__);
-        console.error('   window.__JUCE__.backend:', window.__JUCE__?.backend);
-        console.error('   Available properties:', Object.keys(window).filter(k => k.includes('JUCE') || k.includes('juce') || k.includes('webkit')));
-        return;
-    }
-    
-    // Test 2: Send a test message using emitEvent
-    console.log('🧪 TEST 2: Sending test message to C++ via emitEvent...');
-    const testMessage = {
-        type: 'test',
-        parameter: 'bridgeTest',
-        value: 'Hello from JavaScript! Bridge test successful!'
-    };
-    console.log('   Sending:', JSON.stringify(testMessage));
-    
-    try {
-        if (juceBackend.backend) {
-            juceBackend.backend.emitEvent('message', testMessage);
-            console.log('✅ TEST 2 PASSED: emitEvent() called without error');
-        } else {
-            console.error('❌ TEST 2 FAILED: juceBackend.backend is not available');
-            return;
-        }
-    } catch (error) {
-        console.error('❌ TEST 2 FAILED: emitEvent() threw error:', error);
-        return;
-    }
-    
-    // Test 3: Send a parameter change message
-    console.log('🧪 TEST 3: Sending parameter change message...');
-    const paramMessage = {
-        type: 'parameterChange',
-        parameter: 'size',
-        value: 75
-    };
-    console.log('   Sending:', JSON.stringify(paramMessage));
-    
-    try {
-        if (juceBackend.backend) {
-            juceBackend.backend.emitEvent('message', paramMessage);
-            console.log('✅ TEST 3 PASSED: Parameter change message sent');
-        } else {
-            console.error('❌ TEST 3 FAILED: juceBackend.backend is not available');
-        }
-    } catch (error) {
-        console.error('❌ TEST 3 FAILED: Parameter change message error:', error);
-    }
-    
-    console.log('🧪 ========================================');
-    console.log('🧪 BRIDGE TEST COMPLETE');
-    console.log('🧪 Check C++ console for "RECEIVED MESSAGE" logs');
-    console.log('🧪 ========================================');
+    if (typeof window.postMessageToJUCE !== 'function') return;
+    window.postMessageToJUCE({
+        type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
+        parameter: parameter,
+        value: value
+    });
 }
 
 // Receive audio data from C++ for reactive animations

@@ -11,6 +11,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "../../../_Shared/Source/WebView/OrbitalsWebViewHost.h"
 
 //==============================================================================
 
@@ -51,15 +52,12 @@ private:
     FabricAudioProcessor& audioProcessor;
     
     // WebView for CSS-based UI
-    std::unique_ptr<WebBrowserWithCallbacks> webView;
+    OrbitalsWebViewHost webViewHost;
     
     // Authentication state
     bool isAuthorized = false;
     
     // Helper methods
-    void loadWebUI();
-    void loadAuthScreen();
-    void loadHTMLFile (const juce::File& htmlFile);
     void handleJavaScriptMessage (const juce::var& message);
     void openAudioSettings();
     bool checkAuthorization();

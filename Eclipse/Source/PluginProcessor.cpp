@@ -89,9 +89,33 @@ juce::AudioProcessorValueTreeState::ParameterLayout EclipseAudioProcessor::creat
 
 //==============================================================================
 const juce::String EclipseAudioProcessor::getName() const { return JucePlugin_Name; }
-bool EclipseAudioProcessor::acceptsMidi() const { return true; }
-bool EclipseAudioProcessor::producesMidi() const { return true; }
-bool EclipseAudioProcessor::isMidiEffect() const { return true; }
+
+bool EclipseAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool EclipseAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool EclipseAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
 double EclipseAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int EclipseAudioProcessor::getNumPrograms() { return 1; }
 int EclipseAudioProcessor::getCurrentProgram() { return 0; }
@@ -130,14 +154,20 @@ void EclipseAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     if (bypass)
         return;
 
-    // Threshold parameter (currently not used in processing, reserved for future use)
-    juce::ignoreUnused(*parameters.getRawParameterValue(PARAM_THRESHOLD));
-    
-    float shadowMin = *parameters.getRawParameterValue(PARAM_SHADOW_MIN);
-    float shadowMax = *parameters.getRawParameterValue(PARAM_SHADOW_MAX);
-    float umbra = *parameters.getRawParameterValue(PARAM_UMBRA) / 100.0f;
-    float penumbra = *parameters.getRawParameterValue(PARAM_PENUMBRA) / 100.0f;
-    bool eclipseMode = *parameters.getRawParameterValue(PARAM_ECLIPSE_MODE) > 0.5f; // true = REVEAL, false = HIDE
+    float threshold = static_cast<float> (*parameters.getRawParameterValue (PARAM_THRESHOLD));
+    float shadowMin = *parameters.getRawParameterValue (PARAM_SHADOW_MIN);
+    float shadowMax = *parameters.getRawParameterValue (PARAM_SHADOW_MAX);
+    float umbra = *parameters.getRawParameterValue (PARAM_UMBRA) / 100.0f;
+    float penumbra = *parameters.getRawParameterValue (PARAM_PENUMBRA) / 100.0f;
+    bool eclipseMode = *parameters.getRawParameterValue (PARAM_ECLIPSE_MODE) > 0.5f; // true = REVEAL, false = HIDE
+
+    if (shadowMin > shadowMax)
+        std::swap (shadowMin, shadowMax);
+
+    const float zoneHalfWidth = juce::jmax (1.0f, (shadowMax - shadowMin) * 0.5f);
+    const float zoneCenter = threshold;
+    const float effectiveShadowMin = juce::jlimit (0.0f, 127.0f, zoneCenter - zoneHalfWidth);
+    const float effectiveShadowMax = juce::jlimit (0.0f, 127.0f, zoneCenter + zoneHalfWidth);
 
     juce::MidiBuffer processedMidi;
 
@@ -147,66 +177,57 @@ void EclipseAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
         
         if (message.isNoteOn())
         {
-            int velocity = message.getVelocity();
-            
-            // Determine if note is in shadow zone
-            bool inShadowZone = (velocity >= shadowMin && velocity <= shadowMax);
+            const float velocity = static_cast<float> (message.getVelocity());
+            const bool inShadowZone = (velocity >= effectiveShadowMin && velocity <= effectiveShadowMax);
             
             if (eclipseMode) // REVEAL mode
             {
-                // Only pass through notes in shadow zone
-                if (inShadowZone)
+                if (inShadowZone && velocity >= threshold)
                 {
-                    // Calculate fade based on umbra and penumbra
                     float fadeAmount = 1.0f;
                     
-                    // Umbra affects darkness at center of zone
-                    float zoneCenter = (shadowMin + shadowMax) / 2.0f;
-                    float distanceFromCenter = std::abs(velocity - zoneCenter) / ((shadowMax - shadowMin) / 2.0f);
+                    float distanceFromCenter = std::abs (velocity - zoneCenter) / zoneHalfWidth;
                     fadeAmount *= (1.0f - umbra * (1.0f - distanceFromCenter));
                     
-                    // Penumbra affects edge softness
                     float edgeFade = 1.0f;
-                    if (velocity < shadowMin + (shadowMax - shadowMin) * 0.2f)
+                    const float edgeBand = zoneHalfWidth * 0.2f;
+                    if (velocity < effectiveShadowMin + edgeBand)
                     {
-                        float edgePos = (velocity - shadowMin) / ((shadowMax - shadowMin) * 0.2f);
+                        const float edgePos = (velocity - effectiveShadowMin) / edgeBand;
                         edgeFade = edgePos * penumbra + (1.0f - penumbra);
                     }
-                    else if (velocity > shadowMax - (shadowMax - shadowMin) * 0.2f)
+                    else if (velocity > effectiveShadowMax - edgeBand)
                     {
-                        float edgePos = (shadowMax - velocity) / ((shadowMax - shadowMin) * 0.2f);
+                        const float edgePos = (effectiveShadowMax - velocity) / edgeBand;
                         edgeFade = edgePos * penumbra + (1.0f - penumbra);
                     }
                     
                     fadeAmount *= edgeFade;
                     
-                    int newVelocity = juce::jlimit(1, 127, (int)(velocity * fadeAmount));
-                    auto newMessage = juce::MidiMessage::noteOn(message.getChannel(), 
-                                                                message.getNoteNumber(), 
-                                                                (juce::uint8)newVelocity);
-                    processedMidi.addEvent(newMessage, metadata.samplePosition);
+                    const int newVelocity = juce::jlimit (1, 127, (int) (velocity * fadeAmount));
+                    processedMidi.addEvent (juce::MidiMessage::noteOn (message.getChannel(),
+                                                                       message.getNoteNumber(),
+                                                                       (juce::uint8) newVelocity),
+                                            metadata.samplePosition);
                 }
-                // Notes outside shadow zone are suppressed
             }
             else // HIDE mode
             {
-                // Pass through notes outside shadow zone
-                if (!inShadowZone)
+                if (! inShadowZone || velocity < threshold)
                 {
-                    processedMidi.addEvent(message, metadata.samplePosition);
+                    processedMidi.addEvent (message, metadata.samplePosition);
                 }
                 else
                 {
-                    // Notes in shadow zone are suppressed or faded
-                    float fadeAmount = 1.0f - (umbra * 0.8f); // Umbra reduces volume
+                    const float fadeAmount = 1.0f - (umbra * 0.8f);
                     
                     if (fadeAmount > 0.1f)
                     {
-                        int newVelocity = juce::jlimit(1, 127, (int)(velocity * fadeAmount));
-                        auto newMessage = juce::MidiMessage::noteOn(message.getChannel(),
-                                                                    message.getNoteNumber(),
-                                                                    (juce::uint8)newVelocity);
-                        processedMidi.addEvent(newMessage, metadata.samplePosition);
+                        const int newVelocity = juce::jlimit (1, 127, (int) (velocity * fadeAmount));
+                        processedMidi.addEvent (juce::MidiMessage::noteOn (message.getChannel(),
+                                                                           message.getNoteNumber(),
+                                                                           (juce::uint8) newVelocity),
+                                                metadata.samplePosition);
                     }
                 }
             }

@@ -168,6 +168,47 @@ void PixelPulseAudioProcessor::releaseResources()
 {
 }
 
+void PixelPulseAudioProcessor::queueMidiNote (int noteNumber, int velocity) noexcept
+{
+    noteNumber = juce::jlimit (0, 127, noteNumber);
+    velocity = juce::jlimit (0, 127, velocity);
+
+    int start1 = 0, size1 = 0, start2 = 0, size2 = 0;
+    pendingMidiFifo.prepareToWrite (1, start1, size1, start2, size2);
+
+    if (size1 > 0)
+    {
+        pendingMidiBuffer[(size_t) start1] = { noteNumber, velocity };
+        pendingMidiFifo.finishedWrite (1);
+    }
+}
+
+void PixelPulseAudioProcessor::flushPendingMidi (juce::MidiBuffer& midiMessages) noexcept
+{
+    const int numReady = pendingMidiFifo.getNumReady();
+    if (numReady <= 0)
+        return;
+
+    int start1 = 0, size1 = 0, start2 = 0, size2 = 0;
+    pendingMidiFifo.prepareToRead (numReady, start1, size1, start2, size2);
+
+    auto emitEvent = [&midiMessages] (const PendingMidiEvent& event)
+    {
+        if (event.velocity > 0)
+            midiMessages.addEvent (juce::MidiMessage::noteOn (1, event.note, (juce::uint8) event.velocity), 0);
+        else
+            midiMessages.addEvent (juce::MidiMessage::noteOff (1, event.note), 0);
+    };
+
+    for (int i = 0; i < size1; ++i)
+        emitEvent (pendingMidiBuffer[(size_t) (start1 + i)]);
+
+    for (int i = 0; i < size2; ++i)
+        emitEvent (pendingMidiBuffer[(size_t) (start2 + i)]);
+
+    pendingMidiFifo.finishedRead (size1 + size2);
+}
+
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool PixelPulseAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
@@ -208,12 +249,19 @@ void PixelPulseAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 
     bool bypass = *parameters.getRawParameterValue(PARAM_BYPASS);
     gameRunning.store(!bypass);
-    
+
     if (bypass)
     {
+        if (! previousBypass)
+            midiMessages.addEvent (juce::MidiMessage::allNotesOff (1), 0);
+
+        pendingMidiFifo.reset();
         outputLevel.store(inputLevel.load());
+        previousBypass = true;
         return;
     }
+
+    previousBypass = false;
 
     // Get parameters
     float tempo = *parameters.getRawParameterValue(PARAM_TEMPO);
@@ -225,10 +273,9 @@ void PixelPulseAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     
     // Update game time
     gameTime += numSamples;
-    
-    // For now, pass audio through with volume control
-    // TODO: Generate MIDI notes based on game events
-    buffer.applyGain(volumeGain);
+
+    flushPendingMidi (midiMessages);
+    buffer.applyGain (volumeGain);
     
     // Calculate output level for UI
     float outLevel = 0.0f;

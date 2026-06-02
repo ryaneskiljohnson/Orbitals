@@ -312,30 +312,8 @@ void FabricAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     }
     inputLevel.store(juce::Decibels::gainToDecibels(inLevel, -100.0f));
     
-    // Debug: Log input levels to verify mic input
-    static int inputCheckCounter = 0;
-    if (++inputCheckCounter % 256 == 0) // Every 256 blocks (~3 seconds)
-    {
-        float maxSample = 0.0f;
-        for (int channel = 0; channel < numChannels; ++channel)
-        {
-            auto* channelData = buffer.getReadPointer(channel);
-            for (int sample = 0; sample < numSamples; ++sample)
-            {
-                maxSample = std::max(maxSample, std::abs(channelData[sample]));
-            }
-        }
-        std::cerr << "Input: RMS=" << inLevel << " Max=" << maxSample << " | Channels=" << numChannels << std::endl;
-    }
-    
     // Get bypass parameter
     bool bypass = *parameters.getRawParameterValue(PARAM_BYPASS);
-    
-    // Debug logging (every 100 blocks)
-    static int bypassCheckCounter = 0;
-    if (++bypassCheckCounter % 100 == 0) {
-        std::cout << "Bypass state: " << (bypass ? "BYPASSED (effect OFF)" : "ACTIVE (effect ON)") << std::endl;
-    }
     
     // If bypassed, just pass the input through unchanged (dry signal)
     if (bypass)
@@ -417,15 +395,6 @@ void FabricAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     reverbParams.wetLevel = reverbIntensity * wetDry;
     reverbParams.dryLevel = reverbIntensity * (1.0f - wetDry) + (1.0f - reverbIntensity);
     
-    // Debug wet/dry calculation
-    static int wetDryDebugCounter = 0;
-    if (++wetDryDebugCounter % 256 == 0)
-    {
-        std::cerr << "💧 WET/DRY: Raw=" << rawWetDry << "% → Normalized=" << wetDry 
-                  << " | Mix=" << mix << " → WetLvl=" << reverbParams.wetLevel 
-                  << " DryLvl=" << reverbParams.dryLevel << std::endl;
-    }
-    
     // Ensure we always have some signal (safety check)
     if (reverbParams.wetLevel < 0.001f && reverbParams.dryLevel < 0.001f)
     {
@@ -438,27 +407,6 @@ void FabricAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     
     // Update reverb parameters - this must be called before processing
     reverb.setParameters(reverbParams);
-    
-    // Debug: Log parameter changes
-    static float lastSize = -1, lastDiffusion = -1, lastDamping = -1, lastMix = -1, lastWetDry = -1;
-    bool paramChanged = (lastSize < 0) || // First time
-                        std::fabs(rawSize - lastSize) > 0.5f || 
-                        std::fabs(rawDiffusion - lastDiffusion) > 0.5f || 
-                        std::fabs(rawDamping - lastDamping) > 0.5f || 
-                        std::fabs(rawMix - lastMix) > 0.5f ||
-                        std::fabs(rawWetDry - lastWetDry) > 0.5f;
-    
-    if (paramChanged)
-    {
-        std::cerr << "🎚️ PARAMETER CHANGED: Size=" << rawSize << " Diff=" << rawDiffusion 
-                  << " Damp=" << rawDamping << " Mix=" << rawMix << " W/D=" << rawWetDry 
-                  << " → WetLvl=" << reverbParams.wetLevel << " DryLvl=" << reverbParams.dryLevel << std::endl;
-        lastSize = rawSize;
-        lastDiffusion = rawDiffusion;
-        lastDamping = rawDamping;
-        lastMix = rawMix;
-        lastWetDry = rawWetDry;
-    }
     
     // PREDELAY (Time Dilation): Adds initial delay before reverb
     // - Creates spatial separation between direct sound and reverb

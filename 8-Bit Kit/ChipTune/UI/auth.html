@@ -62,6 +62,40 @@
     </style>
 </head>
 <body>
+<!--
+  @fileoverview Inline fragment: paste immediately after <body> in plugin index.html (before other scripts).
+  @module Orbitals/_Shared/UI
+  @note Matches Cymasynth / JUCE native integration (WKWebView + WebView2).
+-->
+<script>
+(function() {
+    function sendToHost(msg) {
+        try {
+            var envelope = (msg && msg.eventId !== undefined) ? msg : { eventId: 'message', payload: msg };
+            var payload = (typeof envelope === 'string') ? envelope : JSON.stringify(envelope);
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.__JUCE__) {
+                window.webkit.messageHandlers.__JUCE__.postMessage(payload);
+                return true;
+            }
+            if (window.chrome && window.chrome.webview && typeof window.chrome.webview.postMessage === 'function') {
+                window.chrome.webview.postMessage(payload);
+                return true;
+            }
+            return false;
+        } catch (e) { return false; }
+    }
+    window.postMessageToJUCE = function(data) { sendToHost(data); };
+    window.__JUCE__ = window.__JUCE__ || {
+        postMessage: sendToHost,
+        backend: {
+            emitEvent: function(name, data) {
+                if (name === 'message') return sendToHost(data);
+                return sendToHost({ event: name, data: data });
+            }
+        }
+    };
+})();
+</script>
     <div class="auth-container">
         <div class="auth-logo"></div>
         <h1 class="auth-title">SINGULARITY</h1>
@@ -77,9 +111,9 @@
         setInterval(function() {
             // Send message to C++ to check auth status
             if (window.webkit && window.webkit.messageHandlers) {
-                window.webkit.messageHandlers.juce.postMessage({
+                window.webkit.messageHandlers.__JUCE__.postMessage(JSON.stringify({
                     type: 'checkAuth'
-                });
+                }));
             }
         }, 5000);
     </script>

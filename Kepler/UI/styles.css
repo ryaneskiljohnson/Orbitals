@@ -47,7 +47,7 @@
   --ellipse-gradient: radial-gradient(ellipse, rgba(96, 165, 250, 0.2) 0%, rgba(59, 130, 246, 0.1) 50%, transparent 100%);
   
   /* Background image */
-  --plugin-background-image: url('../../_Shared/Assets/backgrounds/kepler-background.png');
+  --plugin-background-image: url('plugin-background.png');
   --plugin-background-opacity: 0.6;
   --kepler-bg-color: #0a0a1a;
 }
@@ -603,4 +603,39 @@
 .semi-major-slider:hover {
   transform: scaleY(1.02);
   transition: transform var(--transition-medium);
+}
+
+.xy-pad {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  background: rgba(15, 23, 42, 0.8);
+  border: 2px solid var(--plugin-primary);
+  border-radius: 8px;
+  cursor: crosshair;
+  overflow: hidden;
+  box-shadow: 0 0 20px var(--plugin-glow);
+}
+
+.xy-pad::before,
+.xy-pad::after {
+  content: '';
+  position: absolute;
+  background: rgba(59, 130, 246, 0.35);
+}
+
+.xy-pad::before {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.xy-pad::after {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
 }

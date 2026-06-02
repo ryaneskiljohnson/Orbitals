@@ -17,6 +17,7 @@ OUTPUT_DIR = "_Shared/Assets/backgrounds/square"
 # List of all plugin background images
 BACKGROUND_IMAGES = [
     "apogee-background.png",
+    "cymasynth-background.png",
     "eclipse-background.png",
     "ion-background.png",
     "kepler-background.png",

@@ -77,9 +77,33 @@ juce::AudioProcessorValueTreeState::ParameterLayout ZenithAudioProcessor::create
 
 //==============================================================================
 const juce::String ZenithAudioProcessor::getName() const { return JucePlugin_Name; }
-bool ZenithAudioProcessor::acceptsMidi() const { return true; }
-bool ZenithAudioProcessor::producesMidi() const { return true; }
-bool ZenithAudioProcessor::isMidiEffect() const { return true; }
+
+bool ZenithAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool ZenithAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool ZenithAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
 double ZenithAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int ZenithAudioProcessor::getNumPrograms() { return 1; }
 int ZenithAudioProcessor::getCurrentProgram() { return 0; }
@@ -95,6 +119,23 @@ void ZenithAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
 
 void ZenithAudioProcessor::releaseResources()
 {
+}
+
+void ZenithAudioProcessor::flagLatestMidiNote (int noteNumber, int velocity) noexcept
+{
+    latestMidiVelocity.store (velocity, std::memory_order_relaxed);
+    latestMidiNote.store (noteNumber, std::memory_order_release);
+}
+
+bool ZenithAudioProcessor::consumeLatestMidiNote (int& noteNumber, int& velocity) noexcept
+{
+    const int note = latestMidiNote.exchange (-1, std::memory_order_acq_rel);
+    if (note < 0)
+        return false;
+
+    noteNumber = note;
+    velocity = latestMidiVelocity.load (std::memory_order_acquire);
+    return true;
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -155,12 +196,8 @@ void ZenithAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
                 // Clamp to valid range
                 newVelocity = juce::jlimit(1, (int)ceiling, newVelocity);
             }
-            
-            // Notify UI of MIDI note
-            if (auto* editor = dynamic_cast<ZenithAudioProcessorEditor*>(getActiveEditor()))
-            {
-                editor->notifyMIDINote(message.getNoteNumber(), newVelocity);
-            }
+
+            flagLatestMidiNote (message.getNoteNumber(), newVelocity);
             
             auto newMessage = juce::MidiMessage::noteOn(message.getChannel(), 
                                                         message.getNoteNumber(), 

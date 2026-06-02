@@ -76,9 +76,33 @@ juce::AudioProcessorValueTreeState::ParameterLayout PerihelionAudioProcessor::cr
 
 //==============================================================================
 const juce::String PerihelionAudioProcessor::getName() const { return JucePlugin_Name; }
-bool PerihelionAudioProcessor::acceptsMidi() const { return true; }
-bool PerihelionAudioProcessor::producesMidi() const { return true; }
-bool PerihelionAudioProcessor::isMidiEffect() const { return true; }
+
+bool PerihelionAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool PerihelionAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool PerihelionAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
 double PerihelionAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int PerihelionAudioProcessor::getNumPrograms() { return 1; }
 int PerihelionAudioProcessor::getCurrentProgram() { return 0; }

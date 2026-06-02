@@ -10,6 +10,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include <array>
 #include <vector>
 #include <cmath>
 
@@ -76,6 +77,9 @@ public:
     // Game state
     std::atomic<bool> gameRunning { false };
 
+    /** @brief Queue a note-on or note-off from the UI thread. @param noteNumber MIDI note 0–127. @param velocity Note-on velocity; 0 sends note-off. */
+    void queueMidiNote (int noteNumber, int velocity) noexcept;
+
 private:
     //==============================================================================
     // Parameter layout
@@ -85,6 +89,20 @@ private:
     double sampleRate = 44100.0;
     double gameTime = 0.0;
     double beatInterval = 0.0;
+    bool previousBypass = false;
+
+    struct PendingMidiEvent
+    {
+        int note = 0;
+        int velocity = 0;
+    };
+
+    static constexpr int maxPendingMidiEvents = 512;
+    juce::AbstractFifo pendingMidiFifo { maxPendingMidiEvents };
+    std::array<PendingMidiEvent, maxPendingMidiEvents> pendingMidiBuffer {};
+
+    /** @brief Emit queued MIDI events into the host buffer. @param midiMessages Output MIDI buffer for this block. */
+    void flushPendingMidi (juce::MidiBuffer& midiMessages) noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChipTuneAudioProcessor)
 };

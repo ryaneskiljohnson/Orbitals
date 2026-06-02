@@ -11,25 +11,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-
-//==============================================================================
-// Helper class to handle WebBrowserComponent callbacks (like NNAudioAccess)
-class WebBrowserWithCallbacks : public juce::WebBrowserComponent
-{
-public:
-    WebBrowserWithCallbacks(const juce::WebBrowserComponent::Options& options)
-        : juce::WebBrowserComponent(options) {}
-    
-    std::function<void(const juce::String&)> onPageFinishedLoading;
-    
-    void pageFinishedLoading(const juce::String& url) override
-    {
-        juce::WebBrowserComponent::pageFinishedLoading(url);
-        if (onPageFinishedLoading) {
-            onPageFinishedLoading(url);
-        }
-    }
-};
+#include "../../../_Shared/Source/WebView/OrbitalsWebViewHost.h"
 
 //==============================================================================
 class EntanglementAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Timer
@@ -48,14 +30,11 @@ public:
 
 private:
     EntanglementAudioProcessor& audioProcessor;
-    std::unique_ptr<WebBrowserWithCallbacks> webView;
+    OrbitalsWebViewHost webViewHost;
     
     // Authentication state
     bool isAuthorized = false;
     
-    void loadWebUI();
-    void loadAuthScreen();
-    void loadHTMLFile (const juce::File& htmlFile);
     void handleJavaScriptMessage (const juce::var& message);
     bool checkAuthorization();
     static juce::File getAuthFile();

@@ -523,8 +523,12 @@ function setupControls() {
   });
 });
   }
-}function sendToJUCE(param, value) {
-  if (window.chrome?.webview) {
-    window.chrome.webview.postMessage({ type: 'parameterChange', parameter: param, value });
-  }
+}/**
+ * @brief Sends parameter changes to C++ via JUCE native bridge (macOS + Windows).
+ * @param {string} param Parameter ID.
+ * @param {*} value Raw parameter value.
+ */
+function sendToJUCE(param, value) {
+    if (typeof window.postMessageToJUCE !== 'function') return;
+    window.postMessageToJUCE({ type: 'parameterChange', parameter: param, value: value });
 }

@@ -1,3 +1,14 @@
+
+/**
+ * @brief Sends parameter changes to C++ via JUCE native bridge (macOS + Windows).
+ * @param {string} param Parameter ID.
+ * @param {*} value Raw parameter value.
+ */
+function sendToJUCE(param, value) {
+    if (typeof window.postMessageToJUCE !== 'function') return;
+    window.postMessageToJUCE({ type: 'parameterChange', parameter: param, value: value });
+}
+
 /**
  * @brief Ascending particle for Apogee - rises along trajectory curves
  */
@@ -230,6 +241,7 @@ function setupControls() {
     onChange: (v) => {
       document.getElementById('liftValue').textContent = Math.round(v) + '%';
       if (window.updateLiftValue) window.updateLiftValue(v);
+      sendToJUCE('lift', v);
     }
   });
   // Ensure initial value is set for fill
@@ -241,6 +253,7 @@ function setupControls() {
     onChange: (v) => {
       document.getElementById('ceilingValue').textContent = Math.round(v);
       if (window.updateCeilingValue) window.updateCeilingValue(v);
+      sendToJUCE('ceiling', Math.round(v));
       
       // Update background image brightness based on ceiling value
       // Map 1-127 to brightness: lower values = darker, higher values = brighter
@@ -269,6 +282,7 @@ function setupControls() {
     onChange: (v) => {
       document.getElementById('momentumValue').textContent = Math.round(v) + '%';
       if (window.updateMomentumValue) window.updateMomentumValue(v);
+      sendToJUCE('momentum', v);
     }
   });
   
@@ -279,6 +293,8 @@ function setupControls() {
       btn.classList.add('active');
       const curve = btn.dataset.curve;
       if (window.updateCurveType) window.updateCurveType(curve);
+      const curveMap = { linear: 0, exp: 1, s: 2, log: 3 };
+      sendToJUCE('curve', curveMap[curve] ?? 0);
     });
   });
   

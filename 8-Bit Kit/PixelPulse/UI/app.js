@@ -452,17 +452,29 @@ function spawnNote(currentTime) {
 }
 
 /**
- * Play a note (send to C++)
+ * @brief Play a MIDI note via the plugin's MIDI output.
+ * @param {number} midiNote MIDI note number.
+ * @param {number} [velocity=100] Note-on velocity.
+ * @param {number} [duration=200] Note length in milliseconds.
  */
-function playNote(midiNote) {
-    if (window.juce) {
-        window.juce.postMessage({
+function playNote(midiNote, velocity = 100, duration = 200) {
+    if (typeof window.postMessageToJUCE === 'function') {
+        window.postMessageToJUCE({
             type: 'playNote',
             note: midiNote,
-            velocity: 100,
-            duration: 200
+            velocity: velocity,
+            duration: duration
         });
     }
+
+    setTimeout(() => {
+        if (typeof window.postMessageToJUCE === 'function') {
+            window.postMessageToJUCE({
+                type: 'stopNote',
+                note: midiNote
+            });
+        }
+    }, duration);
 }
 
 /**
@@ -710,11 +722,10 @@ function initializeBypassToggle() {
 }
 
 function sendToPlugin(parameter, value) {
-    if (window.juce) {
-        window.juce.postMessage({
-            type: 'parameterChange',
-            parameter: parameter,
-            value: value
-        });
-    }
+    if (typeof window.postMessageToJUCE !== 'function') return;
+    window.postMessageToJUCE({
+        type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
+        parameter: parameter,
+        value: value
+    });
 }

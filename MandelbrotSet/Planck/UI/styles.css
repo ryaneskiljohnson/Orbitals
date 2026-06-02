@@ -1,4 +1,4 @@
-:root { --plugin-background-image: url('../../_Shared/Assets/backgrounds/planck.png'); --plugin-background-opacity: 0.3; }
+:root { --plugin-background-image: url('plugin-background.png'); --plugin-background-opacity: 0.3; }
 .controls-eq { display: flex; gap: var(--spacing-2xl); justify-content: center; }
 .eq-band { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs); }
 #planckCanvas { width: 800px; height: 400px; opacity: 0.5; }

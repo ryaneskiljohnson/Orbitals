@@ -135,9 +135,33 @@ int IonAudioProcessor::findNearestScaleNote(int note, const std::vector<int>& sc
 
 //==============================================================================
 const juce::String IonAudioProcessor::getName() const { return JucePlugin_Name; }
-bool IonAudioProcessor::acceptsMidi() const { return true; }
-bool IonAudioProcessor::producesMidi() const { return true; }
-bool IonAudioProcessor::isMidiEffect() const { return true; }
+
+bool IonAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool IonAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool IonAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
 double IonAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int IonAudioProcessor::getNumPrograms() { return 1; }
 int IonAudioProcessor::getCurrentProgram() { return 0; }

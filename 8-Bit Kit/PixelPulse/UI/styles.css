@@ -1,5 +1,5 @@
 :root { 
-    --plugin-background-image: url('../../_Shared/Assets/backgrounds/pixelpulse.png'); 
+    --plugin-background-image: url('plugin-background.png'); 
     --game-green: #00ff00;
     --game-cyan: #00ffff;
     --game-yellow: #ffff00;

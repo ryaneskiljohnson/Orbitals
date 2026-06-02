@@ -1,4 +1,4 @@
-:root { --plugin-background-image: url('../../_Shared/Assets/backgrounds/observer.png'); }
+:root { --plugin-background-image: url('plugin-background.png'); }
 .controls { display: flex; gap: var(--spacing-2xl); justify-content: center; align-items: center; flex-wrap: wrap; }
 #observerCanvas { width: 600px; height: 600px; opacity: 0.6; }
 

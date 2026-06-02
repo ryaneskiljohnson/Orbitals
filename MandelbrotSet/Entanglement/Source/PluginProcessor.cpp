@@ -119,9 +119,32 @@ juce::AudioProcessorValueTreeState::ParameterLayout EntanglementAudioProcessor::
 
 //==============================================================================
 const juce::String EntanglementAudioProcessor::getName() const { return JucePlugin_Name; }
-bool EntanglementAudioProcessor::acceptsMidi() const { return false; }
-bool EntanglementAudioProcessor::producesMidi() const { return false; }
-bool EntanglementAudioProcessor::isMidiEffect() const { return false; }
+bool EntanglementAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool EntanglementAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool EntanglementAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
 double EntanglementAudioProcessor::getTailLengthSeconds() const { return 2.0; } // Max delay time
 int EntanglementAudioProcessor::getNumPrograms() { return 1; }
 int EntanglementAudioProcessor::getCurrentProgram() { return 0; }

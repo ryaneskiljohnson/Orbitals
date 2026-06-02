@@ -105,9 +105,32 @@ juce::AudioProcessorValueTreeState::ParameterLayout ObserverAudioProcessor::crea
 
 //==============================================================================
 const juce::String ObserverAudioProcessor::getName() const { return JucePlugin_Name; }
-bool ObserverAudioProcessor::acceptsMidi() const { return false; }
-bool ObserverAudioProcessor::producesMidi() const { return false; }
-bool ObserverAudioProcessor::isMidiEffect() const { return false; }
+bool ObserverAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool ObserverAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool ObserverAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
 double ObserverAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int ObserverAudioProcessor::getNumPrograms() { return 1; }
 int ObserverAudioProcessor::getCurrentProgram() { return 0; }
@@ -263,9 +286,6 @@ void ObserverAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
         }
     }
     outputLevel.store(juce::Decibels::gainToDecibels(outLevel, -100.0f));
-    
-    // For now, pass audio through unchanged
-    // MIDI processing removed - this is an Audio FX plugin
 }
 
 //==============================================================================

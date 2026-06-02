@@ -91,9 +91,33 @@ juce::AudioProcessorValueTreeState::ParameterLayout LagrangeAudioProcessor::crea
 
 //==============================================================================
 const juce::String LagrangeAudioProcessor::getName() const { return JucePlugin_Name; }
-bool LagrangeAudioProcessor::acceptsMidi() const { return true; }
-bool LagrangeAudioProcessor::producesMidi() const { return true; }
-bool LagrangeAudioProcessor::isMidiEffect() const { return true; }
+
+bool LagrangeAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool LagrangeAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool LagrangeAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
 double LagrangeAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int LagrangeAudioProcessor::getNumPrograms() { return 1; }
 int LagrangeAudioProcessor::getCurrentProgram() { return 0; }
@@ -140,14 +164,24 @@ void LagrangeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     float chaosX = *parameters.getRawParameterValue(PARAM_CHAOS_X) / 100.0f;
     float chaosY = *parameters.getRawParameterValue(PARAM_CHAOS_Y) / 100.0f;
 
-    auto playHead = getPlayHead();
-    if (playHead == nullptr)
-        return;
+    double blockStartTimeSec = 0.0;
+    double beatsPerSecond = 120.0 / 60.0;
 
-    auto positionInfo = playHead->getPosition();
-    if (!positionInfo.hasValue())
-        return;
+    if (auto* playHead = getPlayHead())
+    {
+        if (auto positionInfo = playHead->getPosition(); positionInfo.hasValue())
+        {
+            if (positionInfo->getTimeInSeconds().hasValue())
+                blockStartTimeSec = *positionInfo->getTimeInSeconds();
+            else if (positionInfo->getPpqPosition().hasValue() && positionInfo->getBpm().hasValue())
+                blockStartTimeSec = (*positionInfo->getPpqPosition() / *positionInfo->getBpm()) * 60.0;
 
+            if (positionInfo->getBpm().hasValue())
+                beatsPerSecond = *positionInfo->getBpm() / 60.0;
+        }
+    }
+
+    const double sixteenthsPerSecond = beatsPerSecond * 4.0;
     juce::MidiBuffer processedMidi;
 
     for (const auto metadata : midiMessages)
@@ -157,33 +191,27 @@ void LagrangeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
         
         if (message.isNoteOn() || message.isNoteOff())
         {
-            double currentTime = samplePosition / sampleRate;
+            const double currentTimeSec = blockStartTimeSec + (samplePosition / sampleRate);
+            const double nearestGrid = std::round (currentTimeSec * sixteenthsPerSecond) / sixteenthsPerSecond;
             
-            double beatsPerSecond = 2.0;
-            if (positionInfo->getBpm().hasValue())
-                beatsPerSecond = *positionInfo->getBpm() / 60.0;
-            
-            double sixteenthsPerSecond = beatsPerSecond * 4.0;
-            double nearestGrid = std::round(currentTime * sixteenthsPerSecond) / sixteenthsPerSecond;
-            
-            double deviation = currentTime - nearestGrid;
+            double deviation = currentTimeSec - nearestGrid;
             double pullStrength = stability * mass;
-            double correctedTime = currentTime - (deviation * pullStrength);
+            double correctedTimeSec = currentTimeSec - (deviation * pullStrength);
             
             double driftMinMs = (driftMin / 100.0) * 50.0;
             double driftMaxMs = (driftMax / 100.0) * 50.0;
             double driftRangeMs = driftMaxMs - driftMinMs;
             double maxDeviationMs = driftRangeMs / 2.0;
             
-            double deviationMs = (correctedTime - nearestGrid) * 1000.0;
-            deviationMs = juce::jlimit(-maxDeviationMs, maxDeviationMs, deviationMs);
-            correctedTime = nearestGrid + (deviationMs / 1000.0);
+            double deviationMs = (correctedTimeSec - nearestGrid) * 1000.0;
+            deviationMs = juce::jlimit (-maxDeviationMs, maxDeviationMs, deviationMs);
+            correctedTimeSec = nearestGrid + (deviationMs / 1000.0);
             
             double timingChaos = (random.nextFloat() - 0.5f) * chaosX * 0.01;
-            correctedTime += timingChaos;
+            correctedTimeSec += timingChaos;
             
-            int correctedSample = (int)(correctedTime * sampleRate);
-            correctedSample = juce::jlimit(0, buffer.getNumSamples() - 1, correctedSample);
+            int correctedSample = (int) std::lround ((correctedTimeSec - blockStartTimeSec) * sampleRate);
+            correctedSample = juce::jlimit (0, buffer.getNumSamples() - 1, correctedSample);
             
             if (message.isNoteOn())
             {

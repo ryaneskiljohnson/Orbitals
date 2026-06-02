@@ -105,9 +105,33 @@ juce::AudioProcessorValueTreeState::ParameterLayout RabbitholeAudioProcessor::cr
 
 //==============================================================================
 const juce::String RabbitholeAudioProcessor::getName() const { return JucePlugin_Name; }
-bool RabbitholeAudioProcessor::acceptsMidi() const { return true; }
-bool RabbitholeAudioProcessor::producesMidi() const { return true; }
-bool RabbitholeAudioProcessor::isMidiEffect() const { return true; }
+
+bool RabbitholeAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool RabbitholeAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool RabbitholeAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
 double RabbitholeAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int RabbitholeAudioProcessor::getNumPrograms() { return 1; }
 int RabbitholeAudioProcessor::getCurrentProgram() { return 0; }
@@ -246,9 +270,6 @@ void RabbitholeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         }
     }
     outputLevel.store(juce::Decibels::gainToDecibels(outLevel, -100.0f));
-    
-    // For now, pass audio through unchanged
-    // MIDI processing removed - this is an Audio FX plugin
 }
 
 //==============================================================================

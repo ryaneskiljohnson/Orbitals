@@ -652,7 +652,7 @@ function setupControls() {
         const percent = (v - 0) / (100 - 0);
         orbitSlider.style.setProperty('--slider-value', percent);
         if (window.updateOrbitValue) window.updateOrbitValue(v);
-        sendParameterToJUCE('orbit', v);
+        sendToJUCE('orbit', v);
       }
     });
     orbitSlider.style.setProperty('--slider-value', 0.5);
@@ -666,7 +666,7 @@ function setupControls() {
       onChange: (v) => {
         document.getElementById('gravityValue').textContent = Math.round(v) + '%';
         if (window.updateGravityValue) window.updateGravityValue(v);
-        sendParameterToJUCE('gravity', v);
+        sendToJUCE('gravity', v);
       }
     });
   }
@@ -682,7 +682,7 @@ function setupControls() {
         const percent = (v - 1) / (127 - 1);
         solarPointSlider.style.setProperty('--slider-value', percent);
         if (window.updateSolarPointValue) window.updateSolarPointValue(v);
-        sendParameterToJUCE('solarPoint', v);
+        sendToJUCE('solarPoint', v);
       }
     });
     const initialPercent = (64 - 1) / (127 - 1);
@@ -700,7 +700,7 @@ function setupControls() {
         const percent = (v - (-100)) / (100 - (-100));
         biasSlider.style.setProperty('--slider-value', percent);
         if (window.updateBiasValue) window.updateBiasValue(v);
-        sendParameterToJUCE('bias', v);
+        sendToJUCE('bias', v);
       }
     });
     biasSlider.style.setProperty('--slider-value', 0.5);
@@ -708,14 +708,18 @@ function setupControls() {
   
   // Setup bypass toggle
   if (window.setupBypassToggle) {
-    window.setupBypassToggle(sendParameterToJUCE);
+    window.setupBypassToggle(sendToJUCE);
   }
 }
 
-function sendParameterToJUCE(param, value) {
-  if (window.chrome?.webview) {
-    window.chrome.webview.postMessage({ type: 'parameterChange', parameter: param, value });
-  }
+/**
+ * @brief Sends parameter changes to C++ via JUCE native bridge (macOS + Windows).
+ * @param {string} param Parameter ID.
+ * @param {*} value Raw parameter value.
+ */
+function sendToJUCE(param, value) {
+    if (typeof window.postMessageToJUCE !== 'function') return;
+    window.postMessageToJUCE({ type: 'parameterChange', parameter: param, value: value });
 }
 
 // Receive messages from JUCE

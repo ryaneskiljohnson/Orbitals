@@ -189,16 +189,10 @@ void SingularityAudioProcessor::changeProgramName (int index, const juce::String
 void SingularityAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     this->sampleRate = sampleRate;
-    
-    std::cout << "🎵 prepareToPlay called: sampleRate=" << sampleRate 
-              << ", samplesPerBlock=" << samplesPerBlock 
-              << ", InputChannels=" << getTotalNumInputChannels()
-              << ", OutputChannels=" << getTotalNumOutputChannels() << std::endl;
 }
 
 void SingularityAudioProcessor::releaseResources()
 {
-    std::cout << "🛑 releaseResources called - audio processing stopped" << std::endl;
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -231,13 +225,6 @@ void SingularityAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     // === AUDIO PROCESSING ===
     
     auto totalNumInputChannels  = getTotalNumInputChannels();
-    
-    // Debug: Confirm processBlock is being called
-    static int processBlockCounter = 0;
-    if (++processBlockCounter == 1 || processBlockCounter % 100 == 0) // First call + every 100 blocks (~2 seconds)
-    {
-        std::cout << "✅ processBlock called (#" << processBlockCounter << "): Samples=" << numSamples << ", Channels=" << numChannels << ", InputChannels=" << totalNumInputChannels << std::endl;
-    }
 
     // Calculate input level for UI - with bounds checking
     float inLevel = 0.0f;
@@ -249,32 +236,8 @@ void SingularityAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
         }
     }
     
-    // Convert to dB with minimum of -100dB
     float inputLevelDb = juce::Decibels::gainToDecibels(inLevel, -100.0f);
     inputLevel.store(inputLevelDb);
-    
-    // Debug: Log when input level is calculated
-    if (processBlockCounter == 1 || processBlockCounter % 100 == 0)
-    {
-        std::cout << "   Input level: inLevel=" << inLevel << " -> dB=" << inputLevelDb << std::endl;
-    }
-    
-    // Debug: Log input levels to verify audio input (like Fabric)
-    static int inputCheckCounter = 0;
-    if (++inputCheckCounter == 1 || inputCheckCounter % 100 == 0) // First call + every 100 blocks (~2 seconds)
-    {
-        float maxSample = 0.0f;
-        for (int channel = 0; channel < numChannels; ++channel)
-        {
-            const float* channelData = buffer.getReadPointer(channel);
-            for (int sample = 0; sample < numSamples; ++sample)
-            {
-                maxSample = std::max(maxSample, std::abs(channelData[sample]));
-            }
-        }
-        std::cerr << "Singularity Input: RMS=" << inLevel << " Max=" << maxSample << " | Channels=" << numChannels << " | InputChannels=" << totalNumInputChannels << std::endl;
-        std::cout << "Singularity Input: RMS=" << inLevel << " Max=" << maxSample << " | Channels=" << numChannels << " | InputChannels=" << totalNumInputChannels << std::endl;
-    }
 
     // Get parameters
     bool bypass = *parameters.getRawParameterValue(PARAM_BYPASS);
@@ -371,9 +334,6 @@ void SingularityAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
         }
     }
     outputLevel.store(juce::Decibels::gainToDecibels(outLevel, -100.0f));
-    
-    // For now, pass audio through unchanged
-    // MIDI processing removed - this is an Audio FX plugin
 }
 
 //==============================================================================

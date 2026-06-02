@@ -105,9 +105,32 @@ juce::AudioProcessorValueTreeState::ParameterLayout HadronAudioProcessor::create
 
 //==============================================================================
 const juce::String HadronAudioProcessor::getName() const { return JucePlugin_Name; }
-bool HadronAudioProcessor::acceptsMidi() const { return false; }
-bool HadronAudioProcessor::producesMidi() const { return false; }
-bool HadronAudioProcessor::isMidiEffect() const { return false; }
+bool HadronAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool HadronAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool HadronAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
 double HadronAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int HadronAudioProcessor::getNumPrograms() { return 1; }
 int HadronAudioProcessor::getCurrentProgram() { return 0; }

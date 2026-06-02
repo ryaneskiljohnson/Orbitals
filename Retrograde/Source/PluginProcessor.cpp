@@ -75,9 +75,33 @@ juce::AudioProcessorValueTreeState::ParameterLayout RetrogradeAudioProcessor::cr
 
 //==============================================================================
 const juce::String RetrogradeAudioProcessor::getName() const { return JucePlugin_Name; }
-bool RetrogradeAudioProcessor::acceptsMidi() const { return true; }
-bool RetrogradeAudioProcessor::producesMidi() const { return true; }
-bool RetrogradeAudioProcessor::isMidiEffect() const { return true; }
+
+bool RetrogradeAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool RetrogradeAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool RetrogradeAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
 double RetrogradeAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int RetrogradeAudioProcessor::getNumPrograms() { return 1; }
 int RetrogradeAudioProcessor::getCurrentProgram() { return 0; }
@@ -117,83 +141,106 @@ void RetrogradeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     if (bypass)
         return;
 
-    int mode = (int)*parameters.getRawParameterValue(PARAM_MODE);
-    int scope = (int)*parameters.getRawParameterValue(PARAM_SCOPE);
-    float symmetry = *parameters.getRawParameterValue(PARAM_SYMMETRY);
-    int echoCount = (int)*parameters.getRawParameterValue(PARAM_ECHO);
+    const int mode = (int) *parameters.getRawParameterValue (PARAM_MODE);
+    const int scope = (int) *parameters.getRawParameterValue (PARAM_SCOPE);
+    const float symmetry = *parameters.getRawParameterValue (PARAM_SYMMETRY);
+    const int echoCount = juce::jlimit (0, 8, (int) *parameters.getRawParameterValue (PARAM_ECHO));
+    const int targetSize = juce::jmax (1, scope * 4);
+    const int numSamples = buffer.getNumSamples();
 
-    // Add incoming notes to buffer
-    for (const auto metadata : midiMessages)
-    {
-        auto message = metadata.getMessage();
-        if (message.isNoteOn() || message.isNoteOff())
-        {
-            NoteInfo event;
-            event.message = message;
-            event.samplePosition = metadata.samplePosition;
-            event.timestamp = metadata.samplePosition;
-            noteBuffer.push_back(event);
-        }
-    }
+    const float blend = 0.5f - 0.5f * std::cos (symmetry * juce::MathConstants<float>::pi / 180.0f);
+    const int echoSpacing = echoCount > 0 ? juce::jmax (1, numSamples / (echoCount + 1)) : 0;
 
     juce::MidiBuffer processedMidi;
 
-    // When buffer reaches scope, reverse and output
-    int targetSize = scope * 4; // Assuming 4 notes per unit of scope
-    
-    if (noteBuffer.size() >= targetSize)
+    for (const auto metadata : midiMessages)
     {
-        std::vector<NoteInfo> toReverse(noteBuffer.begin(), noteBuffer.begin() + targetSize);
-        noteBuffer.erase(noteBuffer.begin(), noteBuffer.begin() + targetSize);
-        
-        if (mode == 0) // VELOCITY
+        auto message = metadata.getMessage();
+
+        if (! message.isNoteOn() && ! message.isNoteOff())
         {
-            // Reverse velocity contours
-            std::vector<int> velocities;
-            for (auto& event : toReverse)
-            {
-                if (event.message.isNoteOn())
-                    velocities.push_back(event.message.getVelocity());
-            }
-            std::reverse(velocities.begin(), velocities.end());
-            
-            int velIndex = 0;
-            for (auto& event : toReverse)
-            {
-                if (event.message.isNoteOn() && velIndex < velocities.size())
-                {
-                    auto newMessage = juce::MidiMessage::noteOn(event.message.getChannel(),
-                                                                event.message.getNoteNumber(),
-                                                                (juce::uint8)velocities[velIndex++]);
-                    processedMidi.addEvent(newMessage, event.samplePosition);
-                }
-                else
-                {
-                    processedMidi.addEvent(event.message, event.samplePosition);
-                }
-            }
+            processedMidi.addEvent (message, metadata.samplePosition);
+            continue;
         }
-        else if (mode == 1) // TIMING
-        {
-            // Reverse timing
-            std::reverse(toReverse.begin(), toReverse.end());
-            for (auto& event : toReverse)
-            {
-                processedMidi.addEvent(event.message, event.samplePosition);
-            }
-        }
-        else if (mode == 2) // PHRASE
-        {
-            // Reverse note order
-            std::reverse(toReverse.begin(), toReverse.end());
-            for (auto& event : toReverse)
-            {
-                processedMidi.addEvent(event.message, event.samplePosition);
-            }
-        }
+
+        noteBuffer.push_back ({ message, metadata.samplePosition, 0.0 });
     }
 
-    midiMessages.swapWith(processedMidi);
+    auto emitWithEcho = [&processedMidi, echoCount, echoSpacing, numSamples] (const std::vector<NoteInfo>& events)
+    {
+        for (int echo = 0; echo <= echoCount; ++echo)
+        {
+            const int sampleOffset = echo * echoSpacing;
+
+            for (const auto& event : events)
+            {
+                const int samplePosition = juce::jlimit (0, numSamples - 1, event.samplePosition + sampleOffset);
+                processedMidi.addEvent (event.message, samplePosition);
+            }
+        }
+    };
+
+    while ((int) noteBuffer.size() >= targetSize)
+    {
+        std::vector<NoteInfo> window (noteBuffer.begin(), noteBuffer.begin() + targetSize);
+        noteBuffer.erase (noteBuffer.begin(), noteBuffer.begin() + targetSize);
+
+        std::vector<NoteInfo> transformed = window;
+
+        if (mode == 0)
+        {
+            std::vector<int> velocities;
+            for (const auto& event : window)
+                if (event.message.isNoteOn())
+                    velocities.push_back (event.message.getVelocity());
+
+            std::vector<int> reversedVelocities = velocities;
+            std::reverse (reversedVelocities.begin(), reversedVelocities.end());
+
+            int velocityIndex = 0;
+            for (auto& event : transformed)
+            {
+                if (event.message.isNoteOn() && velocityIndex < (int) velocities.size())
+                {
+                    const int blendedVelocity = juce::jlimit (
+                        1, 127,
+                        (int) std::lround (velocities[(size_t) velocityIndex] * (1.0f - blend)
+                                           + reversedVelocities[(size_t) velocityIndex] * blend));
+                    event.message = juce::MidiMessage::noteOn (event.message.getChannel(),
+                                                               event.message.getNoteNumber(),
+                                                               (juce::uint8) blendedVelocity);
+                    ++velocityIndex;
+                }
+            }
+        }
+        else if (mode == 1)
+        {
+            std::vector<NoteInfo> reversed = window;
+            std::reverse (reversed.begin(), reversed.end());
+
+            for (size_t i = 0; i < transformed.size(); ++i)
+            {
+                const int blendedPosition = (int) std::lround (window[i].samplePosition * (1.0f - blend)
+                                                               + reversed[i].samplePosition * blend);
+                transformed[i].samplePosition = juce::jlimit (0, numSamples - 1, blendedPosition);
+            }
+        }
+        else
+        {
+            for (size_t i = 0; i < transformed.size(); ++i)
+            {
+                const float sourceIndex = (float) i * (1.0f - blend)
+                                        + (float) (window.size() - 1 - i) * blend;
+                const size_t pickIndex = (size_t) juce::jlimit (0, (int) window.size() - 1, (int) std::lround (sourceIndex));
+                transformed[i] = window[pickIndex];
+                transformed[i].samplePosition = window[i].samplePosition;
+            }
+        }
+
+        emitWithEcho (transformed);
+    }
+
+    midiMessages.swapWith (processedMidi);
 }
 
 //==============================================================================

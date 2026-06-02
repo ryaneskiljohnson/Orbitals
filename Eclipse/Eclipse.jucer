@@ -6,12 +6,21 @@
       <FILE id="PluginProcessor.cpp" name="PluginProcessor.cpp" compile="1" resource="0" file="Source/PluginProcessor.cpp" />
       <FILE id="PluginEditor.h" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h" />
       <FILE id="PluginEditor.cpp" name="PluginEditor.cpp" compile="1" resource="0" file="Source/PluginEditor.cpp" />
-    <FILE id="HubAuthComponent_h" name="HubAuthComponent.h" compile="0" resource="0" file="../_Shared/Authentication/HubAuthComponent.h" /><FILE id="HubAuthComponent_cpp" name="HubAuthComponent.cpp" compile="1" resource="0" file="../_Shared/Authentication/HubAuthComponent.cpp" /></GROUP>
+    <FILE id="HubAuthComponent_h" name="HubAuthComponent.h" compile="0" resource="0" file="../_Shared/Authentication/HubAuthComponent.h" /><FILE id="HubAuthComponent_cpp" name="HubAuthComponent.cpp" compile="1" resource="0" file="../_Shared/Authentication/HubAuthComponent.cpp" />      <FILE id="OrbitalsWebViewHost_h" name="OrbitalsWebViewHost.h" compile="0" resource="0" file="../_Shared/Source/WebView/OrbitalsWebViewHost.h" />
+      <FILE id="OrbitalsWebViewHost_cpp" name="OrbitalsWebViewHost.cpp" compile="1" resource="0" file="../_Shared/Source/WebView/OrbitalsWebViewHost.cpp" />
+</GROUP>
     
-    <GROUP id="{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}" name="UI">
-      <FILE id="app_js" name="app.js" compile="0" resource="1" file="UI/app.js" />
+        <GROUP id="{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}" name="UI">
       <FILE id="index_html" name="index.html" compile="0" resource="1" file="UI/index.html" />
+      <FILE id="app_js" name="app.js" compile="0" resource="1" file="UI/app.js" />
       <FILE id="styles_css" name="styles.css" compile="0" resource="1" file="UI/styles.css" />
+      <FILE id="bridge_js" name="orbitals-juce-bridge.js" compile="0" resource="1" file="UI/orbitals-juce-bridge.js" />
+      <FILE id="orbitals_design_system_css" name="orbitals-design-system.css" compile="0" resource="1" file="UI/orbitals-design-system.css" />
+      <FILE id="orbitals_animations_js" name="orbitals-animations.js" compile="0" resource="1" file="UI/orbitals-animations.js" />
+      <FILE id="orbitals_particles_js" name="orbitals-particles.js" compile="0" resource="1" file="UI/orbitals-particles.js" />
+      <FILE id="orbitals_components_js" name="orbitals-components.js" compile="0" resource="1" file="UI/orbitals-components.js" />
+      <FILE id="nnaudio_logo" name="nnaudio-logo.png" compile="0" resource="1" file="UI/nnaudio-logo.png" />
+      <FILE id="plugin_background" name="plugin-background.png" compile="0" resource="1" file="UI/plugin-background.png" />
     </GROUP>
     <GROUP id="{B2C3D4E5-F6A7-8901-BCDE-F23456789012}" name="SharedAssets">
       <FILE id="eclipse_bg" name="eclipse-background.png" compile="0" resource="1" file="../_Shared/Assets/backgrounds/eclipse-background.png" />
@@ -32,7 +41,7 @@
     <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
     <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="1" useGlobalPath="0" />
   </MODULES>
-  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0" />
+  <JUCEOPTIONS JUCE_USE_WIN_WEBVIEW2="1" JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0" />
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" microphonePermissionNeeded="1" microphonePermissionsText="This plugin needs microphone access to process audio input.">
       <CONFIGURATIONS>

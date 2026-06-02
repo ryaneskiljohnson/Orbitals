@@ -9,6 +9,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "../../../_Shared/Authentication/OrbitalsTemporaryAuthBypass.h"
 
 //==============================================================================
 PixelPulseAudioProcessorEditor::PixelPulseAudioProcessorEditor (PixelPulseAudioProcessor& p)
@@ -33,54 +34,26 @@ PixelPulseAudioProcessorEditor::PixelPulseAudioProcessorEditor (PixelPulseAudioP
     DBG(juce::String("Keyboard focus enabled: wants=") + (getWantsKeyboardFocus() ? "true" : "false")
         + ", grabsOnClick=" + (getMouseClickGrabsKeyboardFocus() ? "true" : "false"));
     
-    // Create WebView with native integration enabled for message passing
-    auto options = juce::WebBrowserComponent::Options{}
-        .withNativeIntegrationEnabled (true)
-        .withKeepPageLoadedWhenBrowserIsHidden() // Keep page loaded when hidden (like NNAudioAccess)
-        .withEventListener ("message", [this](const juce::var& message) {
-            handleJavaScriptMessage (message);
-        });
+    OrbitalsWebViewHostConfig webConfig;
+    webConfig.pluginDisplayName = "PixelPulse";
+    webConfig.devPluginDirectory = juce::File (__FILE__).getParentDirectory().getParentDirectory();
 
-    webView = std::make_unique<WebBrowserWithCallbacks> (options);
-    // Don't call setOpaque(false) - it causes white background flash
-    addChildComponent (webView.get()); // Add as child but keep hidden until page loads
-    webView->setBounds (getLocalBounds());
-    webView->setVisible (false); // Start hidden to avoid white screen flash
-    
-    // Set up page finished loading callback - show webView after page loads
-    webView->onPageFinishedLoading = [this](const juce::String& url) {
-        juce::MessageManager::callAsync([this]() {
-            // Show webView after a short delay to ensure HTML is rendered
-            juce::Timer::callAfterDelay(100, [this]() {
-                if (webView != nullptr && !webView->isVisible()) {
-                    webView->setVisible(true);
-                    repaint();
-                }
-            });
-        });
-    };
-    
-    // Fallback: Show webView after 1 second if callback doesn't fire
-    juce::Timer::callAfterDelay(1000, [this]() {
-        if (webView != nullptr && !webView->isVisible()) {
-            webView->setVisible(true);
-            repaint();
-        }
+    webViewHost.initialize (*this, webConfig, [this](const juce::var& msg)
+    {
+        handleJavaScriptMessage (msg);
     });
-    
-    // Check authorization first, then load appropriate UI
+
     isAuthorized = checkAuthorization();
-    
+
     if (isAuthorized)
-    {
-        loadWebUI();
-        startTimer(50); // Re-check every 15 minutes
-    }
+        startTimer (50);
     else
+        startTimer (5000);
+
+    juce::Timer::callAfterDelay (300, [this]()
     {
-        loadAuthScreen();
-        startTimer(5000); // Re-check every 5 seconds
-    }
+        webViewHost.dispatchInitialNavigation (isAuthorized);
+    });
     
     // Try to grab focus after a short delay
     juce::Timer::callAfterDelay(500, [this]() {
@@ -92,6 +65,7 @@ PixelPulseAudioProcessorEditor::PixelPulseAudioProcessorEditor (PixelPulseAudioP
 
 PixelPulseAudioProcessorEditor::~PixelPulseAudioProcessorEditor()
 {
+    webViewHost.shutdown();
 }
 
 void PixelPulseAudioProcessorEditor::paint (juce::Graphics& g)
@@ -99,7 +73,7 @@ void PixelPulseAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll (juce::Colours::black); // Fill with black background to prevent white flash (like NNAudioAccess)
     
     // Draw debug info if no webview
-    if (webView == nullptr || !webView->isVisible())
+    if (! webViewHost.isInitialized() || ! webViewHost.isVisible())
     {
         g.setColour(juce::Colours::white);
         g.setFont(14.0f);
@@ -120,8 +94,7 @@ void PixelPulseAudioProcessorEditor::paint (juce::Graphics& g)
 
 void PixelPulseAudioProcessorEditor::resized()
 {
-    if (webView != nullptr)
-        webView->setBounds (getLocalBounds());
+    webViewHost.resized (*this);
     
     DBG("Editor resized to: " + juce::String(getWidth()) + "x" + juce::String(getHeight()));
 }
@@ -133,217 +106,33 @@ void PixelPulseAudioProcessorEditor::mouseDown(const juce::MouseEvent& e)
     DBG(juce::String("Has focus after click: ") + (hasKeyboardFocus(true) ? "true" : "false"));
 }
 
-void PixelPulseAudioProcessorEditor::loadWebUI()
-{
-    // Navigate DIRECTLY to actual content while webView is HIDDEN (like NNAudioAccess)
-    // Content has inline black styles, so it will be black when it loads
-    juce::MessageManager::callAsync([this]()
-    {
-        // Find UI files relative to plugin binary
-        auto htmlFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
-            .getParentDirectory()
-            .getChildFile("Resources")
-            .getChildFile("index.html");
 
-        // Fallback: try development path
-        if (!htmlFile.existsAsFile())
-        {
-            auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals/8-Bit Kit");
-            htmlFile = projectRoot.getChildFile ("PixelPulse").getChildFile ("UI").getChildFile ("index.html");
-        }
-
-        if (htmlFile.existsAsFile())
-        {
-            DBG("Found HTML file: " + htmlFile.getFullPathName());
-            loadHTMLFile(htmlFile);
-            // webView will be shown automatically via onPageFinishedLoading callback
-        }
-        else
-        {
-            DBG("Could not find index.html");
-            DBG("Tried path: " + htmlFile.getFullPathName());
-            // Try alternative path
-            auto altPath = juce::File("/Users/rjmacbookpro/Development/Orbitals/8-Bit Kit/PixelPulse/UI/index.html");
-            if (altPath.existsAsFile())
-            {
-                DBG("Found HTML file at alternative path: " + altPath.getFullPathName());
-                loadHTMLFile(altPath);
-            }
-            else
-            {
-                DBG("Alternative path also failed: " + altPath.getFullPathName());
-            }
-        }
-    });
-}
-
-void PixelPulseAudioProcessorEditor::loadHTMLFile (const juce::File& htmlFile)
-{
-    auto htmlContent = htmlFile.loadFileAsString();
-    auto uiDir = htmlFile.getParentDirectory();
-    auto projectRoot = juce::File ("/Users/rjmacbookpro/Development/Orbitals/8-Bit Kit");
-    auto sharedDir = projectRoot.getChildFile ("_Shared").getChildFile ("UI");
-
-    // CRITICAL: Inject inline black styles FIRST (before any CSS links)
-    // This prevents white flash - black background applies immediately when HTML loads
-    juce::String blackStyles = R"(<style>
-        /* Set background to black immediately to prevent white flash */
-        html, body { 
-            background-color: #000000 !important; 
-            margin: 0; 
-            padding: 0; 
-        }
-    </style>)";
-    
-    // Inject black styles right after <head> tag (before any CSS links)
-    if (htmlContent.contains("<head>"))
-    {
-        htmlContent = htmlContent.replace("<head>", "<head>\n    " + blackStyles);
-    }
-    else if (htmlContent.contains("<head "))
-    {
-        // Handle <head> with attributes - find the closing > of <head ...>
-        int headStart = htmlContent.indexOf("<head");
-        if (headStart >= 0)
-        {
-            // Find the closing > after <head
-            for (int i = headStart; i < htmlContent.length(); ++i)
-            {
-                if (htmlContent[i] == '>')
-                {
-                    htmlContent = htmlContent.substring(0, i + 1) + "\n    " + blackStyles + htmlContent.substring(i + 1);
-                    break;
-                }
-            }
-        }
-    }
-
-    // Inline CSS
-    auto cssFile = uiDir.getChildFile ("styles.css");
-    if (cssFile.existsAsFile())
-    {
-        auto cssContent = cssFile.loadFileAsString();
-        htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"styles.css\">",
-                                           "<style>" + cssContent + "</style>");
-    }
-
-    auto designSystemFile = sharedDir.getChildFile ("mandelbrot-design-system.css");
-    if (designSystemFile.existsAsFile())
-    {
-        auto designSystemContent = designSystemFile.loadFileAsString();
-        
-        // Replace logo image path with relative path for temp directory
-        // Handle both single and double quotes
-        juce::String logoPattern = "../../_Shared/Assets/logos/nnaudio-logo.png";
-        juce::String logoOldPattern1 = "url('" + logoPattern + "')";
-        juce::String logoOldPattern2 = "url(\"" + logoPattern + "\")";
-        juce::String logoNewPattern = "url('nnaudio-logo.png')";
-        designSystemContent = designSystemContent.replace (logoOldPattern1, logoNewPattern);
-        designSystemContent = designSystemContent.replace (logoOldPattern2, logoNewPattern);
-        
-        htmlContent = htmlContent.replace ("<link rel=\"stylesheet\" href=\"../../_Shared/UI/mandelbrot-design-system.css\">",
-                                           "<style>" + designSystemContent + "</style>");
-    }
-
-    // Inline JavaScript
-    auto jsFile = uiDir.getChildFile ("app.js");
-    if (jsFile.existsAsFile())
-    {
-        auto jsContent = jsFile.loadFileAsString();
-        htmlContent = htmlContent.replace ("<script src=\"app.js\"></script>",
-                                           "<script>" + jsContent + "</script>");
-    }
-
-    auto animationsFile = sharedDir.getChildFile ("mandelbrot-animations.js");
-    if (animationsFile.existsAsFile())
-    {
-        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/mandelbrot-animations.js\"></script>",
-                                           "<script>" + animationsFile.loadFileAsString() + "</script>");
-    }
-
-    auto particlesFile = sharedDir.getChildFile ("mandelbrot-particles.js");
-    if (particlesFile.existsAsFile())
-    {
-        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/mandelbrot-particles.js\"></script>",
-                                           "<script>" + particlesFile.loadFileAsString() + "</script>");
-    }
-
-    auto componentsFile = sharedDir.getChildFile ("mandelbrot-components.js");
-    if (componentsFile.existsAsFile())
-    {
-        htmlContent = htmlContent.replace ("<script src=\"../../_Shared/UI/mandelbrot-components.js\"></script>",
-                                           "<script>" + componentsFile.loadFileAsString() + "</script>");
-    }
-
-    // Handle background image
-    auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/pixelpulse.png");
-    if (backgroundImage.existsAsFile())
-    {
-        juce::MemoryBlock imageData;
-        if (backgroundImage.loadFileAsData(imageData))
-        {
-            juce::String base64 = juce::Base64::toBase64(imageData.getData(), imageData.getSize());
-            htmlContent = htmlContent.replace("../../_Shared/Assets/backgrounds/pixelpulse.png", 
-                                            "data:image/png;base64," + base64);
-        }
-    }
-
-    // Disable right-click context menu and set standalone mode flag
-    juce::String disableRightClickScript = R"(<script>
-        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
-        document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
-        // Set standalone mode flag (only true in standalone builds)
-        window.isStandaloneMode = )";
-    
-#if JucePlugin_Build_Standalone
-    disableRightClickScript += "true";
-#else
-    disableRightClickScript += "false";
-#endif
-    
-    disableRightClickScript += R"(;
-    </script>)";
-    
-    // Inject script before closing body tag
-    if (htmlContent.contains("</body>"))
-        htmlContent = htmlContent.replace("</body>", disableRightClickScript + "</body>");
-    else if (htmlContent.contains("</html>"))
-        htmlContent = htmlContent.replace("</html>", disableRightClickScript + "</html>");
-    else
-        htmlContent += disableRightClickScript;
-    
-    // Load HTML using temporary file approach (avoids data URL encoding issues)
-    auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
-        .getChildFile("PixelPulseUI_" + juce::String(juce::Time::currentTimeMillis()));
-    tempDir.createDirectory();
-    
-    // Copy logo image to temp directory if it exists
-    auto logosDir = projectRoot.getChildFile ("_Shared").getChildFile ("Assets").getChildFile ("logos");
-    auto logoFile = logosDir.getChildFile ("nnaudio-logo.png");
-    if (logoFile.existsAsFile())
-    {
-        auto tempLogoFile = tempDir.getChildFile ("nnaudio-logo.png");
-        logoFile.copyFileTo (tempLogoFile);
-    }
-    
-    auto tempFile = tempDir.getChildFile("index.html");
-    tempFile.replaceWithText(htmlContent);
-    
-    auto filePath = tempFile.getFullPathName().replace(" ", "%20");
-    juce::String fileURL = "file://" + filePath;
-    webView->goToURL(fileURL);
-}
 
 void PixelPulseAudioProcessorEditor::handleJavaScriptMessage (const juce::var& message)
 {
-    if (!message.isObject())
+        juce::var msg = message;
+    if (msg.isString())
+    {
+        juce::var parsed = juce::JSON::parse (msg.toString());
+        if (parsed.isObject())
+            msg = parsed;
+    }
+    if (! msg.isObject())
         return;
 
-    auto obj = message.getDynamicObject();
+    auto obj = msg.getDynamicObject();
     if (obj == nullptr)
         return;
 
-    auto type = obj->getProperty("type").toString();
+    if (obj->hasProperty ("payload") && obj->getProperty ("payload").isObject())
+    {
+        msg = obj->getProperty ("payload");
+        obj = msg.getDynamicObject();
+        if (obj == nullptr)
+            return;
+    }
+
+auto type = obj->getProperty("type").toString();
     
         if (type == "parameterChange")
     {
@@ -360,167 +149,27 @@ void PixelPulseAudioProcessorEditor::handleJavaScriptMessage (const juce::var& m
             p->setValueNotifyingHost(normalizedValue);
         }
     }
+    else if (type == "playNote")
+    {
+        const int note = juce::jlimit (0, 127, (int) obj->getProperty ("note"));
+        const int velocity = juce::jlimit (1, 127, (int) obj->getProperty ("velocity"));
+        audioProcessor.queueMidiNote (note, velocity);
+    }
+    else if (type == "stopNote")
+    {
+        const int note = juce::jlimit (0, 127, (int) obj->getProperty ("note"));
+        audioProcessor.queueMidiNote (note, 0);
+    }
 }
 
 //==============================================================================
-void PixelPulseAudioProcessorEditor::loadAuthScreen()
-{
-    // Navigate DIRECTLY to auth content while webView is HIDDEN (like NNAudioAccess)
-    // Content has inline black styles, so it will be black when it loads
-    juce::MessageManager::callAsync([this]()
-    {
-        // Create auth HTML content with background image
-        juce::String authHTML = R"(<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PixelPulse - Authentication Required</title>
-    <style>
-        /* Set background to black immediately to prevent white flash */
-        html, body { 
-            background-color: #000000 !important; 
-            margin: 0; 
-            padding: 0; 
-        }
-    </style>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body {
-            width: 1200px; height: 750px; overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0a0a0f; color: #e8e8f0;
-            position: relative;
-        }
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('PLACEHOLDER_BACKGROUND');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: 0.6;
-            z-index: 0;
-        }
-        .auth-container {
-            position: relative; z-index: 1;
-            text-align: center; padding: 40px;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            height: 100%; width: 100%;
-        }
-        .logo-container {
-            position: relative; z-index: 2;
-            margin-bottom: 40px;
-        }
-        .logo-container img {
-            max-width: 300px; height: auto;
-            filter: drop-shadow(0 0 10px rgba(194, 107, 44, 0.5));
-        }
-        .text-content {
-            position: relative; z-index: 2;
-            background: rgba(10, 10, 15, 0.85);
-            padding: 50px 60px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            max-width: 700px;
-        }
-        .auth-title {
-            font-size: 48px; font-weight: bold; color: #00d4ff;
-            margin-bottom: 30px; text-shadow: 0 0 20px #00d4ff;
-            font-family: 'Orbitron', monospace; letter-spacing: 4px;
-        }
-        .auth-message {
-            font-size: 20px; line-height: 1.8;
-            margin: 0 auto 20px; color: #e8e8f0;
-        }
-        .auth-status {
-            margin-top: 30px; font-size: 14px; color: #888;
-        }
-    </style>
-</head>
-<body>
-    <div class="auth-container">
-        <div class="logo-container">
-            <img src="PLACEHOLDER_LOGO" alt="NNAudio Logo">
-        </div>
-        <div class="text-content">
-            <h1 class="auth-title">PIXELPULSE</h1>
-            <p class="auth-message">
-                Your plugin's authentication needs to be refreshed.<br><br>
-                Please launch the NNAudio Access app to continue.
-            </p>
-            <p class="auth-status">Checking license...</p>
-        </div>
-    </div>
-    <script>
-        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
-        document.addEventListener('selectstart', function(e) { e.preventDefault(); return false; });
-    </script>
-</body>
-</html>)";
-    
-    // Load and inline background image as base64
-    auto projectRoot = juce::File("/Users/rjmacbookpro/Development/Orbitals/8-Bit Kit");
-    auto backgroundImage = projectRoot.getChildFile("_Shared/Assets/backgrounds/pixelpulse.png");
-    
-    if (backgroundImage.existsAsFile())
-    {
-        juce::MemoryBlock imageData;
-        if (backgroundImage.loadFileAsData(imageData))
-        {
-            juce::String base64 = juce::Base64::toBase64(imageData.getData(), imageData.getSize());
-            juce::String dataURL = "data:image/png;base64," + base64;
-            authHTML = authHTML.replace("PLACEHOLDER_BACKGROUND", dataURL);
-        }
-    }
-    else
-    {
-        // Fallback if image not found
-        authHTML = authHTML.replace("PLACEHOLDER_BACKGROUND", "none");
-    }
-    
-    // Load and inline NNAudio logo as base64
-    auto logoImage = projectRoot.getChildFile("_Shared/Assets/logos/nnaudio-logo.png");
-    
-    if (logoImage.existsAsFile())
-    {
-        juce::MemoryBlock logoData;
-        if (logoImage.loadFileAsData(logoData))
-        {
-            juce::String logoBase64 = juce::Base64::toBase64(logoData.getData(), logoData.getSize());
-            juce::String logoDataURL = "data:image/png;base64," + logoBase64;
-            authHTML = authHTML.replace("PLACEHOLDER_LOGO", logoDataURL);
-        }
-    }
-    else
-    {
-        // Fallback if logo not found
-        authHTML = authHTML.replace("PLACEHOLDER_LOGO", "");
-    }
-    
-    // Load auth HTML using temporary file approach
-    auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory)
-        .getChildFile("PixelPulseAuth_" + juce::String(juce::Time::currentTimeMillis()));
-    tempDir.createDirectory();
-    
-    auto tempFile = tempDir.getChildFile("auth.html");
-    tempFile.replaceWithText(authHTML);
-    
-    auto filePath = tempFile.getFullPathName().replace(" ", "%20");
-    juce::String fileURL = "file://" + filePath;
-    
-    // Navigate to auth screen while webView is HIDDEN
-    webView->goToURL(fileURL);
-    // webView will be shown automatically via onPageFinishedLoading callback
-    });
-}
 
 //==============================================================================
 bool PixelPulseAudioProcessorEditor::checkAuthorization()
 {
+    if (orbitals_auth_bypass_detail::isBypassActive())
+        return true;
+
     const auto decrypted_text = loadAndDecryptLicenseFile();
     
     if (decrypted_text.isEmpty())
@@ -544,12 +193,12 @@ bool PixelPulseAudioProcessorEditor::checkAuthorization()
         isAuthorized = authorized;
         if (isAuthorized)
         {
-            loadWebUI();
+            webViewHost.reloadSurface (true);
             startTimer(50); // Check every 15 minutes
         }
         else
         {
-            loadAuthScreen();
+            webViewHost.reloadSurface (false);
             startTimer(5000); // Check every 5 seconds
         }
     }
@@ -617,7 +266,7 @@ void PixelPulseAudioProcessorEditor::timerCallback()
             isAuthorized = newAuthState;
             if (isAuthorized)
             {
-                loadWebUI();
+                webViewHost.reloadSurface (true);
                 startTimer(50);
             }
         }
@@ -626,7 +275,7 @@ void PixelPulseAudioProcessorEditor::timerCallback()
             
     
     // Send metering data for audio-reactive animation
-    if (isAuthorized && webView != nullptr && webView->isVisible())
+    if (isAuthorized && webViewHost.isVisible())
     {
         sendMeteringData();
     }
@@ -644,19 +293,19 @@ void PixelPulseAudioProcessorEditor::sendMeteringData()
         inputLevelDb, outputLevelDb
     );
     
-    if (webView != nullptr && webView->isVisible())
+    if (webViewHost.isVisible())
     {
-        webView->evaluateJavascript(script);
+        webViewHost.evaluateJavascript(script);
     }
 }
 
 void PixelPulseAudioProcessorEditor::notifyMIDINote(int noteNumber, int velocity)
 {
-    if (webView != nullptr && isAuthorized)
+    if (webViewHost.isInitialized() && isAuthorized)
     {
         juce::String script = "if (window.receiveMessageFromJUCE) { window.receiveMessageFromJUCE({ type: 'midiNote', note: " 
             + juce::String(noteNumber) + ", velocity: " + juce::String(velocity) + " }); }";
-        webView->emitEventIfBrowserIsVisible("eval", script);
+        webViewHost.evaluateJavascript (script);
     }
 }
 
@@ -668,10 +317,10 @@ bool PixelPulseAudioProcessorEditor::keyPressed(const juce::KeyPress& key)
     DBG(juce::String("Has keyboard focus: ") + (hasKeyboardFocus(true) ? "true" : "false"));
     DBG(juce::String("Component wants keyboard focus: ") + (getWantsKeyboardFocus() ? "true" : "false"));
     
-    if (webView != nullptr)
+    if (webViewHost.isInitialized())
     {
         DBG("WebView exists: true");
-        DBG(juce::String("WebView visible: ") + (webView->isVisible() ? "true" : "false"));
+        DBG(juce::String("WebView visible: ") + (webViewHost.isVisible() ? "true" : "false"));
         
         // Map keys to game lanes
         juce::String keyCode;
@@ -692,7 +341,7 @@ bool PixelPulseAudioProcessorEditor::keyPressed(const juce::KeyPress& key)
         {
             DBG("Matched key: " + keyCode + " - sending to JavaScript");
             juce::String script = "console.log('C++ sending key: " + keyCode + "'); if (window.handleKeyFromJUCE) { window.handleKeyFromJUCE('" + keyCode + "'); } else { console.error('handleKeyFromJUCE not found!'); }";
-            webView->evaluateJavascript(script);
+            webViewHost.evaluateJavascript(script);
             return true;
         }
         else

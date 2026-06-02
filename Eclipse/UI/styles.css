@@ -26,7 +26,7 @@
   --corona-gradient: radial-gradient(circle, transparent 40%, #fbbf24 70%, #fef3c7 85%, transparent 100%);
   
   /* Background image */
-  --plugin-background-image: url('../../_Shared/Assets/backgrounds/eclipse-background.png');
+  --plugin-background-image: url('plugin-background.png');
   --plugin-background-opacity: 0.6;
 }
 

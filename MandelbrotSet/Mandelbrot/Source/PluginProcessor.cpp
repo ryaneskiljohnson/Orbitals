@@ -101,9 +101,33 @@ juce::AudioProcessorValueTreeState::ParameterLayout MandelbrotAudioProcessor::cr
 
 //==============================================================================
 const juce::String MandelbrotAudioProcessor::getName() const { return JucePlugin_Name; }
-bool MandelbrotAudioProcessor::acceptsMidi() const { return true; }
-bool MandelbrotAudioProcessor::producesMidi() const { return true; }
-bool MandelbrotAudioProcessor::isMidiEffect() const { return true; }
+
+bool MandelbrotAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool MandelbrotAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool MandelbrotAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
 double MandelbrotAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int MandelbrotAudioProcessor::getNumPrograms() { return 1; }
 int MandelbrotAudioProcessor::getCurrentProgram() { return 0; }

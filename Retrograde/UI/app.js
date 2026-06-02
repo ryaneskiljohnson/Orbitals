@@ -166,6 +166,7 @@ function setupControls() {
     onChange: (v) => {
       document.getElementById('scopeValue').textContent = Math.round(v);
       if (window.updateScopeValue) window.updateScopeValue(v);
+      sendToJUCE('scope', Math.round(v));
     }
   });
   
@@ -175,7 +176,8 @@ function setupControls() {
     orientation: 'horizontal',
     onChange: (v) => {
       document.getElementById('symmetryValue').textContent = Math.round(v) + '°';
-      if (window.updateSymmetryValue) window.updateSymmetryValue(v / 360 * 100); // Normalize to 0-100 for internal use
+      if (window.updateSymmetryValue) window.updateSymmetryValue(v / 360 * 100);
+      sendToJUCE('symmetry', v);
     }
   });
   
@@ -185,6 +187,7 @@ function setupControls() {
     onChange: (v) => {
       document.getElementById('echoValue').textContent = Math.round(v);
       if (window.updateEchoValue) window.updateEchoValue(v);
+      sendToJUCE('echo', Math.round(v));
     }
   });
   
@@ -194,7 +197,8 @@ function setupControls() {
       document.querySelectorAll('.mode-selector button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const mode = btn.dataset.mode;
-      console.log('Reverse mode:', mode);
+      const modeMap = { velocity: 0, timing: 1, phrase: 2 };
+      sendToJUCE('mode', modeMap[mode] ?? 0);
     });
   });
   
@@ -204,8 +208,12 @@ function setupControls() {
   }
 }
 
+/**
+ * @brief Sends parameter changes to C++ via JUCE native bridge (macOS + Windows).
+ * @param {string} param Parameter ID.
+ * @param {*} value Raw parameter value.
+ */
 function sendToJUCE(param, value) {
-  if (window.chrome?.webview) {
-    window.chrome.webview.postMessage({ type: 'parameterChange', parameter: param, value });
-  }
+    if (typeof window.postMessageToJUCE !== 'function') return;
+    window.postMessageToJUCE({ type: 'parameterChange', parameter: param, value: value });
 }

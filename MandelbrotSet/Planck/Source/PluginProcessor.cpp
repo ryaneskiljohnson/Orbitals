@@ -127,9 +127,33 @@ juce::AudioProcessorValueTreeState::ParameterLayout PlanckAudioProcessor::create
 
 //==============================================================================
 const juce::String PlanckAudioProcessor::getName() const { return JucePlugin_Name; }
-bool PlanckAudioProcessor::acceptsMidi() const { return true; }
-bool PlanckAudioProcessor::producesMidi() const { return true; }
-bool PlanckAudioProcessor::isMidiEffect() const { return true; }
+
+bool PlanckAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool PlanckAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool PlanckAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
 double PlanckAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int PlanckAudioProcessor::getNumPrograms() { return 1; }
 int PlanckAudioProcessor::getCurrentProgram() { return 0; }
@@ -286,9 +310,6 @@ void PlanckAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         }
     }
     outputLevel.store(juce::Decibels::gainToDecibels(outLevel, -100.0f));
-    
-    // For now, pass audio through unchanged
-    // MIDI processing removed - this is an Audio FX plugin
 }
 
 //==============================================================================

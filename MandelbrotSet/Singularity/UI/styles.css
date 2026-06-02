@@ -4,7 +4,7 @@
  */
 
 :root {
-    --plugin-background-image: url('../../_Shared/Assets/backgrounds/singularity.png');
+    --plugin-background-image: url('plugin-background.png');
     --plugin-background-opacity: 0.5;
 }
 

@@ -1,4 +1,4 @@
-:root { --plugin-background-image: url('../../_Shared/Assets/backgrounds/bytebeat.png'); }
+:root { --plugin-background-image: url('plugin-background.png'); }
 .controls { display: flex; gap: var(--spacing-2xl); justify-content: center; }
 #bytebeatCanvas { width: 600px; height: 600px; opacity: 0.7; }
 

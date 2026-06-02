@@ -1647,8 +1647,8 @@ function updateScoreDisplay() {
  * Play a note (send to C++)
  */
 function playNote(midiNote, velocity = 100, duration = 200) {
-    if (window.juce) {
-        window.juce.postMessage({
+    if (typeof window.postMessageToJUCE === 'function') {
+        window.postMessageToJUCE({
             type: 'playNote',
             note: midiNote,
             velocity: velocity,
@@ -1659,8 +1659,8 @@ function playNote(midiNote, velocity = 100, duration = 200) {
     state.activeNotes.add(midiNote);
     setTimeout(() => {
         state.activeNotes.delete(midiNote);
-        if (window.juce) {
-            window.juce.postMessage({
+        if (typeof window.postMessageToJUCE === 'function') {
+            window.postMessageToJUCE({
                 type: 'stopNote',
                 note: midiNote
             });
@@ -2050,11 +2050,10 @@ function initializeBypassToggle() {
 }
 
 function sendToPlugin(parameter, value) {
-    if (window.juce) {
-        window.juce.postMessage({
-            type: 'parameterChange',
-            parameter: parameter,
-            value: value
-        });
-    }
+    if (typeof window.postMessageToJUCE !== 'function') return;
+    window.postMessageToJUCE({
+        type: parameter === 'openSettings' ? 'openSettings' : 'parameterChange',
+        parameter: parameter,
+        value: value
+    });
 }

@@ -105,9 +105,33 @@ juce::AudioProcessorValueTreeState::ParameterLayout ByteBeatAudioProcessor::crea
 
 //==============================================================================
 const juce::String ByteBeatAudioProcessor::getName() const { return JucePlugin_Name; }
-bool ByteBeatAudioProcessor::acceptsMidi() const { return true; }
-bool ByteBeatAudioProcessor::producesMidi() const { return true; }
-bool ByteBeatAudioProcessor::isMidiEffect() const { return true; }
+
+bool ByteBeatAudioProcessor::acceptsMidi() const
+{
+   #if JucePlugin_WantsMidiInput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool ByteBeatAudioProcessor::producesMidi() const
+{
+   #if JucePlugin_ProducesMidiOutput
+    return true;
+   #else
+    return false;
+   #endif
+}
+
+bool ByteBeatAudioProcessor::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
 double ByteBeatAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int ByteBeatAudioProcessor::getNumPrograms() { return 1; }
 int ByteBeatAudioProcessor::getCurrentProgram() { return 0; }
@@ -246,9 +270,6 @@ void ByteBeatAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
         }
     }
     outputLevel.store(juce::Decibels::gainToDecibels(outLevel, -100.0f));
-    
-    // For now, pass audio through unchanged
-    // MIDI processing removed - this is an Audio FX plugin
 }
 
 //==============================================================================

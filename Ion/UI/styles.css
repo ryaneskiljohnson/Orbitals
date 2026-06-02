@@ -26,7 +26,7 @@
   --field-gradient: radial-gradient(circle, rgba(192, 132, 252, 0.3) 0%, rgba(139, 92, 246, 0.15) 50%, transparent 100%);
   
   /* Background image */
-  --plugin-background-image: url('../../_Shared/Assets/backgrounds/ion-background.png');
+  --plugin-background-image: url('plugin-background.png');
   --plugin-background-opacity: 0.6;
 }
 

@@ -291,9 +291,6 @@ void QuarksAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         }
     }
     outputLevel.store(juce::Decibels::gainToDecibels(outLevel, -100.0f));
-    
-    // For now, pass audio through unchanged
-    // MIDI processing removed - this is an Audio FX plugin
 }
 
 //==============================================================================
