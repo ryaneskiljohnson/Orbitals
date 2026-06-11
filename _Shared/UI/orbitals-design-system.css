@@ -95,12 +95,12 @@
 }
 
 body, html {
-  width: 1200px; /* Fixed width to prevent layout shifts */
-  height: 750px; /* Fixed height to prevent layout shifts */
-  min-width: 1200px;
-  min-height: 750px;
-  max-width: 1200px;
-  max-height: 750px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
   overflow: hidden;
   font-family: var(--font-body);
   font-size: var(--font-size-base);
@@ -137,12 +137,12 @@ input, textarea, [contenteditable="true"] {
    =================================================================== */
 
 .plugin-container {
-  width: 1200px; /* Fixed width */
-  height: 750px; /* Fixed height */
-  min-width: 1200px;
-  min-height: 750px;
-  max-width: 1200px;
-  max-height: 750px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
   display: flex;
   flex-direction: column;
   background: transparent;
@@ -159,12 +159,12 @@ input, textarea, [contenteditable="true"] {
   position: absolute;
   top: 0;
   left: 0;
-  width: 1200px; /* Fixed width - must match ::after exactly */
-  height: 750px; /* Fixed height - must match ::after exactly */
-  min-width: 1200px;
-  min-height: 750px;
-  max-width: 1200px;
-  max-height: 750px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
   background: var(--deep-space);
   /* Background image must be here too for backdrop-filter visibility (e.g., Totality knob) */
   background-image: 
@@ -195,12 +195,12 @@ input, textarea, [contenteditable="true"] {
   position: absolute;
   top: 0;
   left: 0;
-  width: 1200px; /* Fixed width to match container */
-  height: 750px; /* Fixed height to match container */
-  min-width: 1200px;
-  min-height: 750px;
-  max-width: 1200px;
-  max-height: 750px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
   background: var(--deep-space); /* Match ::before background */
   background-image: var(--plugin-background-image, none);
   background-size: cover !important; /* Preserve aspect ratio - must match ::before exactly */
@@ -259,7 +259,7 @@ input, textarea, [contenteditable="true"] {
 .orbitals-logo {
   width: 120px;
   height: 32px;
-  background-image: url('../../_Shared/Assets/logos/nnaudio-logo.png');
+  background-image: url('nnaudio-logo.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: left center;
@@ -485,8 +485,7 @@ input, textarea, [contenteditable="true"] {
 
 .plugin-main {
   flex: 1;
-  min-height: 638px; /* Fixed: 750 - 64 (header) - 48 (footer) */
-  height: 638px;
+  min-height: 0;
   display: flex;
   position: relative;
   overflow: hidden;
@@ -494,7 +493,8 @@ input, textarea, [contenteditable="true"] {
   box-sizing: border-box;
 }
 
-canvas {
+/* Direct-child canvases only (Mandelbrot-style). Split-panel plugins set #canvas in styles.css */
+.plugin-main > canvas {
   position: absolute;
   top: 0;
   left: 0;

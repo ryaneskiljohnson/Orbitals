@@ -37,56 +37,109 @@
 /* Canvas background is handled in animation-panel */
 
 /* ===================================================================
-   MAIN LAYOUT - Controls on Left, Animation fills screen
+   FLUID VIEWPORT (match Mandelbrot — fill WebView, not fixed 1200px)
+   =================================================================== */
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+}
+
+.ion-theme.plugin-container {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+}
+
+.ion-theme.plugin-container::before,
+.ion-theme.plugin-container::after {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+}
+
+/* ===================================================================
+   MAIN LAYOUT — canvas on top, controls below (Mandelbrot pattern)
    =================================================================== */
 
 .ion-theme .plugin-main {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  gap: var(--spacing-md);
   position: relative;
-  padding: 0;
+  overflow: hidden;
 }
 
-/* Animation Canvas - Right side only, not overlapping controls */
 .animation-panel {
-  position: absolute;
-  top: 0;
-  left: 300px;
-  right: 0;
-  bottom: 0;
-  z-index: 0;
-  display: block;
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 720px;
+  min-height: 260px;
+  max-height: 440px;
+  z-index: var(--z-base);
 }
 
+.ion-theme .plugin-main canvas,
 #ionCanvas {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
+  top: auto;
+  left: auto;
   width: 100%;
   height: 100%;
   pointer-events: none;
   display: block;
 }
 
-/* Left Panel: Controls - Compact vertical stack */
 .controls-panel {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 280px;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-md);
-  max-height: calc(100% - var(--spacing-2xl));
-  overflow-y: auto;
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 1060px;
+  z-index: var(--z-controls);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(10, 10, 26, 0.72);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 28px rgba(139, 92, 246, 0.18);
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-sm) var(--spacing-md);
+  width: 100%;
+}
+
+.control-section--full {
+  grid-column: 1 / -1;
 }
 
 .control-section {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: var(--spacing-xs);
+  width: 100%;
+  min-width: 0;
 }
 
 /* ===================================================================
@@ -394,13 +447,13 @@
   border: 2px solid var(--plugin-primary);
   box-shadow: 0 0 15px var(--plugin-glow),
               inset 0 0 10px rgba(139, 92, 246, 0.1);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 4px var(--spacing-sm);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+  font-size: 11px;
   color: var(--plugin-accent);
   text-align: center;
-  min-width: 70px;
+  min-width: 56px;
   font-weight: 700;
   text-shadow: 0 0 10px rgba(240, 171, 252, 0.8);
 }
@@ -498,9 +551,11 @@
   text-shadow: 0 0 10px rgba(192, 132, 252, 0.8),
                0 2px 4px rgba(0, 0, 0, 0.8);
   font-weight: 700;
-  font-size: var(--font-size-sm);
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
+  text-align: center;
+  margin-bottom: 2px;
 }
 
 /* ===================================================================

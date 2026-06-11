@@ -252,12 +252,35 @@ def patch_jucer(name: str) -> None:
     jucer_path.write_text(text, encoding="utf-8")
 
 
+def patch_design_system_css(name: str) -> None:
+    """@brief Fix bundled asset paths inside copied design-system stylesheets."""
+    for fname in ui_file_list(name):
+        if not fname.endswith("-design-system.css"):
+            continue
+        path = plugin_dir(name) / "UI" / fname
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        text = re.sub(
+            r"url\('\.\./\.\./_Shared/Assets/logos/nnaudio-logo\.png'\)",
+            "url('nnaudio-logo.png')",
+            text,
+        )
+        text = re.sub(
+            r'url\("\.\./\.\./_Shared/Assets/logos/nnaudio-logo\.png"\)',
+            "url('nnaudio-logo.png')",
+            text,
+        )
+        path.write_text(text, encoding="utf-8")
+
+
 def sync_all() -> None:
     all_plugins = ORBITALS + MANDELBROT + EIGHT_BIT
     for name in all_plugins:
         copy_assets(name)
         patch_index_html(name)
         patch_styles_css(name)
+        patch_design_system_css(name)
         patch_jucer(name)
         print(f"synced {name}")
 
